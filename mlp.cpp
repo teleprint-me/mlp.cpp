@@ -5,6 +5,7 @@
 // auto is banned from usage! it is an anti-pattern to hide data types!
 #include <ctime>
 #include <cstdlib>
+#include <cmath>
 #include <cstdio>
 #include <vector>
 
@@ -18,8 +19,8 @@ struct MLPParams {
 
 // Model layers
 struct MLPLayer {
-    float* W = nullptr;  // n_out x n_in
-    float* b = nullptr;  // n_out
+    std::vector<float> W;  // n_out x n_in
+    std::vector<float> b;  // n_out
 };
 
 // Model
@@ -28,8 +29,8 @@ struct MLP {
     std::vector<struct MLPLayer> layers;
 
     // input/output tensors
-    float* x = nullptr;  // 1d input vector
-    float* y = nullptr;  // 1d output vector
+    std::vector<float> x;  // 1d input vector
+    std::vector<float> y;  // 1d output vector
 
     // setup model params
     struct MLPParams params{};
@@ -40,18 +41,49 @@ int main(void) {
 
     // initialize the model
     MLP mlp{};
-    // initialize the model layers
-    mlp.layers.resize(mlp.params.n_layers);
 
     // initialize the input vector
-    std::vector<float> x(mlp.params.n_in);
-    mlp.x = x.data();
-    for (size_t i = 0; i < x.size(); i++) {
+    mlp.x.resize(mlp.params.n_in);
+    for (size_t i = 0; i < mlp.x.size(); i++) {
         mlp.x[i] = (float) rand() / (float) RAND_MAX;  // normalized distribution
     }
 
-    for (int i = 0; i < mlp.params.n_in; i++) {
-        printf("mlp.x[%d] = %.6f\n", i, (double) mlp.x[i]);
+    // dump the input results
+    for (size_t i = 0; i < mlp.x.size(); i++) {
+        printf("mlp.x[%zu] = %.6f\n", i, (double) mlp.x[i]);
     }
+
+    // zero-initialize model layers
+    mlp.layers.resize(mlp.params.n_layers);
+
+    // calculate layer dimensions
+    size_t W_d = mlp.params.n_out * mlp.params.n_in;
+    size_t b_d = mlp.params.n_out;
+
+    // xavier-glorot initialization
+    for (int i = 0; i < mlp.params.n_layers; i++) {
+        // get the current layer
+        MLPLayer* L = &mlp.layers[i];
+
+        // initialize the weights and biases
+        L->W.resize(W_d);
+        L->b.resize(b_d);
+
+        // real distribution
+        float a = sqrtf(6.f / (W_d + b_d));  // fan_in + fan_out
+
+        // apply distribution to weights
+        for (size_t j = 0; j < W_d; j++) {
+            float rd = 2 * ((float) rand() / RAND_MAX) - 1;
+            L->W[j] = rd * a;
+        }
+
+        // apply distribution to biases
+        for (size_t j = 0; j < b_d; j++) {
+            float rd = 2 * ((float) rand() / RAND_MAX) - 1;
+            L->b[j] = rd * a;
+        }
+    }
+
     return 0;
 }
