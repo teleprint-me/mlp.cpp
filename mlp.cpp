@@ -1,6 +1,6 @@
 // mlp/mlp.cpp
 // Multi-layer perceptron implementation in C with minimal C++ features
-// No classes or templates used, minimal vector usage
+// No classes or templates used, auto keyword is banned, minimal vector usage
 
 #include <ctime>
 #include <cstdlib>
@@ -11,9 +11,9 @@
 // Model dimensions
 struct MLPParams {
     int n_layers = 3;  // Number of hidden layers
-    int n_in = 8;  // Input features
-    int n_hidden = 16;  // Hidden units
-    int n_out = 4;  // Output units
+    int n_in = 4;  // Input features
+    int n_hidden = 8;  // Hidden units
+    int n_out = 2;  // Output units
 };
 
 // Model layers
@@ -47,10 +47,11 @@ int main(void) {
         mlp.x[i] = (float) rand() / (float) RAND_MAX;  // Normalize input
     }
 
-    // Output results
+    // Output initialized input vector
     for (size_t i = 0; i < mlp.x.size(); i++) {
         printf("mlp.x[%zu] = %.6f\n", i, (double) mlp.x[i]);
     }
+    printf("\n");  // pad output
 
     // Initialize model layers
     mlp.layers.resize(mlp.params.n_layers);
@@ -59,7 +60,7 @@ int main(void) {
     for (int i = 0; i < mlp.params.n_layers; i++) {
         // Get the current layer
         struct MLPLayer* L = &mlp.layers[i];
-    
+
         // Current layer dimensions
         size_t n_in = (i == 0) ? mlp.params.n_in : mlp.params.n_hidden;
         size_t n_out = (i == mlp.params.n_layers - 1) ? mlp.params.n_out : mlp.params.n_hidden;
@@ -86,6 +87,23 @@ int main(void) {
             float rd = 2.0f * ((float) rand() / (float) RAND_MAX) - 1.0f;
             L->b[j] = rd;  // Can be 0 or small real value
         }
+    }
+
+    // Dump initialized weights and biases
+    for (int i = 0; i < mlp.params.n_layers; i++) {
+        struct MLPLayer* layer = &mlp.layers[i];
+
+        printf("Layer %d:\n", i);
+
+        for (size_t j = 0; j < layer->W.size(); j++) {
+            printf("  W[%zu] = %.6f\n", j, (double) layer->W[j]);
+        }
+
+        for (size_t j = 0; j < layer->b.size(); j++) {
+            printf("  b[%zu] = %.6f\n", j, (double) layer->b[j]);
+        }
+
+        printf("\n");
     }
 
     return 0;
