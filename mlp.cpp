@@ -57,6 +57,46 @@ struct MLP {
 /** @} */
 
 /**
+ * Logging
+ * @{
+ */
+
+void mlp_log_input(struct MLP* mlp) {
+    for (size_t i = 0; i < mlp->x.size(); i++) {
+        printf("mlp.x[%zu] = %.6f\n", i, (double) mlp->x[i]);
+    }
+    printf("\n");  // pad output
+}
+
+void mlp_log_output(struct MLP* mlp) {
+    for (size_t i = 0; i < mlp->y.size(); i++) {
+        printf("mlp.y[%zu] = %.6f\n", i, (double) mlp->y[i]);
+    }
+    printf("\n");  // pad output
+}
+
+void mlp_log_weights_and_biases(struct MLP* mlp) {
+    // Output initialized weights and biases
+    for (int i = 0; i < mlp->params.n_layers; i++) {
+        struct MLPLayer* L = &mlp->layers[i];
+
+        printf("Layer %d:\n", i);
+
+        for (size_t j = 0; j < L->W.size(); j++) {
+            printf("  W[%zu] = %.6f\n", j, (double) L->W[j]);
+        }
+
+        for (size_t j = 0; j < L->b.size(); j++) {
+            printf("  b[%zu] = %.6f\n", j, (double) L->b[j]);
+        }
+
+        printf("\n");
+    }
+}
+
+/** @} */
+
+/**
  * Model initialization
  * @{
  */
@@ -216,38 +256,19 @@ int main(void) {
     }
 
     // Output initialized input vector
-    for (size_t i = 0; i < mlp.x.size(); i++) {
-        printf("mlp.x[%zu] = %.6f\n", i, (double) mlp.x[i]);
-    }
-    printf("\n");  // pad output
+    mlp_log_input(&mlp);
 
     // Initialize model layers
     mlp_xavier_init(&mlp);
 
     // Output initialized weights and biases
-    for (int i = 0; i < mlp.params.n_layers; i++) {
-        struct MLPLayer* L = &mlp.layers[i];
-
-        printf("Layer %d:\n", i);
-
-        for (size_t j = 0; j < L->W.size(); j++) {
-            printf("  W[%zu] = %.6f\n", j, (double) L->W[j]);
-        }
-
-        for (size_t j = 0; j < L->b.size(); j++) {
-            printf("  b[%zu] = %.6f\n", j, (double) L->b[j]);
-        }
-
-        printf("\n");
-    }
+    mlp_log_weights_and_biases(&mlp);
 
     // Execute the forward pass
     mlp_forward(&mlp, mlp.x.data(), mlp.x.size());
 
     // Output results
-    for (size_t i = 0; i < mlp.y.size(); i++) {
-        printf("mlp.y[%zu] = %.6f\n", i, (double) mlp.y[i]);
-    }
+    mlp_log_output(&mlp);
 
     return 0;
 }
