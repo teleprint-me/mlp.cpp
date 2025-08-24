@@ -138,6 +138,36 @@ void sgd(float* w, const float* grad, size_t n, float lr, float weight_decay) {
     }
 }
 
+void mlp_forward(struct MLP* mlp, float* x_in, size_t n) {
+    struct MLPParams* params = &mlp->params;
+
+    // Copy the input vector
+    std::vector<float> x(x_in, x_in + n);
+
+    // Apply the forward pass
+    for (size_t i = 0; i < mlp->layers.size(); i++) {
+        struct MLPLayer* L = &mlp->layers[i];
+
+        // Current layer dimensions
+        size_t n_in = (i == 0) ? params->n_in : params->n_hidden;
+        size_t n_out = (i == (size_t) params->n_layers - 1) ? params->n_out : params->n_hidden;
+
+        // Resize the output vector
+        mlp->y.resize(n_out);
+
+        // Ensure the weights and biases are correctly sized
+        assert(L->W.size() == n_in * n_out);
+        assert(L->b.size() == n_out);
+
+        // Matrix multiplication and activation function application
+        matmul(mlp->y.data(), L->W.data(), x.data(), L->b.data(), n_out, n_in);
+        sigmoid_vector(mlp->y.data(), n_out);
+
+        // Copy the output of the current layer to the input
+        x = mlp->y;
+    }
+}
+
 int main(void) {
     srand(time(NULL));  // Seed random number generator
 
@@ -179,27 +209,8 @@ int main(void) {
         printf("\n");
     }
 
-    // Setup the input and output for the forward pass
-    std::vector<float> x = mlp.x;
-
-    // Apply the forward pass
-    for (size_t i = 0; i < mlp.layers.size(); i++) {
-        struct MLPLayer* L = &mlp.layers[i];
-
-        // Current layer dimensions
-        size_t n_in = (i == 0) ? mlp.params.n_in : mlp.params.n_hidden;
-        size_t n_out = (i == (size_t) mlp.params.n_layers - 1) ? mlp.params.n_out
-                                                               : mlp.params.n_hidden;
-
-        mlp.y.resize(n_out);
-
-        assert(L->W.size() == n_in * n_out);
-        assert(L->b.size() == n_out);
-        matmul(mlp.y.data(), L->W.data(), x.data(), L->b.data(), n_out, n_in);
-        sigmoid_vector(mlp.y.data(), n_out);
-
-        x = mlp.y;
-    }
+    // Execute the forward pass
+    mlp_forward(&mlp, mlp.x.data(), mlp.x.size());
 
     // Output results
     for (size_t i = 0; i < mlp.y.size(); i++) {
