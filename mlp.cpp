@@ -26,7 +26,7 @@ struct MLPLayer {
 // Model
 struct MLP {
     // Model layers
-    std::vector<MLPLayer> layers;
+    std::vector<struct MLPLayer> layers;
 
     // Input/output tensors
     std::vector<float> x;  // 1D input vector
@@ -36,7 +36,7 @@ struct MLP {
     struct MLPParams params{};
 };
 
-struct Opt {
+struct SGDParams {
     float lr = 0.01f;  // Learning rate (gamma)
     float weight_decay = 0.0f;  // L2 regularization (lambda)
     float momentum = 0.0f;  // Momentum coefficient (mu)
@@ -44,6 +44,46 @@ struct Opt {
     bool nesterov = false;  // Nesterov acceleration
     bool maximize = false;  // Minimize or maximize loss
 };
+
+// https://proceedings.mlr.press/v9/glorot10a/glorot10a.pdf
+// https://en.wikipedia.org/wiki/Weight_initialization#Glorot_initialization
+void mlp_xavier_init(struct MLP* mlp) {
+    struct MLPParams* params = &mlp->params;
+
+    // Initialize model layers
+    mlp->layers.resize(params->n_layers);
+    for (int i = 0; i < params->n_layers; i++) {
+        // Get the current layer
+        struct MLPLayer* L = &mlp->layers[i];
+
+        // Current layer dimensions
+        size_t n_in = (i == 0) ? params->n_in : params->n_hidden;
+        size_t n_out = (i == params->n_layers - 1) ? params->n_out : params->n_hidden;
+
+        // Layer dimensions
+        size_t W_d = n_in * n_out;  // Weights (n_in x n_out)
+        size_t b_d = n_out;  // Biases (n_out)
+
+        // Initialize weights and biases
+        L->W.resize(W_d);
+        L->b.resize(b_d);
+
+        // Scaling factor
+        float a = sqrtf(6.0f / (n_in + n_out));
+
+        // Initialize weights
+        for (size_t j = 0; j < W_d; j++) {
+            float rd = 2.0f * ((float) rand() / (float) RAND_MAX) - 1.0f;
+            L->W[j] = rd * a;  // [-a, +a] range
+        }
+
+        // Initialize biases
+        for (size_t j = 0; j < b_d; j++) {
+            float rd = 2.0f * ((float) rand() / (float) RAND_MAX) - 1.0f;
+            L->b[j] = rd;  // Can be 0 or small real value
+        }
+    }
+}
 
 // Sigmoid Activation Function
 float sigmoid(float x) {
@@ -120,41 +160,7 @@ int main(void) {
     printf("\n");  // pad output
 
     // Initialize model layers
-    mlp.layers.resize(mlp.params.n_layers);
-
-    // Xavier-Glorot initialization
-    // https://proceedings.mlr.press/v9/glorot10a/glorot10a.pdf
-    for (int i = 0; i < mlp.params.n_layers; i++) {
-        // Get the current layer
-        struct MLPLayer* L = &mlp.layers[i];
-
-        // Current layer dimensions
-        size_t n_in = (i == 0) ? mlp.params.n_in : mlp.params.n_hidden;
-        size_t n_out = (i == mlp.params.n_layers - 1) ? mlp.params.n_out : mlp.params.n_hidden;
-
-        // Layer dimensions
-        size_t W_d = n_in * n_out;  // Weights (n_in x n_out)
-        size_t b_d = n_out;  // Biases (n_out)
-
-        // Initialize weights and biases
-        L->W.resize(W_d);
-        L->b.resize(b_d);
-
-        // Xavier-Glorot initialization
-        float a = sqrtf(6.0f / (n_in + n_out));  // Scaling factor
-
-        // Initialize weights
-        for (size_t j = 0; j < W_d; j++) {
-            float rd = 2.0f * ((float) rand() / (float) RAND_MAX) - 1.0f;
-            L->W[j] = rd * a;  // [-a, +a] range
-        }
-
-        // Initialize biases
-        for (size_t j = 0; j < b_d; j++) {
-            float rd = 2.0f * ((float) rand() / (float) RAND_MAX) - 1.0f;
-            L->b[j] = rd;  // Can be 0 or small real value
-        }
-    }
+    mlp_xavier_init(&mlp);
 
     // Output initialized weights and biases
     for (int i = 0; i < mlp.params.n_layers; i++) {
