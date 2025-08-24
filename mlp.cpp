@@ -9,12 +9,26 @@
 #include <cstdio>
 #include <vector>
 
+/**
+ * Model structure
+ * @{
+ */
+
 // Model dimensions
 struct MLPParams {
     int n_layers = 3;  // Number of hidden layers
     int n_in = 4;  // Input features
     int n_hidden = 8;  // Hidden units
     int n_out = 2;  // Output units
+};
+
+struct SGDParams {
+    float lr = 0.01f;  // Learning rate (gamma)
+    float weight_decay = 0.0f;  // L2 regularization (lambda)
+    float momentum = 0.0f;  // Momentum coefficient (mu)
+    float dampening = 0.0f;  // Dampening coefficient (tau)
+    bool nesterov = false;  // Nesterov acceleration
+    bool maximize = false;  // Minimize or maximize loss
 };
 
 // Model layers
@@ -34,16 +48,17 @@ struct MLP {
 
     // Model dimensions
     struct MLPParams params{};
+
+    // Model optimization
+    struct SGDParams opt{};
 };
 
-struct SGDParams {
-    float lr = 0.01f;  // Learning rate (gamma)
-    float weight_decay = 0.0f;  // L2 regularization (lambda)
-    float momentum = 0.0f;  // Momentum coefficient (mu)
-    float dampening = 0.0f;  // Dampening coefficient (tau)
-    bool nesterov = false;  // Nesterov acceleration
-    bool maximize = false;  // Minimize or maximize loss
-};
+/** @} */
+
+/**
+ * Model initialization
+ * @{
+ */
 
 // https://proceedings.mlr.press/v9/glorot10a/glorot10a.pdf
 // https://en.wikipedia.org/wiki/Weight_initialization#Glorot_initialization
@@ -85,27 +100,22 @@ void mlp_xavier_init(struct MLP* mlp) {
     }
 }
 
+/** @} */
+
+/**
+ * Model Forward
+ * @{
+ */
+
 // Sigmoid Activation Function
 float sigmoid(float x) {
     return 1.0f / (1.0f + expf(-x));
-}
-
-// Derivative of sigmoid for backpropagation
-float sigmoid_prime(float x) {
-    return x * (1.0f - x);
 }
 
 void sigmoid_vector(float* v, size_t n) {
 #pragma omp parallel for
     for (size_t i = 0; i < n; i++) {
         v[i] = sigmoid(v[i]);
-    }
-}
-
-void sigmoid_prime_vector(float* v, size_t n) {
-#pragma omp parallel for
-    for (size_t i = 0; i < n; i++) {
-        v[i] = sigmoid_prime(v[i]);
     }
 }
 
@@ -118,23 +128,6 @@ void matmul(float* y, float* W, float* x, float* b, size_t n_out, size_t n_in) {
             sum += W[i * n_in + j] * x[j];
         }
         y[i] = sum + b[i];
-    }
-}
-
-// reduction as mean
-float mse(float* y_pred, float* y_true, size_t n) {
-    float loss = 0.0f;
-    for (size_t i = 0; i < n; i++) {
-        float diff = y_pred[i] - y_true[i];
-        loss += diff * diff;
-    }
-    return loss / n;
-}
-
-void sgd(float* w, const float* grad, size_t n, float lr, float weight_decay) {
-    for (size_t i = 0; i < n; ++i) {
-        float g = grad[i] + weight_decay * w[i];  // add L2 penalty if needed
-        w[i] -= lr * g;
     }
 }
 
@@ -167,6 +160,44 @@ void mlp_forward(struct MLP* mlp, float* x_in, size_t n) {
         x = mlp->y;
     }
 }
+
+/** @} */
+
+/**
+ * Model Backward
+ * @{
+ */
+
+// Derivative of sigmoid for backpropagation
+float sigmoid_prime(float x) {
+    return x * (1.0f - x);
+}
+
+void sigmoid_prime_vector(float* v, size_t n) {
+#pragma omp parallel for
+    for (size_t i = 0; i < n; i++) {
+        v[i] = sigmoid_prime(v[i]);
+    }
+}
+
+// reduction as mean
+float mse(float* y_pred, float* y_true, size_t n) {
+    float loss = 0.0f;
+    for (size_t i = 0; i < n; i++) {
+        float diff = y_pred[i] - y_true[i];
+        loss += diff * diff;
+    }
+    return loss / n;
+}
+
+void sgd(float* w, const float* grad, size_t n, float lr, float weight_decay) {
+    for (size_t i = 0; i < n; ++i) {
+        float g = grad[i] + weight_decay * w[i];  // add L2 penalty if needed
+        w[i] -= lr * g;
+    }
+}
+
+/** @} */
 
 int main(void) {
     srand(time(NULL));  // Seed random number generator
