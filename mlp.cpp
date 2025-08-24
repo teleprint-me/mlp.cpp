@@ -123,6 +123,7 @@ int main(void) {
     mlp.layers.resize(mlp.params.n_layers);
 
     // Xavier-Glorot initialization
+    // https://proceedings.mlr.press/v9/glorot10a/glorot10a.pdf
     for (int i = 0; i < mlp.params.n_layers; i++) {
         // Get the current layer
         struct MLPLayer* L = &mlp.layers[i];
