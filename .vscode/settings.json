@@ -1,0 +1,56 @@
+{
+  "window.zoomLevel": 0,
+  "extensions.ignoreRecommendations": false,
+  "editor.defaultFormatter": null,
+  "editor.stickyTabStops": true,
+  "editor.tabCompletion": "on",
+  "editor.wordWrap": "on",
+  "editor.fontSize": 10,
+  "editor.detectIndentation": false,
+  "editor.tabSize": 4,
+  "editor.insertSpaces": true,
+  "editor.lightbulb.enabled": "off",
+  "editor.wordWrapColumn": 80,
+  "editor.fontFamily": "'Noto Sans Mono', 'Source Code Pro', 'Droid Sans Mono'",
+  "editor.inlineSuggest.enabled": true,
+  "terminal.integrated.fontSize": 10,
+  "[markdown]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+  "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+  "clang-format.executable": "/usr/bin/clang-format",
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "explicit"
+  },
+  "[makefile]": {
+    "editor.defaultFormatter": "vscode.markdown-language-features",
+    "editor.tabSize": 4,
+    "editor.formatOnSave": true,
+    "editor.insertSpaces": false,
+    "editor.formatOnPaste": true,
+    "editor.formatOnType": true,
+    "editor.trimAutoWhitespace": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll": "explicit"
+    }
+  },
+  "[c]": {
+    "editor.defaultFormatter": "xaver.clang-format",
+    "editor.tabSize": 4,
+    "editor.formatOnSave": false,
+    "editor.insertSpaces": true
+  },
+  "files.associations": {
+    "*.c": "c",
+    "*.cc": "c",
+    "*.h": "c"
+  }
+}
