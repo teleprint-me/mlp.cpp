@@ -2,6 +2,7 @@
 // Multi-layer perceptron implementation in C with minimal C++ features
 // No classes or templates used, auto keyword is banned, minimal vector usage
 
+#include <cassert>
 #include <ctime>
 #include <cstdlib>
 #include <cmath>
@@ -77,6 +78,9 @@ int main(void) {
     // Initialize model
     MLP mlp{};
 
+    // Output vector
+    mlp.y.resize(mlp.params.n_out);
+
     // Input vector
     mlp.x.resize(mlp.params.n_in);
     for (size_t i = 0; i < mlp.x.size(); i++) {
@@ -140,6 +144,32 @@ int main(void) {
         }
 
         printf("\n");
+    }
+
+    // Setup the input and output for the forward pass
+    std::vector<float> x = mlp.x;
+
+    // Apply the forward pass
+    for (size_t i = 0; i < mlp.layers.size(); i++) {
+        struct MLPLayer* L = &mlp.layers[i];
+
+        // Current layer dimensions
+        size_t n_in = (i == 0) ? mlp.params.n_in : mlp.params.n_hidden;
+        size_t n_out = (i == (size_t) mlp.params.n_layers - 1) ? mlp.params.n_out : mlp.params.n_hidden;
+
+        mlp.y.resize(n_out);
+
+        assert(L->W.size() == n_in * n_out);
+        assert(L->b.size() == n_out);
+        matmul(mlp.y.data(), L->W.data(), x.data(), L->b.data(), n_out, n_in);
+        sigmoid_vector(mlp.y.data(), n_out);
+
+        x = mlp.y;
+    }
+
+    // Output results
+    for (size_t i = 0; i < mlp.y.size(); i++) {
+        printf("mlp.y[%zu] = %.6f\n", i, (double) mlp.y[i]);
     }
 
     return 0;
