@@ -56,33 +56,44 @@ int main(void) {
     // zero-initialize model layers
     mlp.layers.resize(mlp.params.n_layers);
 
-    // calculate layer dimensions
-    size_t W_d = mlp.params.n_out * mlp.params.n_in;
-    size_t b_d = mlp.params.n_out;
+    // initialzie model dimensions
+    size_t n_in = mlp.params.n_in;
+    size_t n_out = mlp.params.n_out;
 
     // xavier-glorot initialization
     for (int i = 0; i < mlp.params.n_layers; i++) {
         // get the current layer
         MLPLayer* L = &mlp.layers[i];
 
+        // calculate layer context
+        size_t fan_in = n_in;  // n_{l+1}
+        size_t fan_out = n_out;  // n_{l-1}
+
+        // calculate layer dimensions
+        size_t W_d = fan_in * fan_out;  // W_{ij}
+        size_t b_d = fan_out;  // b_i
+
         // initialize the weights and biases
         L->W.resize(W_d);
         L->b.resize(b_d);
 
-        // real distribution
-        float a = sqrtf(6.f / (W_d + b_d));  // fan_in + fan_out
+        // real distribution > U(+/- sqrt(6 / (n_{l+1} + n_{l-1})))
+        float a = sqrtf(6.f / (fan_in + fan_out));
 
         // apply distribution to weights
         for (size_t j = 0; j < W_d; j++) {
             float rd = 2 * ((float) rand() / RAND_MAX) - 1;
-            L->W[j] = rd * a;
+            L->W[j] = rd * a;  // U[-a, +a]
         }
 
         // apply distribution to biases
         for (size_t j = 0; j < b_d; j++) {
             float rd = 2 * ((float) rand() / RAND_MAX) - 1;
-            L->b[j] = rd * a;
+            L->b[j] = rd;  // can be 0 or a small real value
         }
+
+        // update dimensions
+        n_in = n_out;
     }
 
     return 0;
