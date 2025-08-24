@@ -16,9 +16,9 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
 
-set(WARN "-Wall -Wextra -Wpedantic -Wformat-security -fexceptions") # -Werror, -Wshadow (won't build if enabled)
-set(EXTRA_WARN "-Wformat -Wnull-dereference") # -Wdouble-promotion
-# set(SANITIZE "-fsanitize=address,undefined -fno-omit-frame-pointer")
+set(WARN "-Wall -Wextra -Wpedantic -Werror -Wformat-security -Wshadow -fexceptions")
+set(EXTRA_WARN "-Wformat -Wnull-dereference -Wdouble-promotion")
+set(SANITIZE "-fsanitize=address,undefined -fno-omit-frame-pointer")
 set(ANALYSIS "-Wanalyzer-double-free -Wanalyzer-file-leak -Wanalyzer-malloc-leak -Wanalyzer-null-dereference -Wanalyzer-out-of-bounds -Wanalyzer-va-list-leak")
 set(COMMON "-D_FILE_OFFSET_BITS=64 ${OpenMP_C_FLAGS} ${WARN}")
 
@@ -46,7 +46,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 # target_link_libraries(mlp PRIVATE m rt)
 
 # Add binaries
-add_executable(mlp mlp.c)
+add_executable(mlp mlp.cpp)
 # Target and link the executable
 target_link_libraries(mlp PRIVATE m rt)
 
