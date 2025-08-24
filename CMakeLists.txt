@@ -22,8 +22,8 @@ set(SANITIZE "-fsanitize=address,undefined -fno-omit-frame-pointer")
 set(ANALYSIS "-Wanalyzer-double-free -Wanalyzer-file-leak -Wanalyzer-malloc-leak -Wanalyzer-null-dereference -Wanalyzer-out-of-bounds -Wanalyzer-va-list-leak")
 set(COMMON "-D_FILE_OFFSET_BITS=64 ${OpenMP_C_FLAGS} ${WARN}")
 
-set(DEBUG "${COMMON} -g3 ${EXTRA_WARN} ${SANITIZE} ${ANALYSIS}")
-set(RELEASE "${COMMON} -Ofast -march=native")
+set(DEBUG "${COMMON} -fopenmp -g3 ${EXTRA_WARN} ${SANITIZE} ${ANALYSIS}")
+set(RELEASE "${COMMON} -fopenmp -Ofast -march=native")
 
 find_package(OpenMP REQUIRED)
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -48,7 +48,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 # Add binaries
 add_executable(mlp mlp.cpp)
 # Target and link the executable
-target_link_libraries(mlp PRIVATE m rt)
+target_link_libraries(mlp PRIVATE m)
 
 add_custom_target(run_clean
     COMMAND ${CMAKE_COMMAND} -E rm -rf ${CMAKE_BINARY_DIR}
