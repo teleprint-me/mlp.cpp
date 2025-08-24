@@ -1,6 +1,11 @@
-// mlp/mlp.cpp
-// Multi-layer perceptron implementation in C with minimal C++ features
-// No classes or templates used, auto keyword is banned, minimal vector usage
+/**
+ * Copyright © 2025 Austin Berrio
+ * @file mlp/mlp.cpp
+ * @brief Multi-layer perceptron implementation in C with minimal C++ features.
+ * - No classes or templates used
+ * - auto keyword is banned
+ * - minimal vector usage
+ */
 
 #include <cassert>
 #include <ctime>
