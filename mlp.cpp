@@ -15,7 +15,7 @@
 #include <vector>
 
 /**
- * Model structure
+ * Structures
  * @{
  */
 
@@ -102,7 +102,7 @@ void mlp_log_weights_and_biases(struct MLP* mlp) {
 /** @} */
 
 /**
- * Model initialization
+ * Initialization
  * @{
  */
 
@@ -165,7 +165,7 @@ void mlp_init_xavier(struct MLP* mlp) {
 /** @} */
 
 /**
- * Model forward (inference)
+ * Forward pass (inference)
  * @{
  */
 
@@ -226,7 +226,7 @@ void mlp_forward(struct MLP* mlp, float* x_in, size_t n) {
 /** @} */
 
 /**
- * Model backward propagation (training)
+ * Backward propagation (training)
  * @{
  */
 
