@@ -25,19 +25,18 @@
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnSave": true
   },
-  "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
-  "clang-format.executable": "/usr/bin/clang-format",
+  "clang-format.executable": "clang-format",
   "editor.codeActionsOnSave": {
     "source.organizeImports": "explicit"
   },
   "[makefile]": {
     "editor.defaultFormatter": "vscode.markdown-language-features",
     "editor.tabSize": 4,
-    "editor.formatOnSave": true,
     "editor.insertSpaces": false,
+    "editor.trimAutoWhitespace": true,
+    "editor.formatOnSave": true,
     "editor.formatOnPaste": true,
     "editor.formatOnType": true,
-    "editor.trimAutoWhitespace": true,
     "editor.codeActionsOnSave": {
       "source.fixAll": "explicit"
     }
@@ -45,18 +44,22 @@
   "[c]": {
     "editor.defaultFormatter": "xaver.clang-format",
     "editor.tabSize": 4,
-    "editor.formatOnSave": false,
-    "editor.insertSpaces": true
+    "editor.formatOnSave": true,
+    "editor.formatOnPaste": false,
+    "editor.formatOnType": false
   },
   "[cpp]": {
     "editor.defaultFormatter": "xaver.clang-format",
     "editor.tabSize": 4,
-    "editor.formatOnSave": false,
-    "editor.insertSpaces": true
+    "editor.formatOnSave": true,
+    "editor.formatOnPaste": false,
+    "editor.formatOnType": false
   },
   "files.associations": {
     "*.c": "c",
     "*.cc": "c",
-    "*.h": "c"
+    "*.cpp": "c",
+    "*.h": "c",
+    "*.hpp": "c"
   }
 }
