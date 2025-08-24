@@ -56,14 +56,14 @@ int main(void) {
     // zero-initialize model layers
     mlp.layers.resize(mlp.params.n_layers);
 
-    // initialzie model dimensions
-    size_t n_in = mlp.params.n_in;
-    size_t n_out = mlp.params.n_out;
-
     // xavier-glorot initialization
     for (int i = 0; i < mlp.params.n_layers; i++) {
         // get the current layer
         MLPLayer* L = &mlp.layers[i];
+
+        // get current layer dimensions
+        size_t n_in = (i == 0) ? mlp.params.n_in : mlp.params.n_hidden;
+        size_t n_out = (i == mlp.params.n_layers - 1) ? mlp.params.n_out : mlp.params.n_hidden;
 
         // calculate layer context
         size_t fan_in = n_in;  // n_{l+1}
@@ -91,9 +91,6 @@ int main(void) {
             float rd = 2 * ((float) rand() / RAND_MAX) - 1;
             L->b[j] = rd;  // can be 0 or a small real value
         }
-
-        // update dimensions
-        n_in = n_out;
     }
 
     return 0;
