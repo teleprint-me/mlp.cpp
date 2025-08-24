@@ -45,6 +45,32 @@ float sigmoid_prime(float x) {
     return x * (1.0f - x);
 }
 
+void sigmoid_vector(float* v, size_t n) {
+#pragma omp parallel for
+    for (size_t i = 0; i < n; i++) {
+        v[i] = sigmoid(v[i]);
+    }
+}
+
+void sigmoid_prime_vector(float* v, size_t n) {
+#pragma omp parallel for
+    for (size_t i = 0; i < n; i++) {
+        v[i] = sigmoid_prime(v[i]);
+    }
+}
+
+// Create a simple matmul function (y = Wx + b)
+void matmul(float* y, float* W, float* x, float* b, size_t n_out, size_t n_in) {
+#pragma omp parallel for
+    for (size_t i = 0; i < n_out; i++) {
+        float sum = 0.0f;
+        for (size_t j = 0; j < n_in; j++) {
+            sum += W[i * n_in + j] * x[j];
+        }
+        y[i] = sum + b[i];
+    }
+}
+
 int main(void) {
     srand(time(NULL));  // Seed random number generator
 
