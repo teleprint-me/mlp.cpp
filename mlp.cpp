@@ -1,8 +1,7 @@
 // mlp/mlp.cpp
-// a multi-layer perceptron in C++ completely from scratch.
-// the code will lean into C heavily while leveraging C++ utils to reduce complexity.
-// no classes or templates are allowed. minimal usage of vectors, maps, etc. is valid.
-// auto is banned from usage! it is an anti-pattern to hide data types!
+// Multi-layer perceptron implementation in C with minimal C++ features
+// No classes or templates used, minimal vector usage
+
 #include <ctime>
 #include <cstdlib>
 #include <cmath>
@@ -11,85 +10,81 @@
 
 // Model dimensions
 struct MLPParams {
-    int n_layers = 3;
-    int n_in = 8;
-    int n_hidden = 16;
-    int n_out = 4;
+    int n_layers = 3;  // Number of hidden layers
+    int n_in = 8;  // Input features
+    int n_hidden = 16;  // Hidden units
+    int n_out = 4;  // Output units
 };
 
 // Model layers
 struct MLPLayer {
-    std::vector<float> W;  // n_out x n_in
-    std::vector<float> b;  // n_out
+    std::vector<float> W;  // Output layer weights (n_out x n_in)
+    std::vector<float> b;  // Output layer biases (n_out)
 };
 
 // Model
 struct MLP {
-    // setup model layers
-    std::vector<struct MLPLayer> layers;
+    // Model layers
+    std::vector<MLPLayer> layers;
 
-    // input/output tensors
-    std::vector<float> x;  // 1d input vector
-    std::vector<float> y;  // 1d output vector
+    // Input/output tensors
+    std::vector<float> x;  // 1D input vector
+    std::vector<float> y;  // 1D output vector
 
-    // setup model params
+    // Model dimensions
     struct MLPParams params{};
 };
 
 int main(void) {
-    srand(time(NULL));
+    srand(time(NULL));  // Seed random number generator
 
-    // initialize the model
+    // Initialize model
     MLP mlp{};
 
-    // initialize the input vector
+    // Input vector
     mlp.x.resize(mlp.params.n_in);
     for (size_t i = 0; i < mlp.x.size(); i++) {
-        mlp.x[i] = (float) rand() / (float) RAND_MAX;  // normalized distribution
+        mlp.x[i] = (float) rand() / (float) RAND_MAX;  // Normalize input
     }
 
-    // dump the input results
+    // Output results
     for (size_t i = 0; i < mlp.x.size(); i++) {
         printf("mlp.x[%zu] = %.6f\n", i, (double) mlp.x[i]);
     }
 
-    // zero-initialize model layers
+    // Initialize model layers
     mlp.layers.resize(mlp.params.n_layers);
 
-    // xavier-glorot initialization
+    // Xavier-Glorot initialization
     for (int i = 0; i < mlp.params.n_layers; i++) {
-        // get the current layer
-        MLPLayer* L = &mlp.layers[i];
-
-        // get current layer dimensions
+        // Get the current layer
+        struct MLPLayer* L = &mlp.layers[i];
+    
+        // Current layer dimensions
         size_t n_in = (i == 0) ? mlp.params.n_in : mlp.params.n_hidden;
         size_t n_out = (i == mlp.params.n_layers - 1) ? mlp.params.n_out : mlp.params.n_hidden;
 
-        // calculate layer context
-        size_t fan_in = n_in;  // n_{l+1}
-        size_t fan_out = n_out;  // n_{l-1}
+        // Layer dimensions
+        size_t W_d = n_in * n_out;  // Weights (n_in x n_out)
+        size_t b_d = n_out;  // Biases (n_out)
 
-        // calculate layer dimensions
-        size_t W_d = fan_in * fan_out;  // W_{ij}
-        size_t b_d = fan_out;  // b_i
-
-        // initialize the weights and biases
+        // Initialize weights and biases
         L->W.resize(W_d);
         L->b.resize(b_d);
 
-        // real distribution > U(+/- sqrt(6 / (n_{l+1} + n_{l-1})))
-        float a = sqrtf(6.f / (fan_in + fan_out));
+        // Xavier-Glorot initialization
+        float a = sqrtf(6.0f / (n_in + n_out));  // Scaling factor
 
-        // apply distribution to weights
+        // Initialize weights
         for (size_t j = 0; j < W_d; j++) {
-            float rd = 2 * ((float) rand() / RAND_MAX) - 1;
-            L->W[j] = rd * a;  // U[-a, +a]
+            float rd = 2.0f * ((float) rand() / (float) RAND_MAX) - 1.0f;
+            L->W[j] = rd * a;  // [-a, +a] range
         }
 
-        // apply distribution to biases
+        // Initialize biases
         for (size_t j = 0; j < b_d; j++) {
-            float rd = 2 * ((float) rand() / RAND_MAX) - 1;
-            L->b[j] = rd;  // can be 0 or a small real value
+            float rd = 2.0f * ((float) rand() / (float) RAND_MAX) - 1.0f;
+            L->b[j] = rd;  // Can be 0 or small real value
         }
     }
 
