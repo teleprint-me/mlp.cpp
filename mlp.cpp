@@ -91,16 +91,16 @@ int main(void) {
 
     // Dump initialized weights and biases
     for (int i = 0; i < mlp.params.n_layers; i++) {
-        struct MLPLayer* layer = &mlp.layers[i];
+        struct MLPLayer* L = &mlp.layers[i];
 
         printf("Layer %d:\n", i);
 
-        for (size_t j = 0; j < layer->W.size(); j++) {
-            printf("  W[%zu] = %.6f\n", j, (double) layer->W[j]);
+        for (size_t j = 0; j < L->W.size(); j++) {
+            printf("  W[%zu] = %.6f\n", j, (double) L->W[j]);
         }
 
-        for (size_t j = 0; j < layer->b.size(); j++) {
-            printf("  b[%zu] = %.6f\n", j, (double) layer->b[j]);
+        for (size_t j = 0; j < L->b.size(); j++) {
+            printf("  b[%zu] = %.6f\n", j, (double) L->b[j]);
         }
 
         printf("\n");
