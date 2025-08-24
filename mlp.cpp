@@ -43,10 +43,19 @@ struct MLPLayer {
     std::vector<float> b;  // Output layer biases (n_out)
 };
 
+// Layer cache
+struct MLPLayerCache {
+    std::vector<float> z;  // pre-activation (Wx + b)
+    std::vector<float> a;  // post-activation (sigmoid(z))
+};
+
 // Model
 struct MLP {
     // Model layers
     std::vector<struct MLPLayer> layers;
+
+    // Layer cache
+    std::vector<struct MLPLayerCache> cache;
 
     // Input/output tensors
     std::vector<float> x;  // 1D input vector
