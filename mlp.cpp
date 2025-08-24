@@ -35,6 +35,16 @@ struct MLP {
     struct MLPParams params{};
 };
 
+// Sigmoid Activation Function
+float sigmoid(float x) {
+    return 1.0f / (1.0f + expf(-x));
+}
+
+// Derivative of sigmoid for backpropagation
+float sigmoid_prime(float x) {
+    return x * (1.0f - x);
+}
+
 int main(void) {
     srand(time(NULL));  // Seed random number generator
 
@@ -89,7 +99,7 @@ int main(void) {
         }
     }
 
-    // Dump initialized weights and biases
+    // Output initialized weights and biases
     for (int i = 0; i < mlp.params.n_layers; i++) {
         struct MLPLayer* L = &mlp.layers[i];
 
