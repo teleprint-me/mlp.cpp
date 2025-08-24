@@ -21,10 +21,10 @@
 
 // Model dimensions
 struct MLPParams {
-    int n_layers = 3;  // Number of hidden layers
-    int n_in = 4;  // Input features
-    int n_hidden = 8;  // Hidden units
-    int n_out = 2;  // Output units
+    size_t n_layers = 3;  // Number of hidden layers
+    size_t n_in = 4;  // Input features
+    size_t n_hidden = 8;  // Hidden units
+    size_t n_out = 2;  // Output units
 };
 
 // Model optimization
@@ -82,10 +82,10 @@ void mlp_log_output(struct MLP* mlp) {
 
 void mlp_log_weights_and_biases(struct MLP* mlp) {
     // Output initialized weights and biases
-    for (int i = 0; i < mlp->params.n_layers; i++) {
+    for (size_t i = 0; i < mlp->params.n_layers; i++) {
         struct MLPLayer* L = &mlp->layers[i];
 
-        printf("Layer %d:\n", i);
+        printf("Layer %zu:\n", i);
 
         for (size_t j = 0; j < L->W.size(); j++) {
             printf("  W[%zu] = %.6f\n", j, (double) L->W[j]);
@@ -106,6 +106,22 @@ void mlp_log_weights_and_biases(struct MLP* mlp) {
  * @{
  */
 
+void mlp_input_init(struct MLP* mlp, float* x_in, size_t n) {
+    assert(n == mlp->params.n_in);
+
+    mlp->x.resize(n);
+    for (size_t i = 0; i < mlp->x.size(); i++) {
+        mlp->x[i] = x_in[i];
+    }
+}
+
+void mlp_input_init_random(struct MLP* mlp) {
+    mlp->x.resize(mlp->params.n_in);
+    for (size_t i = 0; i < mlp->x.size(); i++) {
+        mlp->x[i] = (float) rand() / (float) RAND_MAX;  // Normalize input
+    }
+}
+
 // https://proceedings.mlr.press/v9/glorot10a/glorot10a.pdf
 // https://en.wikipedia.org/wiki/Weight_initialization#Glorot_initialization
 void mlp_xavier_init(struct MLP* mlp) {
@@ -113,7 +129,7 @@ void mlp_xavier_init(struct MLP* mlp) {
 
     // Initialize model layers
     mlp->layers.resize(params->n_layers);
-    for (int i = 0; i < params->n_layers; i++) {
+    for (size_t i = 0; i < params->n_layers; i++) {
         // Get the current layer
         struct MLPLayer* L = &mlp->layers[i];
 
@@ -189,7 +205,7 @@ void mlp_forward(struct MLP* mlp, float* x_in, size_t n) {
 
         // Current layer dimensions
         size_t n_in = (i == 0) ? params->n_in : params->n_hidden;
-        size_t n_out = (i == (size_t) params->n_layers - 1) ? params->n_out : params->n_hidden;
+        size_t n_out = (i == params->n_layers - 1) ? params->n_out : params->n_hidden;
 
         // Resize the output vector
         mlp->y.resize(n_out);
@@ -251,14 +267,12 @@ int main(void) {
     // Initialize model
     MLP mlp{};
 
-    // Output vector
+    // Initialize input and output vectors
+    mlp.x.resize(mlp.params.n_in);
     mlp.y.resize(mlp.params.n_out);
 
     // Input vector
-    mlp.x.resize(mlp.params.n_in);
-    for (size_t i = 0; i < mlp.x.size(); i++) {
-        mlp.x[i] = (float) rand() / (float) RAND_MAX;  // Normalize input
-    }
+    mlp_input_init_random(&mlp);
 
     // Output initialized input vector
     mlp_log_input(&mlp);
