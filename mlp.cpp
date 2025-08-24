@@ -72,6 +72,16 @@ void matmul(float* y, float* W, float* x, float* b, size_t n_out, size_t n_in) {
     }
 }
 
+// reduction as mean
+float mse(float* y_pred, float* y_true, size_t n) {
+    float loss = 0.0f;
+    for (size_t i = 0; i < n; i++) {
+        float diff = y_pred[i] - y_true[i];
+        loss += diff * diff;
+    }
+    return loss / n;
+}
+
 int main(void) {
     srand(time(NULL));  // Seed random number generator
 
@@ -155,7 +165,8 @@ int main(void) {
 
         // Current layer dimensions
         size_t n_in = (i == 0) ? mlp.params.n_in : mlp.params.n_hidden;
-        size_t n_out = (i == (size_t) mlp.params.n_layers - 1) ? mlp.params.n_out : mlp.params.n_hidden;
+        size_t n_out = (i == (size_t) mlp.params.n_layers - 1) ? mlp.params.n_out
+                                                               : mlp.params.n_hidden;
 
         mlp.y.resize(n_out);
 
