@@ -1,3 +1,11 @@
+---
+title: 'cross entropy loss'
+type: 'algorithm'
+version: '1'
+date: '2025-08-24'
+license: 'cc-by-nc-sa-4.0'
+---
+
 # Cross Entropy Loss
 
 ### Purpose
