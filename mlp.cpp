@@ -53,7 +53,7 @@ struct MLP {
     std::vector<float> y;  // 1D output vector
 
     // Model dimensions
-    struct MLPParams params{};
+    struct MLPParams dim{};
 
     // Model optimization
     struct SGDParams opt{};
@@ -82,7 +82,7 @@ void mlp_log_output(struct MLP* mlp) {
 
 void mlp_log_weights_and_biases(struct MLP* mlp) {
     // Output initialized weights and biases
-    for (size_t i = 0; i < mlp->params.n_layers; i++) {
+    for (size_t i = 0; i < mlp->dim.n_layers; i++) {
         struct MLPLayer* L = &mlp->layers[i];
 
         printf("Layer %zu:\n", i);
@@ -107,7 +107,7 @@ void mlp_log_weights_and_biases(struct MLP* mlp) {
  */
 
 void mlp_init_input(struct MLP* mlp, float* x_in, size_t n) {
-    assert(n == mlp->params.n_in);
+    assert(n == mlp->dim.n_in);
 
     mlp->x.resize(n);
     for (size_t i = 0; i < mlp->x.size(); i++) {
@@ -116,7 +116,7 @@ void mlp_init_input(struct MLP* mlp, float* x_in, size_t n) {
 }
 
 void mlp_init_input_random(struct MLP* mlp) {
-    mlp->x.resize(mlp->params.n_in);
+    mlp->x.resize(mlp->dim.n_in);
     for (size_t i = 0; i < mlp->x.size(); i++) {
         mlp->x[i] = (float) rand() / (float) RAND_MAX;  // Normalize input
     }
@@ -125,17 +125,17 @@ void mlp_init_input_random(struct MLP* mlp) {
 // https://proceedings.mlr.press/v9/glorot10a/glorot10a.pdf
 // https://en.wikipedia.org/wiki/Weight_initialization#Glorot_initialization
 void mlp_init_xavier(struct MLP* mlp) {
-    struct MLPParams* params = &mlp->params;
+    struct MLPParams* dim = &mlp->dim;
 
     // Initialize model layers
-    mlp->layers.resize(params->n_layers);
-    for (size_t i = 0; i < params->n_layers; i++) {
+    mlp->layers.resize(dim->n_layers);
+    for (size_t i = 0; i < dim->n_layers; i++) {
         // Get the current layer
         struct MLPLayer* L = &mlp->layers[i];
 
         // Current layer dimensions
-        size_t n_in = (i == 0) ? params->n_in : params->n_hidden;
-        size_t n_out = (i == params->n_layers - 1) ? params->n_out : params->n_hidden;
+        size_t n_in = (i == 0) ? dim->n_in : dim->n_hidden;
+        size_t n_out = (i == dim->n_layers - 1) ? dim->n_out : dim->n_hidden;
 
         // Layer dimensions
         size_t W_d = n_in * n_out;  // Weights (n_in x n_out)
@@ -194,7 +194,7 @@ void matmul(float* y, float* W, float* x, float* b, size_t n_out, size_t n_in) {
 }
 
 void mlp_forward(struct MLP* mlp, float* x_in, size_t n) {
-    struct MLPParams* params = &mlp->params;
+    struct MLPParams* dim = &mlp->dim;
 
     // Copy the input vector
     std::vector<float> x(x_in, x_in + n);
@@ -204,8 +204,8 @@ void mlp_forward(struct MLP* mlp, float* x_in, size_t n) {
         struct MLPLayer* L = &mlp->layers[i];
 
         // Current layer dimensions
-        size_t n_in = (i == 0) ? params->n_in : params->n_hidden;
-        size_t n_out = (i == params->n_layers - 1) ? params->n_out : params->n_hidden;
+        size_t n_in = (i == 0) ? dim->n_in : dim->n_hidden;
+        size_t n_out = (i == dim->n_layers - 1) ? dim->n_out : dim->n_hidden;
 
         // Resize the output vector
         mlp->y.resize(n_out);
@@ -268,8 +268,8 @@ int main(void) {
     MLP mlp{};
 
     // Initialize input and output vectors
-    mlp.x.resize(mlp.params.n_in);
-    mlp.y.resize(mlp.params.n_out);
+    mlp.x.resize(mlp.dim.n_in);
+    mlp.y.resize(mlp.dim.n_out);
 
     // Input vector
     mlp_init_input_random(&mlp);
