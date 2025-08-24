@@ -106,7 +106,7 @@ void mlp_log_weights_and_biases(struct MLP* mlp) {
  * @{
  */
 
-void mlp_input_init(struct MLP* mlp, float* x_in, size_t n) {
+void mlp_init_input(struct MLP* mlp, float* x_in, size_t n) {
     assert(n == mlp->params.n_in);
 
     mlp->x.resize(n);
@@ -115,7 +115,7 @@ void mlp_input_init(struct MLP* mlp, float* x_in, size_t n) {
     }
 }
 
-void mlp_input_init_random(struct MLP* mlp) {
+void mlp_init_input_random(struct MLP* mlp) {
     mlp->x.resize(mlp->params.n_in);
     for (size_t i = 0; i < mlp->x.size(); i++) {
         mlp->x[i] = (float) rand() / (float) RAND_MAX;  // Normalize input
@@ -124,7 +124,7 @@ void mlp_input_init_random(struct MLP* mlp) {
 
 // https://proceedings.mlr.press/v9/glorot10a/glorot10a.pdf
 // https://en.wikipedia.org/wiki/Weight_initialization#Glorot_initialization
-void mlp_xavier_init(struct MLP* mlp) {
+void mlp_init_xavier(struct MLP* mlp) {
     struct MLPParams* params = &mlp->params;
 
     // Initialize model layers
@@ -272,13 +272,13 @@ int main(void) {
     mlp.y.resize(mlp.params.n_out);
 
     // Input vector
-    mlp_input_init_random(&mlp);
+    mlp_init_input_random(&mlp);
 
     // Output initialized input vector
     mlp_log_input(&mlp);
 
     // Initialize model layers
-    mlp_xavier_init(&mlp);
+    mlp_init_xavier(&mlp);
 
     // Output initialized weights and biases
     mlp_log_weights_and_biases(&mlp);
