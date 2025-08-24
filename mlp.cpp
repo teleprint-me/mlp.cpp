@@ -22,6 +22,7 @@ struct MLPParams {
     int n_out = 2;  // Output units
 };
 
+// Model optimization
 struct SGDParams {
     float lr = 0.01f;  // Learning rate (gamma)
     float weight_decay = 0.0f;  // L2 regularization (lambda)
@@ -103,7 +104,7 @@ void mlp_xavier_init(struct MLP* mlp) {
 /** @} */
 
 /**
- * Model Forward
+ * Model forward (inference)
  * @{
  */
 
@@ -164,7 +165,7 @@ void mlp_forward(struct MLP* mlp, float* x_in, size_t n) {
 /** @} */
 
 /**
- * Model Backward
+ * Model backward propagation (training)
  * @{
  */
 
