@@ -37,12 +37,12 @@ struct MLP {
 };
 
 struct SGD {
-    float lr = 0.01f;           // Learning rate (gamma)
+    float lr = 0.01f;  // Learning rate (gamma)
     float weight_decay = 0.0f;  // L2 regularization (lambda)
-    float momentum = 0.0f;      // Momentum coefficient (mu)
-    float dampening = 0.0f;     // Dampening coefficient (tau)
-    bool nesterov = false;      // Nesterov acceleration
-    bool maximize = false;      // Minimize or maximize loss
+    float momentum = 0.0f;  // Momentum coefficient (mu)
+    float dampening = 0.0f;  // Dampening coefficient (tau)
+    bool nesterov = false;  // Nesterov acceleration
+    bool maximize = false;  // Minimize or maximize loss
 };
 
 // Sigmoid Activation Function
@@ -93,7 +93,7 @@ float mse(float* y_pred, float* y_true, size_t n) {
 
 void sgd(float* w, const float* grad, size_t n, float lr, float weight_decay) {
     for (size_t i = 0; i < n; ++i) {
-        float g = grad[i] + weight_decay * w[i]; // add L2 penalty if needed
+        float g = grad[i] + weight_decay * w[i];  // add L2 penalty if needed
         w[i] -= lr * g;
     }
 }
