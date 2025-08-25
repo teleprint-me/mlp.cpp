@@ -21,6 +21,7 @@
 
 // Model dimensions
 struct MLPParams {
+    size_t seed = 1337;  // Random seed for reproducibility
     size_t n_layers = 3;  // Number of hidden layers
     size_t n_in = 4;  // Input features
     size_t n_hidden = 8;  // Hidden units
@@ -279,14 +280,19 @@ void sgd(float* w, const float* grad, size_t n, float lr, float weight_decay) {
 /** @} */
 
 int main(void) {
-    srand(time(NULL));  // Seed random number generator
-
     /**
      * Initialize the model
      */
 
     // Create the model
     MLP mlp{};
+
+    // Seed random number generator
+    if (mlp.dim.seed > 0) {
+        srand(mlp.dim.seed);
+    } else {
+        srand(time(NULL));
+    }
 
     // Create input and output vectors
     mlp.x.resize(mlp.dim.n_in);
