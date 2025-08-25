@@ -6,9 +6,10 @@
  * @ref 1989 Multilayer Feedforward Networks are Universal Approximators
  */
 
-#include <math.h>
-#include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
 
 // Define the structure of the network
 #define INPUT_SIZE 2  // Number of input features (e.g., XOR has 2 inputs)
@@ -21,6 +22,21 @@
 #define EPOCHS 10000  // Maximum number of training epochs
 #define ERROR_THRESHOLD 0.01f  // Early stopping threshold for average error
 
+// Linear initialization [0, 1]
+float random_norm(void) {
+    return (float) rand() / (float) RAND_MAX;
+}
+
+// Sigmoid Activation Function
+float sigmoid(float x) {
+    return 1.0f / (1.0f + expf(-x));
+}
+
+// Derivative of sigmoid for backpropagation
+float sigmoid_prime(float x) {
+    return x * (1.0f - x);
+}
+
 // Initialize weights and biases
 void initialize_weights(
     float hidden_weights_input[INPUT_SIZE][HIDDEN_SIZE],
@@ -29,13 +45,13 @@ void initialize_weights(
     float* output_bias
 ) {
     for (int i = 0; i < HIDDEN_SIZE; i++) {
-        hidden_biases[i] = random_linear();
-        hidden_weights_output[i] = random_linear();
+        hidden_biases[i] = random_norm();
+        hidden_weights_output[i] = random_norm();
         for (int j = 0; j < INPUT_SIZE; j++) {
-            hidden_weights_input[j][i] = random_linear();
+            hidden_weights_input[j][i] = random_norm();
         }
     }
-    *output_bias = random_linear();
+    *output_bias = random_norm();
 }
 
 // Forward pass
@@ -53,14 +69,14 @@ void forward(
         for (int j = 0; j < INPUT_SIZE; j++) {
             hidden[i] += hidden_weights_input[j][i] * input[j];
         }
-        hidden[i] = activate_sigmoid(hidden[i]);
+        hidden[i] = sigmoid(hidden[i]);
     }
 
     *output = *output_bias;
     for (int i = 0; i < HIDDEN_SIZE; i++) {
         *output += hidden_weights_output[i] * hidden[i];
     }
-    *output = activate_sigmoid(*output);
+    *output = sigmoid(*output);
 }
 
 void backward(
@@ -74,7 +90,7 @@ void backward(
     float* output_bias
 ) {
     float output_error = target - output;  // Error at output layer
-    float output_gradient = output_error * activate_sigmoid_prime(output);
+    float output_gradient = output_error * sigmoid_prime(output);
 
     // Update output weights and bias
     for (int i = 0; i < HIDDEN_SIZE; i++) {
@@ -85,7 +101,7 @@ void backward(
     // Hidden layer gradients
     for (int i = 0; i < HIDDEN_SIZE; i++) {
         float hidden_error = output_gradient * hidden_weights_output[i];
-        float hidden_gradient = hidden_error * activate_sigmoid_prime(hidden[i]);
+        float hidden_gradient = hidden_error * sigmoid_prime(hidden[i]);
 
         // Update hidden weights and biases
         for (int j = 0; j < INPUT_SIZE; j++) {
