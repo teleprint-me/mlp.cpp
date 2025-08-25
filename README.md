@@ -20,8 +20,21 @@ cd mlp
 
 ## build
 
+### debug
+
 ```sh
 cmake -B build -DCMAKE_BUILD_TYPE=Debug
+```
+
+### release
+
+```sh
+cmake -B build -DCMAKE_BUILD_TYPE=Release
+```
+
+### compile
+
+```sh
 cmake --build build -j 16
 ```
 
@@ -30,6 +43,8 @@ cmake --build build -j 16
 ```sh
 ./build/bin/mlp
 ```
+
+Executables can be found in `./build/bin`.
 
 ## references
 
