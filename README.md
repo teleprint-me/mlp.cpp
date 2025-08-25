@@ -1,6 +1,35 @@
 # mlp
 
-A simple multi-layer perceptron.
+A multi-layer perceptron.
+
+## dependencies
+
+- g++
+- clangd
+- clang-format
+- clib
+- libmath
+- openmp
+
+## setup
+
+```sh
+git clone https://github.com/teleprint-me/mlp.cpp mlp
+cd mlp
+```
+
+## build
+
+```sh
+cmake -B build -DCMAKE_BUILD_TYPE=Debug
+cmake --build build -j 16
+```
+
+## run
+
+```sh
+./build/bin/mlp
+```
 
 ## references
 
