@@ -72,52 +72,6 @@ struct MLP {
 /** @} */
 
 /**
- * Logging
- * @{
- */
-
-void mlp_log_vector(const char* title, const float* x, size_t n) {
-    printf("%s\n", title);
-    for (size_t i = 0; i < n; i++) {
-        printf("  %.6f", (double) x[i]);
-    }
-    printf("\n");  // pad output
-}
-
-// Print a row-major matrix (rows x cols)
-void mlp_log_matrix(const char* title, const float* W, int rows, int cols) {
-    printf("%s\n", title);
-    for (int i = 0; i < rows; i++) {
-        for (int j = 0; j < cols; j++) {
-            printf("  %.6f", (double) W[i * cols + j]);
-        }
-        printf("\n");
-    }
-    printf("\n");
-}
-
-void mlp_log_weights_and_biases(struct MLP* mlp) {
-    // Output initialized weights and biases
-    for (size_t i = 0; i < mlp->dim.n_layers; i++) {
-        struct MLPLayer* L = &mlp->layers[i];
-
-        printf("Layer %zu:\n", i);
-
-        for (size_t j = 0; j < L->W.size(); j++) {
-            printf("  W[%zu] = %.6f\n", j, (double) L->W[j]);
-        }
-
-        for (size_t j = 0; j < L->b.size(); j++) {
-            printf("  b[%zu] = %.6f\n", j, (double) L->b[j]);
-        }
-
-        printf("\n");
-    }
-}
-
-/** @} */
-
-/**
  * MLP Utils
  * @{
  */
@@ -132,6 +86,55 @@ size_t mlp_layer_dim_in(struct MLP* mlp, size_t layer) {
 size_t mlp_layer_dim_out(struct MLP* mlp, size_t layer) {
     assert(layer < mlp->dim.n_layers);
     return (layer == mlp->dim.n_layers - 1) ? mlp->dim.n_out : mlp->dim.n_hidden;
+}
+
+/** @} */
+
+/**
+ * Logging
+ * @{
+ */
+
+void mlp_log_vector(const char* title, const float* x, size_t n) {
+    printf("%s:\n", title);
+    for (size_t i = 0; i < n; i++) {
+        printf("    %6.6f", (double) x[i]);
+    }
+    printf("\n\n");  // pad output
+}
+
+// Print a row-major matrix (rows x cols)
+void mlp_log_matrix(const char* title, const float* W, int rows, int cols) {
+    printf("%s:\n", title);
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            printf("    %.6f", (double) W[i * cols + j]);
+        }
+        printf("\n");
+    }
+    printf("\n");
+}
+
+void mlp_log_layers(struct MLP* mlp) {
+    // Output initialized weights and biases
+    for (size_t i = 0; i < mlp->dim.n_layers; i++) {
+        // y = (n_out,)
+        // W = (n_out, n_in)
+        // x = (n_in,)
+        // b = (n_out,)
+        struct MLPLayer* L = &mlp->layers[i];
+        printf("Layer %zu:\n", i);
+
+        // n_in = input dim = columns
+        size_t n_in = mlp_layer_dim_in(mlp, i);
+        // n_out = output dim = rows
+        size_t n_out = mlp_layer_dim_out(mlp, i);
+        printf("  (n_in, n_out) = (%zu, %zu)\n\n", n_in, n_out);
+
+        // matrix is row-major
+        mlp_log_matrix("W", L->W.data(), n_out, n_in);
+        mlp_log_vector("b", L->b.data(), n_out);
+    }
 }
 
 /** @} */
@@ -353,13 +356,13 @@ int main(void) {
     mlp_init_input(&mlp, inputs.data(), inputs.size());
 
     // Log initialized input vector
-    mlp_log_vector("Input vector:", mlp.x.data(), mlp.x.size());
+    mlp_log_vector("Input vector", mlp.x.data(), mlp.x.size());
 
     // Apply xavier-glorot initialization to model layers
     mlp_init_xavier(&mlp);
 
     // Log initialized weights and biases
-    mlp_log_weights_and_biases(&mlp);
+    mlp_log_layers(&mlp);
 
     /**
      * Perform a forward pass
@@ -369,7 +372,7 @@ int main(void) {
     mlp_forward(&mlp, mlp.x.data(), mlp.x.size());
 
     // Output results
-    mlp_log_vector("Output vector:", mlp.y.data(), mlp.y.size());
+    mlp_log_vector("Output vector", mlp.y.data(), mlp.y.size());
 
     /**
      * Perform a backward pass
