@@ -1,8 +1,7 @@
 /**
+ * Copyright © 2025 Austin Berrio
  * @file examples/models/xor.c
- *
  * @brief Train and test the multi-layer perceptron model using XOR gates.
- *
  * @ref 1989 Multilayer Feedforward Networks are Universal Approximators
  */
 
