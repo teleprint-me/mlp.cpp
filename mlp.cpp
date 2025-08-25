@@ -23,9 +23,9 @@
 struct MLPParams {
     size_t seed = 1337;  // Random seed for reproducibility
     size_t n_layers = 3;  // Number of hidden layers
-    size_t n_in = 4;  // Input features
-    size_t n_hidden = 8;  // Hidden units
-    size_t n_out = 2;  // Output units
+    size_t n_in = 8;  // Input features (e.g., XOR has 4 samples by 2 inputs)
+    size_t n_hidden = 16;  // Number of hidden units (4 states per output)
+    size_t n_out = 4;  // Output units (e.g., XOR has 4 samples by 1 output)
 };
 
 // Model optimization
@@ -317,8 +317,25 @@ int main(void) {
     mlp.x.resize(mlp.dim.n_in);
     mlp.y.resize(mlp.dim.n_out);
 
+    // Expected XOR inputs (n_samples, n_in) = 4 * 2 = 8
+    // The input vector must be flat!
+    std::vector<float> inputs = {
+        // [0, 0]
+        0.0f,
+        0.0f,
+        // [0, 1]
+        0.0f,
+        1.0f,
+        // [1, 0]
+        1.0f,
+        0.0f,
+        // [1, 1]
+        1.0f,
+        1.0f
+    };
+
     // Randomly initialize the input vector
-    mlp_init_input_random(&mlp);
+    mlp_init_input(&mlp, inputs.data(), inputs.size());
 
     // Log initialized input vector
     mlp_log_input(&mlp);
@@ -342,6 +359,9 @@ int main(void) {
     /**
      * Perform a backward pass
      */
+
+    // Expected XOR outputs (n_samples)
+    std::vector<float> targets = {0.0f, 1.0f, 1.0f, 0.0f};
 
     // Assume single input and target vector for now
     std::vector<float> y_true = mlp.x;
