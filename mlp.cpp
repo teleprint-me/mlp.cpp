@@ -112,6 +112,25 @@ void mlp_log_weights_and_biases(struct MLP* mlp) {
 /** @} */
 
 /**
+ * MLP Utils
+ * @{
+ */
+
+// Get layer dimension in
+size_t mlp_layer_dim_in(struct MLP* mlp, size_t layer) {
+    assert(layer < mlp->dim.n_layers);
+    return (layer == 0) ? mlp->dim.n_in : mlp->dim.n_hidden;
+}
+
+// Get layer dimension out
+size_t mlp_layer_dim_out(struct MLP* mlp, size_t layer) {
+    assert(layer < mlp->dim.n_layers);
+    return (layer == mlp->dim.n_layers - 1) ? mlp->dim.n_out : mlp->dim.n_hidden;
+}
+
+/** @} */
+
+/**
  * Initialization
  * @{
  */
@@ -144,8 +163,8 @@ void mlp_init_xavier(struct MLP* mlp) {
         struct MLPLayer* L = &mlp->layers[i];
 
         // Get current layer dimensions
-        size_t n_in = (i == 0) ? dim->n_in : dim->n_hidden;
-        size_t n_out = (i == dim->n_layers - 1) ? dim->n_out : dim->n_hidden;
+        size_t n_in = mlp_layer_dim_in(mlp, i);
+        size_t n_out = mlp_layer_dim_out(mlp, i);
 
         // Calculate current layer dimensions
         size_t W_d = n_in * n_out;  // Weights (n_in x n_out)
@@ -218,8 +237,8 @@ void mlp_forward(struct MLP* mlp, float* x_in, size_t n) {
         struct MLPLayerCache* C = &mlp->cache[i];
 
         // Current layer dimensions
-        size_t n_in = (i == 0) ? dim->n_in : dim->n_hidden;
-        size_t n_out = (i == dim->n_layers - 1) ? dim->n_out : dim->n_hidden;
+        size_t n_in = mlp_layer_dim_in(mlp, i);
+        size_t n_out = mlp_layer_dim_out(mlp, i);
 
         // Resize the output vector
         mlp->y.resize(n_out);
@@ -324,5 +343,16 @@ int main(void) {
      * Perform a backward pass
      */
 
+    // Assume single input and target vector for now
+    std::vector<float> y_true = mlp.x;
+    std::vector<float> y_pred = mlp.y;
+
+    // Compute output loss and delta for output layer
+    std::vector<std::vector<float>> deltas(mlp.dim.n_layers);
+    for (int i = mlp.dim.n_layers - 1; i >= 0; i--) {
+        size_t n_in = mlp_layer_dim_in(&mlp, i);
+        size_t n_out = mlp_layer_dim_out(&mlp, i);
+        deltas[i].resize(n_out);
+    }
     return 0;
 }
