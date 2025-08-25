@@ -45,9 +45,12 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 # target_include_directories(mlp PUBLIC include)
 # target_link_libraries(mlp PRIVATE m rt)
 
-# Add binaries
+# Add xor executable
+add_executable(xor xor.c)
+target_link_libraries(xor PRIVATE m)
+
+# Add mlp executable
 add_executable(mlp mlp.cpp)
-# Target and link the executable
 target_link_libraries(mlp PRIVATE m)
 
 add_custom_target(run_clean
