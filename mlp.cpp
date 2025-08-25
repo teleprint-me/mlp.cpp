@@ -281,30 +281,42 @@ void sgd(float* w, const float* grad, size_t n, float lr, float weight_decay) {
 int main(void) {
     srand(time(NULL));  // Seed random number generator
 
-    // Initialize model
+    /**
+     * Initialize the model
+     */
+
+    // Create the model
     MLP mlp{};
 
-    // Initialize input and output vectors
+    // Create input and output vectors
     mlp.x.resize(mlp.dim.n_in);
     mlp.y.resize(mlp.dim.n_out);
 
-    // Input vector
+    // Randomly initialize the input vector
     mlp_init_input_random(&mlp);
 
-    // Output initialized input vector
+    // Log initialized input vector
     mlp_log_input(&mlp);
 
-    // Initialize model layers
+    // Apply xavier-glorot initialization to model layers
     mlp_init_xavier(&mlp);
 
-    // Output initialized weights and biases
+    // Log initialized weights and biases
     mlp_log_weights_and_biases(&mlp);
+
+    /**
+     * Perform a forward pass
+     */
 
     // Execute the forward pass
     mlp_forward(&mlp, mlp.x.data(), mlp.x.size());
 
     // Output results
     mlp_log_output(&mlp);
+
+    /**
+     * Perform a backward pass
+     */
 
     return 0;
 }
