@@ -24,7 +24,7 @@ struct MLPParams {
     size_t seed = 1337;  // Random seed for reproducibility
     size_t n_layers = 3;  // Number of hidden layers
     size_t n_in = 8;  // Input features (e.g., XOR has 4 samples by 2 inputs)
-    size_t n_hidden = 16;  // Number of hidden units (4 states per output)
+    size_t n_hidden = 16;  // Number of hidden units (4 states per sampled pair)
     size_t n_out = 4;  // Output units (e.g., XOR has 4 samples by 1 output)
 };
 
@@ -290,7 +290,7 @@ float mse(float* y_pred, float* y_true, size_t n) {
 }
 
 void sgd(float* w, const float* grad, size_t n, float lr, float weight_decay) {
-    for (size_t i = 0; i < n; ++i) {
+    for (size_t i = 0; i < n; i++) {
         float g = grad[i] + weight_decay * w[i];  // add L2 penalty if needed
         w[i] -= lr * g;
     }
