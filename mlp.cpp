@@ -2,9 +2,15 @@
  * Copyright © 2025 Austin Berrio
  * @file mlp/mlp.cpp
  * @brief Multi-layer perceptron implementation in C with minimal C++ features.
- * - No classes or templates used
- * - auto keyword is banned
- * - minimal vector usage
+ * - Classes and templates are **not** allowed! C-like structs are preferred.
+ *   - Setting default field parameters for `struct` is encouraged.
+ * - `auto` keyword usage is **not** allowed!
+ *   - Data types must be explicitly declared! Hiding types is discouraged.
+ * - Using std::vector is allowed to simplify memory management.
+ *   - std::vector usage is preferred to simplify vector and matrix operations.
+ * - Function signatures must be explicit and C-like.
+ *   - Function parameters must use explicit types and shapes, e.g. f(float* x, size_t n).
+ *   - Pointer refs signal the data is mutable to some capacity unless const qualified.
  */
 
 #include <cassert>
@@ -308,6 +314,7 @@ void sgd(float* w, const float* grad, size_t n, float lr, float weight_decay) {
 
 // Transpose a row-major matrix (rows x cols) into (cols x rows)
 void transpose(const float* W, float* W_T, int rows, int cols) {
+#pragma omp parallel for
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < cols; j++) {
             W_T[j * rows + i] = W[i * cols + j];
@@ -385,11 +392,28 @@ int main(void) {
     // Assume single input and target vector for now
     std::vector<float> y_pred = mlp.y;  // original predicitions
 
-    // Allocate and prepare deltas
-    std::vector<std::vector<float>> deltas(mlp.dim.n_layers);
-    for (int i = mlp.dim.n_layers - 1; i >= 0; i--) {
+    // Ensure the output dimensions match
+    assert(y_true.size() == y_pred.size());
+
+    // Accumulate the gradients
+    std::vector<float> delta(mlp.dim.n_out, 0.0f);
+    for (size_t i = 0; i < mlp.dim.n_out; i++) {
+        // δ_i​ = (a_i​ - y_i​) ⋅ σ'(a_i​)
+        float error = y_pred[i] - y_true[i];
+        delta[i] = error * sigmoid_prime(y_pred[i]);
+    }
+
+    // Update weights and biases
+    for (size_t i = 0; i < mlp.dim.n_layers; i++) {
+        // Get the current layer
+        struct MLPLayer* L = &mlp.layers[i];
+        // Get the current layer dimensions
+        size_t n_in = mlp_layer_dim_in(&mlp, i);
         size_t n_out = mlp_layer_dim_out(&mlp, i);
-        deltas[i].resize(n_out, 0.0f);
+        for (size_t j = 0; j < n_out; j++) {
+            L->W[j] += mlp.opt.lr * y_pred[j] * delta[j];
+        }
+        L->b[i] += mlp.opt.lr * delta[i];
     }
 
     return 0;
