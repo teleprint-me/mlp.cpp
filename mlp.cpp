@@ -97,6 +97,7 @@ size_t mlp_layer_dim_out(struct MLP* mlp, size_t layer) {
 
 void mlp_log_vector(const char* title, const float* x, size_t n) {
     printf("%s:\n", title);
+    printf("    (n_out,) = (%zu,)\n", n);
     for (size_t i = 0; i < n; i++) {
         printf("    %6.6f", (double) x[i]);
     }
@@ -106,6 +107,7 @@ void mlp_log_vector(const char* title, const float* x, size_t n) {
 // Print a row-major matrix (rows x cols)
 void mlp_log_matrix(const char* title, const float* W, int rows, int cols) {
     printf("%s:\n", title);
+    printf("    (n_out, n_in) = (%d, %d)\n", rows, cols);
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < cols; j++) {
             printf("    %.6f", (double) W[i * cols + j]);
@@ -129,9 +131,8 @@ void mlp_log_layers(struct MLP* mlp) {
         size_t n_in = mlp_layer_dim_in(mlp, i);
         // n_out = output dim = rows
         size_t n_out = mlp_layer_dim_out(mlp, i);
-        printf("  (n_in, n_out) = (%zu, %zu)\n\n", n_in, n_out);
 
-        // matrix is row-major
+        // matrix is row-major (n_out, n_in) = (rows, columns)
         mlp_log_matrix("W", L->W.data(), n_out, n_in);
         mlp_log_vector("b", L->b.data(), n_out);
     }
@@ -356,7 +357,7 @@ int main(void) {
     mlp_init_input(&mlp, inputs.data(), inputs.size());
 
     // Log initialized input vector
-    mlp_log_vector("Input vector", mlp.x.data(), mlp.x.size());
+    mlp_log_matrix("Input vector", mlp.x.data(), mlp.dim.n_out, mlp.dim.n_in / mlp.dim.n_out);
 
     // Apply xavier-glorot initialization to model layers
     mlp_init_xavier(&mlp);
