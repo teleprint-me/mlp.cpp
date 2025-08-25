@@ -229,11 +229,11 @@ void mlp_forward(struct MLP* mlp, float* x_in, size_t n) {
 
         // Apply matrix multiplication
         matmul(mlp->y.data(), L->W.data(), x.data(), L->b.data(), n_out, n_in);
-        C->z = mlp->y;  // copy the pre-activation
+        C->z = mlp->y;  // cache pre-activation
 
         // Apply activation function
         sigmoid_vector(mlp->y.data(), n_out);
-        C->a = mlp->y;  // copy the post-activation
+        C->a = mlp->y;  // cache post-activation
 
         // Copy the output of the current layer to the input
         x = mlp->y;
