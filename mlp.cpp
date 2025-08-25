@@ -360,19 +360,18 @@ int main(void) {
      * Perform a backward pass
      */
 
-    // Expected XOR outputs (n_samples)
-    std::vector<float> targets = {0.0f, 1.0f, 1.0f, 0.0f};
+    // Expected XOR outputs (n_samples * n_out) = 4 * 1 = 4
+    std::vector<float> y_true = {0.0f, 1.0f, 1.0f, 0.0f};
 
     // Assume single input and target vector for now
-    std::vector<float> y_true = mlp.x;
-    std::vector<float> y_pred = mlp.y;
+    std::vector<float> y_pred = mlp.y;  // original predicitions
 
-    // Compute output loss and delta for output layer
+    // Allocate and prepare deltas
     std::vector<std::vector<float>> deltas(mlp.dim.n_layers);
     for (int i = mlp.dim.n_layers - 1; i >= 0; i--) {
-        // size_t n_in = mlp_layer_dim_in(&mlp, i);
         size_t n_out = mlp_layer_dim_out(&mlp, i);
-        deltas[i].resize(n_out);
+        deltas[i].resize(n_out, 0.0f);
     }
+
     return 0;
 }
