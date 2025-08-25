@@ -142,19 +142,19 @@ void mlp_init_xavier(struct MLP* mlp) {
         // Get the current layer
         struct MLPLayer* L = &mlp->layers[i];
 
-        // Current layer dimensions
+        // Get current layer dimensions
         size_t n_in = (i == 0) ? dim->n_in : dim->n_hidden;
         size_t n_out = (i == dim->n_layers - 1) ? dim->n_out : dim->n_hidden;
 
-        // Layer dimensions
+        // Calculate current layer dimensions
         size_t W_d = n_in * n_out;  // Weights (n_in x n_out)
         size_t b_d = n_out;  // Biases (n_out)
 
-        // Initialize weights and biases
+        // Resize weights and biases
         L->W.resize(W_d);
         L->b.resize(b_d);
 
-        // Scaling factor
+        // Calculate the scaling factor
         float a = sqrtf(6.0f / (n_in + n_out));
 
         // Initialize weights
