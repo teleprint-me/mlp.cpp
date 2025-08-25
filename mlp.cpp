@@ -76,18 +76,24 @@ struct MLP {
  * @{
  */
 
-void mlp_log_input(struct MLP* mlp) {
-    for (size_t i = 0; i < mlp->x.size(); i++) {
-        printf("mlp.x[%zu] = %.6f\n", i, (double) mlp->x[i]);
+void mlp_log_vector(const char* title, const float* x, size_t n) {
+    printf("%s\n", title);
+    for (size_t i = 0; i < n; i++) {
+        printf("  %.6f", (double) x[i]);
     }
     printf("\n");  // pad output
 }
 
-void mlp_log_output(struct MLP* mlp) {
-    for (size_t i = 0; i < mlp->y.size(); i++) {
-        printf("mlp.y[%zu] = %.6f\n", i, (double) mlp->y[i]);
+// Print a row-major matrix (rows x cols)
+void mlp_log_matrix(const char* title, const float* W, int rows, int cols) {
+    printf("%s\n", title);
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            printf("  %.6f", (double) W[i * cols + j]);
+        }
+        printf("\n");
     }
-    printf("\n");  // pad output
+    printf("\n");
 }
 
 void mlp_log_weights_and_biases(struct MLP* mlp) {
@@ -210,7 +216,7 @@ void sigmoid_vector(float* v, size_t n) {
     }
 }
 
-// Create a simple matmul function (y = Wx + b)
+// Apply row-major matrix multiplication (y = Wx + b)
 void matmul(float* y, float* W, float* x, float* b, size_t n_out, size_t n_in) {
 #pragma omp parallel for
     for (size_t i = 0; i < n_out; i++) {
@@ -296,6 +302,15 @@ void sgd(float* w, const float* grad, size_t n, float lr, float weight_decay) {
     }
 }
 
+// Transpose a row-major matrix (rows x cols) into (cols x rows)
+void transpose(const float* W, float* W_T, int rows, int cols) {
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            W_T[j * rows + i] = W[i * cols + j];
+        }
+    }
+}
+
 /** @} */
 
 int main(void) {
@@ -338,7 +353,7 @@ int main(void) {
     mlp_init_input(&mlp, inputs.data(), inputs.size());
 
     // Log initialized input vector
-    mlp_log_input(&mlp);
+    mlp_log_vector("Input vector:", mlp.x.data(), mlp.x.size());
 
     // Apply xavier-glorot initialization to model layers
     mlp_init_xavier(&mlp);
@@ -354,7 +369,7 @@ int main(void) {
     mlp_forward(&mlp, mlp.x.data(), mlp.x.size());
 
     // Output results
-    mlp_log_output(&mlp);
+    mlp_log_vector("Output vector:", mlp.y.data(), mlp.y.size());
 
     /**
      * Perform a backward pass
