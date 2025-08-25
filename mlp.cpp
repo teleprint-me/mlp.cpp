@@ -350,7 +350,7 @@ int main(void) {
     // Compute output loss and delta for output layer
     std::vector<std::vector<float>> deltas(mlp.dim.n_layers);
     for (int i = mlp.dim.n_layers - 1; i >= 0; i--) {
-        size_t n_in = mlp_layer_dim_in(&mlp, i);
+        // size_t n_in = mlp_layer_dim_in(&mlp, i);
         size_t n_out = mlp_layer_dim_out(&mlp, i);
         deltas[i].resize(n_out);
     }
