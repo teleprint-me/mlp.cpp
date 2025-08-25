@@ -208,9 +208,13 @@ void mlp_forward(struct MLP* mlp, float* x_in, size_t n) {
     // Copy the input vector
     std::vector<float> x(x_in, x_in + n);
 
+    // Initialize cached layers
+    mlp->cache.resize(dim->n_layers);
+
     // Apply the forward pass
-    for (size_t i = 0; i < mlp->layers.size(); i++) {
+    for (size_t i = 0; i < dim->n_layers; i++) {
         struct MLPLayer* L = &mlp->layers[i];
+        struct MLPLayerCache* C = &mlp->cache[i];
 
         // Current layer dimensions
         size_t n_in = (i == 0) ? dim->n_in : dim->n_hidden;
@@ -223,9 +227,13 @@ void mlp_forward(struct MLP* mlp, float* x_in, size_t n) {
         assert(L->W.size() == n_in * n_out);
         assert(L->b.size() == n_out);
 
-        // Matrix multiplication and activation function application
+        // Apply matrix multiplication
         matmul(mlp->y.data(), L->W.data(), x.data(), L->b.data(), n_out, n_in);
+        C->z = mlp->y;  // copy the pre-activation
+
+        // Apply activation function
         sigmoid_vector(mlp->y.data(), n_out);
+        C->a = mlp->y;  // copy the post-activation
 
         // Copy the output of the current layer to the input
         x = mlp->y;
