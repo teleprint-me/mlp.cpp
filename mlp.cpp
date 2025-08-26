@@ -34,7 +34,7 @@ struct MLPParams {
     size_t seed = 1337;  // Random seed for reproducibility
     size_t n_layers = 3;  // Number of hidden layers
     size_t n_in = 8;  // Input features (e.g., XOR has 4 samples by 2 inputs)
-    size_t n_hidden = 16;  // Number of hidden units (4 states per sampled pair)
+    size_t n_hidden = 8;  // Number of hidden units (4 states per sampled pair)
     size_t n_out = 4;  // Output units (e.g., XOR has 4 samples by 1 output)
 };
 
