@@ -188,12 +188,12 @@ void mlp_init_xavier(struct MLP* mlp) {
         L->b.resize(b_d);
 
         // Calculate the scaling factor
-        float a = sqrtf(6.0f / (n_in + n_out));  // [-a, +a] range
+        float a = sqrtf(6.0f / (n_in + n_out));
 
         // Initialize weights
         for (size_t j = 0; j < W_d; j++) {
-            float rd = (float) rand() / (float) RAND_MAX;
-            L->W[j] = rd * a;  // scale by uniform dist
+            float nd = (float) rand() / (float) RAND_MAX;  // [0, 1]
+            L->W[j] = nd * a;  // scale by normal dist
         }
 
         // Initialize biases
