@@ -331,6 +331,31 @@ void mlp_compute_gradients(struct MLP* mlp, float* y_true) {
     }
 }
 
+// Update weights and biases
+void mlp_update_params(struct MLP* mlp) {
+    for (size_t i = 0; i < mlp->dim.n_layers; i++) {
+        // Get the current input layer
+        struct MLPLayer* L = &mlp->layers[i];
+
+        // Get the current input dimension
+        size_t n_in = mlp_layer_dim_in(mlp, i);
+        // Get the current output dimension
+        size_t n_out = mlp_layer_dim_out(mlp, i);
+
+        // Get the previous activation
+        std::vector<float>* a = (i == 0) ? &mlp->x : &mlp->layers[i - 1].a;
+
+#pragma omp parallel for
+        for (size_t j = 0; j < n_out; j++) {
+            // Apply stochastic gradient descent
+            for (size_t k = 0; k < n_in; k++) {
+                L->W[j * n_in + k] -= mlp->opt.lr * L->d[j] * (*a)[k];
+            }
+            L->b[j] -= mlp->opt.lr * L->d[j];
+        }
+    }
+}
+
 // reduction as mean
 float mse(float* y_pred, float* y_true, size_t n) {
     float loss = 0.0f;
@@ -437,21 +462,7 @@ int main(void) {
     mlp_compute_gradients(&mlp, y_true.data());
 
     // Update weights and biases
-    for (size_t i = 0; i < mlp.dim.n_layers; i++) {
-        struct MLPLayer* L = &mlp.layers[i];
-
-        size_t n_in = mlp_layer_dim_in(&mlp, i);
-        size_t n_out = mlp_layer_dim_out(&mlp, i);
-
-        std::vector<float>* a_prev = (i == 0) ? &mlp.x : &mlp.layers[i - 1].a;
-
-        for (size_t j = 0; j < n_out; j++) {
-            for (size_t k = 0; k < n_in; k++) {
-                L->W[j * n_in + k] -= mlp.opt.lr * L->d[j] * (*a_prev)[k];
-            }
-            L->b[j] -= mlp.opt.lr * L->d[j];
-        }
-    }
+    mlp_update_params(&mlp);
 
     mlp_forward(&mlp, mlp.x.data(), mlp.x.size());
 
