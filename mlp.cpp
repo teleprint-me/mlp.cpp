@@ -400,7 +400,7 @@ int main(void) {
         // Delta output layer: δ_i = (a_i - y_i) ⋅ σ'(a_i)
         float a = L_last->a[i];  // post-activation
         float y = y_true[i];  // target
-        L_last->d[i] = (a - y) * sigmoid(a);
+        L_last->d[i] = (a - y) * sigmoid_prime(a);
     }
 
     // Back-propagate hidden layer deltas/gradients
