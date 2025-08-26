@@ -310,7 +310,7 @@ void mlp_compute_gradients(struct MLP* mlp, float* y_true) {
         // This layers outputs
         size_t n_out = mlp_layer_dim_out(mlp, l);
         // Next layers outputs
-        size_t n_next_out = mlp_layer_dim_out(mlp, l + 1);
+        size_t n_next_out = mlp_layer_dim_out(mlp, l + 1);  // equivalent???
         // Next layers inputs
         size_t n_next_in = mlp_layer_dim_in(mlp, l + 1);  // is this right???
 
