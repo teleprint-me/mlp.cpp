@@ -307,23 +307,24 @@ void mlp_compute_gradients(struct MLP* mlp, float* y_true) {
         // Next hidden layer
         struct MLPLayer* L_next = &mlp->layers[l + 1];
 
-        // This layers outputs
+        // Get the current output dimension (current row)
         size_t n_out = mlp_layer_dim_out(mlp, l);
-        // Next layers outputs
-        size_t n_next_out = mlp_layer_dim_out(mlp, l + 1);  // equivalent???
-        // Next layers inputs
-        size_t n_next_in = mlp_layer_dim_in(mlp, l + 1);  // is this right???
+        // Get the next output dimension (next row)
+        size_t n_out_next = mlp_layer_dim_out(mlp, l + 1);
 
         // Resize to the current hidden layer
         L->d.resize(n_out);
 
+        // Apply the chain rule
 #pragma omp parallel for
         for (size_t i = 0; i < n_out; i++) {
             float sum = 0.0f;
 
-            for (size_t j = 0; j < n_next_out; j++) {
-                // Weight from i (this layer) to j (next layer)
-                sum += L_next->W[j * n_next_in + i] * L_next->d[j];  // n_out???
+            for (size_t j = 0; j < n_out_next; j++) {
+                // W_T[j * rows + i] = W[i * cols + j];
+                // Weight from this layer (i) to next layer (j)
+                // W_T = W[j * current_row + i]
+                sum += L_next->W[j * n_out + i] * L_next->d[j];  // Is this correct?
             }
 
             L->d[i] = sum * sigmoid_prime(L->a[i]);
@@ -343,13 +344,13 @@ void mlp_update_params(struct MLP* mlp) {
         size_t n_out = mlp_layer_dim_out(mlp, i);
 
         // Get the previous activation
-        std::vector<float>* a = (i == 0) ? &mlp->x : &mlp->layers[i - 1].a;
+        std::vector<float> &a = (i == 0) ? mlp->x : mlp->layers[i - 1].a;
 
+        // Apply stochastic gradient descent
 #pragma omp parallel for
         for (size_t j = 0; j < n_out; j++) {
-            // Apply stochastic gradient descent
             for (size_t k = 0; k < n_in; k++) {
-                L->W[j * n_in + k] -= mlp->opt.lr * L->d[j] * (*a)[k];
+                L->W[j * n_in + k] -= mlp->opt.lr * L->d[j] * (a)[k];
             }
             L->b[j] -= mlp->opt.lr * L->d[j];
         }
