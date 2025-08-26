@@ -283,6 +283,7 @@ float sigmoid_prime(float x) {
 
 // Compute output layer deltas (aka gradients)
 void gradient(float* y_pred, float* y_true, float* deltas, size_t n) {
+#pragma omp parallel for
     for (size_t i = 0; i < n; i++) {
         // Delta output layer: δ_i = (a_i - y_i) ⋅ σ'(a_i)
         deltas[i] = (y_pred[i] - y_true[i]) * sigmoid_prime(y_pred[i]);
