@@ -311,6 +311,8 @@ void mlp_compute_gradients(struct MLP* mlp, float* y_true) {
         size_t n_out = mlp_layer_dim_out(mlp, l);
         // Next layers outputs
         size_t n_next_out = mlp_layer_dim_out(mlp, l + 1);
+        // Next layers inputs
+        size_t n_next_in = mlp_layer_dim_in(mlp, l + 1);  // is this right???
 
         // Resize to the current hidden layer
         L->d.resize(n_out);
@@ -321,7 +323,7 @@ void mlp_compute_gradients(struct MLP* mlp, float* y_true) {
 
             for (size_t j = 0; j < n_next_out; j++) {
                 // Weight from i (this layer) to j (next layer)
-                sum += L_next->W[j * n_out + i] * L_next->d[j];
+                sum += L_next->W[j * n_next_in + i] * L_next->d[j];  // n_out???
             }
 
             L->d[i] = sum * sigmoid_prime(L->a[i]);
