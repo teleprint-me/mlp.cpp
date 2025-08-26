@@ -52,7 +52,6 @@ struct SGDParams {
 struct MLPLayer {
     std::vector<float> W;  // Weights (n_out x n_in)
     std::vector<float> b;  // Biases (n_out)
-    std::vector<float> z;  // pre-activation (Wx + b)
     std::vector<float> a;  // post-activation (sigmoid(z))
     std::vector<float> d;  // delta (δ_n = ε_n * a_n​)
 };
@@ -259,11 +258,12 @@ void mlp_forward(struct MLP* mlp, float* x_in, size_t n) {
 
         // Apply matrix multiplication
         matmul(mlp->y.data(), L->W.data(), x.data(), L->b.data(), n_out, n_in);
-        L->z = mlp->y;  // cache pre-activation
 
         // Apply activation function
         sigmoid_vector(mlp->y.data(), n_out);
-        L->a = mlp->y;  // cache post-activation
+
+        // Cache post-activation
+        L->a = mlp->y;
 
         // Copy the output of the current layer to the input
         x = mlp->y;
