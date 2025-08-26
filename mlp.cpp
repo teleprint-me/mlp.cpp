@@ -11,6 +11,10 @@
  * - Function signatures must be explicit and C-like.
  *   - Function parameters must use explicit types and shapes, e.g. f(float* x, size_t n).
  *   - Pointer refs signal the data is mutable to some capacity unless const qualified.
+ * - Simplicity rules them all!
+ *   - Implementations should prioritize simplicity at all costs.
+ *   - Abstractions are deferred until absolutely necessary.
+ *   - Abstractions will reveal themselves through prototyping.
  */
 
 #include <cassert>
@@ -46,23 +50,17 @@ struct SGDParams {
 
 // Model layers
 struct MLPLayer {
-    std::vector<float> W;  // Output layer weights (n_out x n_in)
-    std::vector<float> b;  // Output layer biases (n_out)
-};
-
-// Layer cache
-struct MLPLayerCache {
+    std::vector<float> W;  // Weights (n_out x n_in)
+    std::vector<float> b;  // Biases (n_out)
     std::vector<float> z;  // pre-activation (Wx + b)
     std::vector<float> a;  // post-activation (sigmoid(z))
+    std::vector<float> d;  // delta (δ_n = ε_n * a_n​)
 };
 
 // Model
 struct MLP {
     // Model layers
     std::vector<struct MLPLayer> layers;
-
-    // Layer cache
-    std::vector<struct MLPLayerCache> cache;
 
     // Input/output tensors
     std::vector<float> x;  // 1D input vector
@@ -244,13 +242,9 @@ void mlp_forward(struct MLP* mlp, float* x_in, size_t n) {
     // Copy the input vector
     std::vector<float> x(x_in, x_in + n);
 
-    // Initialize cached layers
-    mlp->cache.resize(dim->n_layers);
-
     // Apply the forward pass
     for (size_t i = 0; i < dim->n_layers; i++) {
         struct MLPLayer* L = &mlp->layers[i];
-        struct MLPLayerCache* C = &mlp->cache[i];
 
         // Current layer dimensions
         size_t n_in = mlp_layer_dim_in(mlp, i);
@@ -265,11 +259,11 @@ void mlp_forward(struct MLP* mlp, float* x_in, size_t n) {
 
         // Apply matrix multiplication
         matmul(mlp->y.data(), L->W.data(), x.data(), L->b.data(), n_out, n_in);
-        C->z = mlp->y;  // cache pre-activation
+        L->z = mlp->y;  // cache pre-activation
 
         // Apply activation function
         sigmoid_vector(mlp->y.data(), n_out);
-        C->a = mlp->y;  // cache post-activation
+        L->a = mlp->y;  // cache post-activation
 
         // Copy the output of the current layer to the input
         x = mlp->y;
@@ -384,6 +378,8 @@ int main(void) {
 
     /**
      * Perform a backward pass
+     * A gradient is the error weighted by the derivative of the
+     * activation function at the output.
      */
 
     // Expected XOR outputs (n_samples * n_out) = 4 * 1 = 4
@@ -395,25 +391,60 @@ int main(void) {
     // Ensure the output dimensions match
     assert(y_true.size() == y_pred.size());
 
-    // Accumulate the gradients
-    std::vector<float> delta(mlp.dim.n_out, 0.0f);
-    for (size_t i = 0; i < mlp.dim.n_out; i++) {
-        // δ_i​ = (a_i​ - y_i​) ⋅ σ'(a_i​)
-        float error = y_pred[i] - y_true[i];
-        delta[i] = error * sigmoid_prime(y_pred[i]);
+    // Compute output layer deltas/gradients
+    size_t last_layer = mlp.dim.n_layers - 1;
+    size_t last_dim = mlp_layer_dim_out(&mlp, last_layer);
+    struct MLPLayer* L_last = &mlp.layers[last_layer];
+    L_last->d.resize(last_dim);
+    for (size_t i = 0; i < last_dim; i++) {
+        // Delta output layer: δ_i = (a_i - y_i) ⋅ σ'(a_i)
+        float a = L_last->a[i];  // post-activation
+        float y = y_true[i];  // target
+        L_last->d[i] = (a - y) * sigmoid(a);
+    }
+
+    // Back-propagate hidden layer deltas/gradients
+    for (int l = last_layer - 1; l >= 0; l--) {
+        // Current hidden layer
+        struct MLPLayer* L = &mlp.layers[l];
+        // Next hidden layer
+        struct MLPLayer* L_next = &mlp.layers[l + 1];
+
+        // Get the current hidden dimensions
+        size_t n_out = mlp_layer_dim_out(&mlp, l);
+        // Get the next hidden dimensions
+        size_t n_next = mlp_layer_dim_out(&mlp, l + 1);
+
+        // Resize to the current hidden layer
+        L->d.resize(n_out);
+
+        for (size_t i = 0; i < n_out; i++) {
+            float sum = 0.0f;
+
+            for (size_t j = 0; j < n_next; j++) {
+                // Weight from i (this layer) to j (next layer)
+                sum += L_next->W[j * n_out + i] * L_next->d[j];
+            }
+
+            L->d[i] = sum * sigmoid_prime(L->a[i]);
+        }
     }
 
     // Update weights and biases
     for (size_t i = 0; i < mlp.dim.n_layers; i++) {
-        // Get the current layer
         struct MLPLayer* L = &mlp.layers[i];
-        // Get the current layer dimensions
+
         size_t n_in = mlp_layer_dim_in(&mlp, i);
         size_t n_out = mlp_layer_dim_out(&mlp, i);
+
+        std::vector<float>* a_prev = (i == 0) ? &mlp.x : &mlp.layers[i - 1].a;
+
         for (size_t j = 0; j < n_out; j++) {
-            L->W[j] += mlp.opt.lr * y_pred[j] * delta[j];
+            for (size_t k = 0; k < n_in; k++) {
+                L->W[j * n_in + k] -= mlp.opt.lr * L->d[j] * (*a_prev)[k];
+            }
+            L->b[j] -= mlp.opt.lr * L->d[j];
         }
-        L->b[i] += mlp.opt.lr * delta[i];
     }
 
     return 0;
