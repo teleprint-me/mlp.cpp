@@ -338,9 +338,9 @@ void mlp_update_params(struct MLP* mlp) {
         // Get the current input layer
         struct MLPLayer* L = &mlp->layers[i];
 
-        // Get the current input dimension
+        // Get the current input dimension (col)
         size_t n_in = mlp_layer_dim_in(mlp, i);
-        // Get the current output dimension
+        // Get the current output dimension (row)
         size_t n_out = mlp_layer_dim_out(mlp, i);
 
         // Get the previous activation
