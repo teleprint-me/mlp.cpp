@@ -192,8 +192,8 @@ void mlp_init_xavier(struct MLP* mlp) {
 
         // Initialize weights
         for (size_t j = 0; j < W_d; j++) {
-            float nd = (float) rand() / (float) RAND_MAX;  // [0, 1]
-            L->W[j] = nd * a;  // scale by normal dist
+            float ud = 2 * ((float) rand() / (float) RAND_MAX) - 1;  // uniform
+            L->W[j] = ud * a;  // [-a, +a]
         }
 
         // Initialize biases
