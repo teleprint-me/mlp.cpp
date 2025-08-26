@@ -281,10 +281,11 @@ float sigmoid_prime(float x) {
     return x * (1.0f - x);
 }
 
-void sigmoid_prime_vector(float* v, size_t n) {
-#pragma omp parallel for
+// Compute output layer deltas (aka gradients)
+void gradient(float* y_pred, float* y_true, float* deltas, size_t n) {
     for (size_t i = 0; i < n; i++) {
-        v[i] = sigmoid_prime(v[i]);
+        // Delta output layer: δ_i = (a_i - y_i) ⋅ σ'(a_i)
+        deltas[i] = (y_pred[i] - y_true[i]) * sigmoid_prime(y_pred[i]);
     }
 }
 
@@ -384,26 +385,19 @@ int main(void) {
     // Expected XOR outputs (n_samples * n_out) = 4 * 1 = 4
     std::vector<float> y_true = {0.0f, 1.0f, 1.0f, 0.0f};
 
-    // Assume single input and target vector for now
-    std::vector<float> y_pred = mlp.y;  // original predicitions
-
     // Ensure the output dimensions match
-    assert(y_true.size() == y_pred.size());
+    assert(mlp.y.size() == y_true.size());
 
-    float loss = mse(mlp.y.data(), y_true.data(), mlp.y.size());
-    printf("Initial loss: %.6f\n", (double) loss);
+    float pre_loss = mse(mlp.y.data(), y_true.data(), mlp.y.size());
+    printf("Pre loss: %.6f\n", (double) pre_loss);
 
-    // Compute output layer deltas/gradients
+    // Compute output layer deltas (aka gradients)
     size_t last_layer = mlp.dim.n_layers - 1;
     size_t last_dim = mlp_layer_dim_out(&mlp, last_layer);
     struct MLPLayer* L_last = &mlp.layers[last_layer];
     L_last->d.resize(last_dim);
-    for (size_t i = 0; i < last_dim; i++) {
-        // Delta output layer: δ_i = (a_i - y_i) ⋅ σ'(a_i)
-        float a = L_last->a[i];  // post-activation
-        float y = y_true[i];  // target
-        L_last->d[i] = (a - y) * sigmoid_prime(a);
-    }
+    // Compute output layer deltas (aka gradients)
+    gradient(L_last->a.data(), y_true.data(), L_last->d.data(), last_dim);
 
     // Back-propagate hidden layer deltas/gradients
     for (int l = last_layer - 1; l >= 0; l--) {
@@ -448,6 +442,20 @@ int main(void) {
             L->b[j] -= mlp.opt.lr * L->d[j];
         }
     }
+
+    mlp_forward(&mlp, mlp.x.data(), mlp.x.size());
+
+    float post_loss = mse(mlp.y.data(), y_true.data(), mlp.y.size());
+    printf("Post Loss: %.6f\n", (double) post_loss);
+    printf(
+        "Loss Diff: %.6f - %.6f = %.6f\n\n",
+        (double) post_loss,
+        (double) pre_loss,
+        (double) (post_loss - pre_loss)
+    );
+
+    mlp_log_layers(&mlp);
+    mlp_log_vector("y", mlp.y.data(), mlp.y.size());
 
     return 0;
 }
