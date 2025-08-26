@@ -281,12 +281,51 @@ float sigmoid_prime(float x) {
     return x * (1.0f - x);
 }
 
-// Compute output layer deltas (aka gradients)
-void gradient(float* y_pred, float* y_true, float* deltas, size_t n) {
+// Compute the multi-layer gradients (aka deltas)
+void mlp_compute_gradients(struct MLP* mlp, float* y_true) {
+    // Get the final layer index
+    size_t last_layer = mlp->dim.n_layers - 1;
+    // Get the final layer dimension
+    size_t last_dim = mlp_layer_dim_out(mlp, last_layer);
+    // Get the final layer
+    struct MLPLayer* L_last = &mlp->layers[last_layer];
+
+    // Initialize the output deltas
+    L_last->d.resize(last_dim);
+
+    // Backpropagate output layer deltas
 #pragma omp parallel for
-    for (size_t i = 0; i < n; i++) {
+    for (size_t i = 0; i < last_dim; i++) {
         // Delta output layer: δ_i = (a_i - y_i) ⋅ σ'(a_i)
-        deltas[i] = (y_pred[i] - y_true[i]) * sigmoid_prime(y_pred[i]);
+        L_last->d[i] = (L_last->a[i] - y_true[i]) * sigmoid_prime(L_last->a[i]);
+    }
+
+    // Backpropagate hidden layer deltas
+    for (int l = last_layer - 1; l >= 0; l--) {
+        // Current hidden layer
+        struct MLPLayer* L = &mlp->layers[l];
+        // Next hidden layer
+        struct MLPLayer* L_next = &mlp->layers[l + 1];
+
+        // This layers outputs
+        size_t n_out = mlp_layer_dim_out(mlp, l);
+        // Next layers outputs
+        size_t n_next_out = mlp_layer_dim_out(mlp, l + 1);
+
+        // Resize to the current hidden layer
+        L->d.resize(n_out);
+
+#pragma omp parallel for
+        for (size_t i = 0; i < n_out; i++) {
+            float sum = 0.0f;
+
+            for (size_t j = 0; j < n_next_out; j++) {
+                // Weight from i (this layer) to j (next layer)
+                sum += L_next->W[j * n_out + i] * L_next->d[j];
+            }
+
+            L->d[i] = sum * sigmoid_prime(L->a[i]);
+        }
     }
 }
 
@@ -392,40 +431,8 @@ int main(void) {
     float pre_loss = mse(mlp.y.data(), y_true.data(), mlp.y.size());
     printf("Pre loss: %.6f\n", (double) pre_loss);
 
-    // Compute output layer deltas (aka gradients)
-    size_t last_layer = mlp.dim.n_layers - 1;
-    size_t last_dim = mlp_layer_dim_out(&mlp, last_layer);
-    struct MLPLayer* L_last = &mlp.layers[last_layer];
-    L_last->d.resize(last_dim);
-    // Compute output layer deltas (aka gradients)
-    gradient(L_last->a.data(), y_true.data(), L_last->d.data(), last_dim);
-
-    // Back-propagate hidden layer deltas/gradients
-    for (int l = last_layer - 1; l >= 0; l--) {
-        // Current hidden layer
-        struct MLPLayer* L = &mlp.layers[l];
-        // Next hidden layer
-        struct MLPLayer* L_next = &mlp.layers[l + 1];
-
-        // Get the current hidden dimensions
-        size_t n_out = mlp_layer_dim_out(&mlp, l);
-        // Get the next hidden dimensions
-        size_t n_next = mlp_layer_dim_out(&mlp, l + 1);
-
-        // Resize to the current hidden layer
-        L->d.resize(n_out);
-
-        for (size_t i = 0; i < n_out; i++) {
-            float sum = 0.0f;
-
-            for (size_t j = 0; j < n_next; j++) {
-                // Weight from i (this layer) to j (next layer)
-                sum += L_next->W[j * n_out + i] * L_next->d[j];
-            }
-
-            L->d[i] = sum * sigmoid_prime(L->a[i]);
-        }
-    }
+    // Compute output layer gradients (aka deltas)
+    mlp_compute_gradients(&mlp, y_true.data());
 
     // Update weights and biases
     for (size_t i = 0; i < mlp.dim.n_layers; i++) {
