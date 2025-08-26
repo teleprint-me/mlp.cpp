@@ -390,6 +390,9 @@ int main(void) {
     // Ensure the output dimensions match
     assert(y_true.size() == y_pred.size());
 
+    float loss = mse(mlp.y.data(), y_true.data(), mlp.y.size());
+    printf("Initial loss: %.6f\n", (double) loss);
+
     // Compute output layer deltas/gradients
     size_t last_layer = mlp.dim.n_layers - 1;
     size_t last_dim = mlp_layer_dim_out(&mlp, last_layer);
