@@ -295,6 +295,8 @@ void mlp_compute_gradients(struct MLP* mlp, float* y_true) {
 
     // The derivative of f'(a) is defined to be the instantaneous rate of change
     // of f at the point a, f(a). e.g. f'(a) = Δy / Δx = f(b) - f(a) / b - a
+    // where b is a value near a, e.g. if a = 2, then b = 2.0001
+
     // Backpropagate output layer deltas
 #pragma omp parallel for
     for (size_t i = 0; i < last_dim; i++) {
