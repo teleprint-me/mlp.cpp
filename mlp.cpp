@@ -565,8 +565,8 @@ int main(void) {
     // Ensure the output dimensions match
     assert(mlp.y.size() == y_true.size());
 
-    float pre_loss = mse(mlp.y.data(), y_true.data(), mlp.y.size());
-    printf("Pre loss: %.6f\n", (double) pre_loss);
+    float loss_0 = mse(mlp.y.data(), y_true.data(), mlp.y.size());
+    printf("loss_0: %.6f\n", (double) loss_0);
 
     // Compute output layer gradients (aka deltas)
     mlp_compute_gradients(&mlp, y_true.data());
@@ -576,13 +576,13 @@ int main(void) {
 
     mlp_forward(&mlp, mlp.x.data(), mlp.x.size());
 
-    float post_loss = mse(mlp.y.data(), y_true.data(), mlp.y.size());
-    printf("Post Loss: %.6f\n", (double) post_loss);
+    float loss_1 = mse(mlp.y.data(), y_true.data(), mlp.y.size());
+    printf("loss_1: %.6f\n", (double) loss_1);
     printf(
-        "Loss Diff: %.6f - %.6f = %.6f\n\n",
-        (double) post_loss,
-        (double) pre_loss,
-        (double) (post_loss - pre_loss)
+        "loss_diff: %.6f - %.6f = %.6f\n\n",
+        (double) loss_1,
+        (double) loss_0,
+        (double) (loss_1 - loss_0)
     );
 
     mlp_log_layers(&mlp);
