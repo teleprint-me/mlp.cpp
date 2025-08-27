@@ -327,17 +327,17 @@ void mlp_forward(struct MLP* mlp, float* x_in, size_t n) {
  *      dL/dw = dL/da · da/dz · dz/dw
  *   where:
  *      - L is the loss function
- *      - a is the activation output (e.g. sigmoid(z))
+ *      - a is the activation output (e.g. σ(z))
  *      - z is the pre-activation (linear combination)
  *      - w is a weight
  * - For sigmoid activation:
- *      sigmoid(z) = 1 / (1 + exp(-z))
- *      d/dz sigmoid(z) = sigmoid(z)·(1 - sigmoid(z))
- * - For MSE loss:
+ *      σ(z) = 1 / (1 + exp(-z))
+ *      d/dz σ(z) = σ(z)·(1 - σ(z))
+ * - For SE (Squared Error) loss:
  *      L = ½(a - y)²
  *      dL/da = (a - y)
  * - Output layer error term (delta):
- *      delta = (a - y) · sigmoid'(z)
+ *      delta = (a - y) · σ'(z)
  *   This gives the gradient of the loss with respect to z.
  *
  * 7. Batch Aggregation (not part of chain rule)
