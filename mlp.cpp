@@ -212,7 +212,7 @@ void mlp_init_xavier(struct MLP* mlp) {
 
 // Sigmoid Activation Function
 float sigmoid(float x) {
-    return 1.0f / (1.0f + expf(-x));
+    return 1.0f / (1.0f + expf(-x));  // creates non-linearity
 }
 
 void sigmoid_vector(float* v, size_t n) {
