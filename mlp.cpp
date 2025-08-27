@@ -52,9 +52,13 @@ struct SGDParams {
 struct MLPLayer {
     std::vector<float> W;  // Weights (n_out x n_in)
     std::vector<float> b;  // Biases (n_out)
+
     std::vector<float> z;  // pre-activation (Wx + b)
     std::vector<float> a;  // post-activation (sigmoid(z))
     std::vector<float> d;  // delta (δ_n = ε_n * a_n​)
+
+    std::vector<float> vW;  // Weights momentum
+    std::vector<float> vb;  // Biases momentum
 };
 
 // Model
@@ -421,15 +425,50 @@ void mlp_update_params(struct MLP* mlp) {
         // Get the previous activation
         std::vector<float> &a = (i == 0) ? mlp->x : mlp->layers[i - 1].a;
 
+        // Only initialize moment if it's set
+        if (mlp->opt.momentum > 0) {
+            // Initialize weight momentum
+            if (L->vW.size() != L->W.size()) {
+                L->vW.assign(L->W.size(), 0.0f);
+            }
+
+            // Initialize bias momentum
+            if (L->vb.size() != L->b.size()) {
+                L->vb.assign(L->b.size(), 0.0f);
+            }
+        }
+
         // Apply stochastic gradient descent
         // #pragma omp parallel for
         for (size_t j = 0; j < n_out; j++) {
+            // Update the weights
             for (size_t k = 0; k < n_in; k++) {
-                float w = L->W[j * n_in + k];
-                float g = L->d[j] * a[k] + mlp->opt.weight_decay * w;
-                L->W[j * n_in + k] -= mlp->opt.lr * g;
+                // Get the current parameter
+                size_t idx = j * n_in + k;
+                // Calculate the base gradient
+                float g = L->d[j] * a[k];
+
+                // Apply weight decay
+                if (mlp->opt.weight_decay > 0) {
+                    g += mlp->opt.weight_decay * L->W[idx];
+                }
+
+                // Apply momentum
+                if (mlp->opt.momentum > 0) {
+                    L->vW[idx] = mlp->opt.momentum * L->vW[idx] + g;
+                    L->W[idx] -= mlp->opt.lr * L->vW[idx];
+                } else {  // Otherwise, update
+                    L->W[idx] -= mlp->opt.lr * g;
+                }
             }
-            L->b[j] -= mlp->opt.lr * L->d[j];
+
+            // Update the biases
+            if (mlp->opt.momentum > 0) {
+                L->vb[j] = mlp->opt.momentum * L->vb[j] + L->d[j];
+                L->b[j] -= mlp->opt.lr * L->vb[j];
+            } else {
+                L->b[j] -= mlp->opt.lr * L->d[j];
+            }
         }
     }
 }
@@ -442,13 +481,6 @@ float mse(float* y_pred, float* y_true, size_t n) {
         loss += diff * diff;
     }
     return loss / n;
-}
-
-void sgd(float* w, const float* grad, size_t n, float lr, float weight_decay) {
-    for (size_t i = 0; i < n; i++) {
-        float g = grad[i] + weight_decay * w[i];  // add L2 penalty if needed
-        w[i] -= lr * g;
-    }
 }
 
 // Transpose a row-major matrix (rows x cols) into (cols x rows)
