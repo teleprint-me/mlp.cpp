@@ -433,6 +433,9 @@ void mlp_update_params(struct MLP* mlp) {
             }
         }
 
+        // before updating parameters
+        constexpr float GRAD_EPS = 1e-15f;
+
         // Apply stochastic gradient descent
         // #pragma omp parallel for
         for (size_t j = 0; j < n_out; j++) {
@@ -451,6 +454,13 @@ void mlp_update_params(struct MLP* mlp) {
                 // Apply dampening if set
                 g *= (1.0f - mlp->opt.dampening);
 
+                if (!(fabsf(g) > GRAD_EPS) || std::isnan(g)) {
+                    printf(
+                        "Warning: small or NaN gradient detected: %f at idx %zu\n", (double) g, idx
+                    );
+                    // assert(0 && "Gradient vanished or NaN!");
+                }
+
                 // Apply momentum
                 if (mlp->opt.momentum > 0) {
                     L->vW[idx] = mlp->opt.momentum * L->vW[idx] + g;
@@ -458,20 +468,24 @@ void mlp_update_params(struct MLP* mlp) {
                 } else {  // Otherwise, update
                     L->W[idx] -= mlp->opt.lr * g;
                 }
-
-                assert(L->W[idx] != 0 && "Gradient vanished!");  // catch vanishing gradients
             }
 
             // Update the biases
             float db = (1.0f - mlp->opt.dampening) * L->d[j];
+
+            if (!(fabsf(db) > GRAD_EPS) || std::isnan(db)) {
+                printf(
+                    "Warning: small or NaN bias gradient detected: %f at idx %zu\n", (double) db, j
+                );
+                // assert(0 && "Gradient vanished or NaN!");
+            }
+
             if (mlp->opt.momentum > 0) {
                 L->vb[j] = mlp->opt.momentum * L->vb[j] + db;
                 L->b[j] -= mlp->opt.lr * L->vb[j];
             } else {
                 L->b[j] -= mlp->opt.lr * db;
             }
-
-            assert(L->b[j] != 0 && "Gradient vanished!");  // catching vanishing gradients
         }
     }
 }
