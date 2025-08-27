@@ -354,6 +354,8 @@ float sigmoid_prime(float x) {
 }
 
 // Compute the multi-layer gradients (aka deltas)
+// Each layer’s deltas are calculated using the deltas from the next layer.
+// The shape of deltas always matches the number of outputs for that layer.
 void mlp_compute_gradients(struct MLP* mlp, float* y_true) {
     // Get the final layer index
     size_t last_layer = mlp->dim.n_layers - 1;
@@ -380,9 +382,9 @@ void mlp_compute_gradients(struct MLP* mlp, float* y_true) {
         struct MLPLayer* L_next = &mlp->layers[l + 1];
 
         // Get the current output dimension (current row)
-        size_t n_out = mlp_layer_dim_out(mlp, l);
+        size_t n_out = mlp_layer_dim_out(mlp, l);  // delta shape
         // Get the next output dimension (next row)
-        size_t n_out_next = mlp_layer_dim_out(mlp, l + 1);
+        size_t n_out_next = mlp_layer_dim_out(mlp, l + 1);  // next delta
 
         // Resize to the current hidden layer
         L->d.resize(n_out);
@@ -392,11 +394,12 @@ void mlp_compute_gradients(struct MLP* mlp, float* y_true) {
         for (size_t i = 0; i < n_out; i++) {
             float sum = 0.0f;
 
+            // Use next layer’s weights and deltas to compute the current layer’s deltas.
             for (size_t j = 0; j < n_out_next; j++) {
                 // W_T[j * rows + i] = W[i * cols + j];
                 // Weight from this layer (i) to next layer (j)
                 // W_T = W[j * current_row + i]
-                sum += L_next->W[j * n_out + i] * L_next->d[j];  // Is this correct?
+                sum += L_next->W[j * n_out + i] * L_next->d[j];
             }
 
             L->d[i] = sum * sigmoid_prime(L->a[i]);
