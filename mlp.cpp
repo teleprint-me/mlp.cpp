@@ -276,24 +276,40 @@ void mlp_forward(struct MLP* mlp, float* x_in, size_t n) {
  * @{
  */
 
-/**
- * ***********
- * Definitions
- * *******************
- * Definition of Slope
- * *******************
- * The slope of the line through the distinct points (x_1, y_1) and (x_2, y_2)
- * is change in y / change in x = rise / run
- * e.g. Δy / Δx = y_2 - y_1 / x_2 - x_1 where x_2 - x_1 != 0
- * *********************
- * Derivative at a point
- * *********************
- * The derivative of f'(a) is defined to be the instantaneous rate of change
- * of f at the point a, f(a). e.g. f'(a) = Δy / Δx = f(b) - f(a) / b - a
- * where b is a value near a, e.g. if a = 2, then b = 2.0001
- * ---
+/*********************************************
+ *       Calculus: Slope and Derivative      *
+ *********************************************
  *
- */
+ * 1. Slope of a Line
+ * ------------------
+ * The slope between two distinct points (x₁, y₁) and (x₂, y₂) is:
+ *      slope = (change in y) / (change in x)
+ *            = (y₂ - y₁) / (x₂ - x₁),   where x₂ ≠ x₁
+ *
+ * 2. Derivative at a Point
+ * ------------------------
+ * The derivative f'(a) is the instantaneous rate of change of f at x = a:
+ *      f'(a) ≈ (f(b) - f(a)) / (b - a),   for b close to a
+ * As b → a, this becomes the true derivative.
+ *
+ * - If f' > 0 on an interval, f is increasing there.
+ * - If f' < 0, f is decreasing.
+ * - If f' = 0, f is constant.
+ * - |f'| gives the magnitude of the rate of change.
+ *
+ * 3. Leibniz Notation
+ * -------------------
+ * If y = f(x), then:
+ *      Δy / Δx  →  dy / dx  =  f'(x)
+ *      d/dx (y)  =  derivative of y with respect to x
+ *
+ * 4. Tangent Line Approximation
+ * -----------------------------
+ * For small Δx near 0:
+ *      Δy ≈ f'(a)·Δx,
+ *      f(x) ≈ f(a) + f'(a)·(x - a)
+ *
+ *********************************************/
 
 // Derivative of sigmoid for backpropagation
 float sigmoid_prime(float x) {
