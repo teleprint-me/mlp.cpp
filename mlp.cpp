@@ -45,7 +45,6 @@ struct SGDParams {
     float momentum = 0.0f;  // Momentum coefficient (mu)
     float dampening = 0.0f;  // Dampening coefficient (tau)
     bool nesterov = false;  // Nesterov acceleration
-    bool maximize = false;  // Minimize or maximize loss
 };
 
 // Model layers
