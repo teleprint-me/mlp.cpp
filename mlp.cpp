@@ -422,17 +422,19 @@ void mlp_update_params(struct MLP* mlp) {
         std::vector<float> &a = (i == 0) ? mlp->x : mlp->layers[i - 1].a;
 
         // Apply stochastic gradient descent
-#pragma omp parallel for
+        // #pragma omp parallel for
         for (size_t j = 0; j < n_out; j++) {
             for (size_t k = 0; k < n_in; k++) {
-                L->W[j * n_in + k] -= mlp->opt.lr * L->d[j] * (a)[k];
+                float w = L->W[j * n_in + k];
+                float g = L->d[j] * a[k] + mlp->opt.weight_decay * w;
+                L->W[j * n_in + k] -= mlp->opt.lr * g;
             }
             L->b[j] -= mlp->opt.lr * L->d[j];
         }
     }
 }
 
-// reduction as mean
+// loss with reduction as mean
 float mse(float* y_pred, float* y_true, size_t n) {
     float loss = 0.0f;
     for (size_t i = 0; i < n; i++) {
