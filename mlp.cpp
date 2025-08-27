@@ -458,6 +458,8 @@ void mlp_update_params(struct MLP* mlp) {
                 } else {  // Otherwise, update
                     L->W[idx] -= mlp->opt.lr * g;
                 }
+
+                assert(L->W[idx] != 0 && "Gradient vanished!");  // catch vanishing gradients
             }
 
             // Update the biases
@@ -468,6 +470,8 @@ void mlp_update_params(struct MLP* mlp) {
             } else {
                 L->b[j] -= mlp->opt.lr * db;
             }
+
+            assert(L->b[j] != 0 && "Gradient vanished!");  // catching vanishing gradients
         }
     }
 }
