@@ -449,6 +449,9 @@ void mlp_update_params(struct MLP* mlp) {
                     g += mlp->opt.weight_decay * L->W[idx];
                 }
 
+                // Apply dampening if set
+                g *= (1.0f - mlp->opt.dampening);
+
                 // Apply momentum
                 if (mlp->opt.momentum > 0) {
                     L->vW[idx] = mlp->opt.momentum * L->vW[idx] + g;
@@ -459,11 +462,12 @@ void mlp_update_params(struct MLP* mlp) {
             }
 
             // Update the biases
+            float db = (1.0f - mlp->opt.dampening) * L->d[j];
             if (mlp->opt.momentum > 0) {
-                L->vb[j] = mlp->opt.momentum * L->vb[j] + L->d[j];
+                L->vb[j] = mlp->opt.momentum * L->vb[j] + db;
                 L->b[j] -= mlp->opt.lr * L->vb[j];
             } else {
-                L->b[j] -= mlp->opt.lr * L->d[j];
+                L->b[j] -= mlp->opt.lr * db;
             }
         }
     }
