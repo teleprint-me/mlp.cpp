@@ -276,6 +276,25 @@ void mlp_forward(struct MLP* mlp, float* x_in, size_t n) {
  * @{
  */
 
+/**
+ * ***********
+ * Definitions
+ * *******************
+ * Definition of Slope
+ * *******************
+ * The slope of the line through the distinct points (x_1, y_1) and (x_2, y_2)
+ * is change in y / change in x = rise / run
+ * e.g. Δy / Δx = y_2 - y_1 / x_2 - x_1 where x_2 - x_1 != 0
+ * *********************
+ * Derivative at a point
+ * *********************
+ * The derivative of f'(a) is defined to be the instantaneous rate of change
+ * of f at the point a, f(a). e.g. f'(a) = Δy / Δx = f(b) - f(a) / b - a
+ * where b is a value near a, e.g. if a = 2, then b = 2.0001
+ * ---
+ *
+ */
+
 // Derivative of sigmoid for backpropagation
 float sigmoid_prime(float x) {
     return x * (1.0f - x);
@@ -292,10 +311,6 @@ void mlp_compute_gradients(struct MLP* mlp, float* y_true) {
 
     // Initialize the output deltas
     L_last->d.resize(last_dim);
-
-    // The derivative of f'(a) is defined to be the instantaneous rate of change
-    // of f at the point a, f(a). e.g. f'(a) = Δy / Δx = f(b) - f(a) / b - a
-    // where b is a value near a, e.g. if a = 2, then b = 2.0001
 
     // Backpropagate output layer deltas
 #pragma omp parallel for
