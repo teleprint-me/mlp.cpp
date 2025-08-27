@@ -280,40 +280,73 @@ void mlp_forward(struct MLP* mlp, float* x_in, size_t n) {
  * @{
  */
 
-/*********************************************
- *       Calculus: Slope and Derivative      *
- *********************************************
+/**************************************************
+ *      Calculus for Machine Learning Reference    *
+ **************************************************
  *
  * 1. Slope of a Line
  * ------------------
- * The slope between two distinct points (x₁, y₁) and (x₂, y₂) is:
- *      slope = (change in y) / (change in x)
- *            = (y₂ - y₁) / (x₂ - x₁),   where x₂ ≠ x₁
+ * The slope between points (x₁, y₁) and (x₂, y₂) is:
+ *      slope = (y₂ - y₁) / (x₂ - x₁),  where x₂ ≠ x₁
+ * - Geometrically: "rise over run" (average rate of change).
  *
  * 2. Derivative at a Point
  * ------------------------
- * The derivative f'(a) is the instantaneous rate of change of f at x = a:
- *      f'(a) ≈ (f(b) - f(a)) / (b - a),   for b close to a
- * As b → a, this becomes the true derivative.
- *
- * - If f' > 0 on an interval, f is increasing there.
- * - If f' < 0, f is decreasing.
- * - If f' = 0, f is constant.
- * - |f'| gives the magnitude of the rate of change.
+ * The derivative f'(a) gives the instantaneous rate of change of f at x = a:
+ *      f'(a) ≈ (f(b) - f(a)) / (b - a), for b near a
+ *      f'(a) = lim (b→a) (f(b) - f(a)) / (b - a)
+ * - Interpreted as the slope of the tangent at x = a.
+ * - If f'(a) > 0, f is increasing at a.
+ * - If f'(a) < 0, f is decreasing at a.
+ * - |f'(a)| is the magnitude of change.
  *
  * 3. Leibniz Notation
  * -------------------
  * If y = f(x), then:
- *      Δy / Δx  →  dy / dx  =  f'(x)
- *      d/dx (y)  =  derivative of y with respect to x
+ *      Δy / Δx → dy/dx = f'(x)
+ *      d/dx (y) = derivative of y with respect to x
  *
- * 4. Tangent Line Approximation
- * -----------------------------
- * For small Δx near 0:
- *      Δy ≈ f'(a)·Δx,
+ * 4. Tangent Line Approximation (Linearization)
+ * ---------------------------------------------
+ * For small Δx:
+ *      Δy ≈ f'(a)·Δx
  *      f(x) ≈ f(a) + f'(a)·(x - a)
+ * - Used for quick estimates and numerical updates.
  *
- *********************************************/
+ * 5. The Exponential Rule
+ * -----------------------
+ * For any positive constant a:
+ *      d/dx (a^x) = (ln a)·a^x
+ * - Special case: d/dx (e^x) = e^x
+ *
+ * 6. The Chain Rule (Core of Backpropagation)
+ * -------------------------------------------
+ * If y = f(z) and z = g(t), then:
+ *      dy/dt = (dy/dz)·(dz/dt)
+ * - In ML, for composite functions (layered neural nets):
+ *      dL/dw = dL/da · da/dz · dz/dw
+ *   where:
+ *      - L is the loss function
+ *      - a is the activation output (e.g. sigmoid(z))
+ *      - z is the pre-activation (linear combination)
+ *      - w is a weight
+ * - For sigmoid activation:
+ *      sigmoid(z) = 1 / (1 + exp(-z))
+ *      d/dz sigmoid(z) = sigmoid(z)·(1 - sigmoid(z))
+ * - For MSE loss:
+ *      L = ½(a - y)²
+ *      dL/da = (a - y)
+ * - Output layer error term (delta):
+ *      delta = (a - y) · sigmoid'(z)
+ *   This gives the gradient of the loss with respect to z.
+ *
+ * 7. Batch Aggregation (not part of chain rule)
+ * ---------------------------------------------
+ * - In ML, we often sum or average loss/gradients over a batch:
+ *      MSE = (1/n) ∑ (a_i - y_i)²
+ *   This "mean" is separate from the chain rule and does not affect the chain itself.
+ *
+ **************************************************/
 
 // Derivative of sigmoid for backpropagation
 float sigmoid_prime(float x) {
