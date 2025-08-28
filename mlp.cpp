@@ -22,6 +22,7 @@
 #include <cstdlib>
 #include <cmath>
 #include <cstdio>
+#include <cstring>
 #include <vector>
 
 /**
@@ -535,13 +536,48 @@ void transpose(const float* W, float* W_T, int rows, int cols) {
 
 /** @} */
 
-int main(void) {
+void print_usage(const char* prog) {
+    const char options[] = "[--seed N] [--layers N] [--hidden N] [--epochs N] [--lr F] [--log N]";
+    printf("Usage: %s %s\n", prog, options);
+    printf("  --seed   N    Random seed (default: 1337)\n");
+    printf("  --layers N    Number of layers (default: 5)\n");
+    printf("  --hidden N    Hidden units per layer (default: 4)\n");
+    printf("  --epochs N    Training epochs (default: 10000)\n");
+    printf("  --lr     F    Learning rate (default: 0.1)\n");
+    printf("  --log    N    Log every N epochs (default: 100)\n");
+}
+
+int main(int argc, const char* argv[]) {
     /**
      * Initialize the model
      */
 
     // Create the model
     MLP mlp{};
+
+    // Simple manual CLI parse
+    for (int i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "--seed") == 0 && i + 1 < argc) {
+            mlp.dim.seed = atoi(argv[++i]);
+        } else if (strcmp(argv[i], "--layers") == 0 && i + 1 < argc) {
+            mlp.dim.n_layers = atoi(argv[++i]);
+        } else if (strcmp(argv[i], "--hidden") == 0 && i + 1 < argc) {
+            mlp.dim.n_hidden = atoi(argv[++i]);
+        } else if (strcmp(argv[i], "--epochs") == 0 && i + 1 < argc) {
+            mlp.opt.epochs = atoi(argv[++i]);
+        } else if (strcmp(argv[i], "--lr") == 0 && i + 1 < argc) {
+            mlp.opt.lr = atof(argv[++i]);
+        } else if (strcmp(argv[i], "--log") == 0 && i + 1 < argc) {
+            mlp.opt.log = atoi(argv[++i]);
+        } else if (strcmp(argv[i], "--help") == 0) {
+            print_usage(argv[0]);
+            return 0;
+        } else {
+            printf("Unknown or incomplete option: %s\n", argv[i]);
+            print_usage(argv[0]);
+            return 1;
+        }
+    }
 
     // Seed random number generator
     if (mlp.dim.seed > 0) {
