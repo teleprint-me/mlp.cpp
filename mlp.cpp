@@ -40,6 +40,7 @@ struct MLPParams {
 
 // Model optimization
 struct SGDParams {
+    size_t epochs = 1;  // Training cycles
     float lr = 1e-2f;  // Learning rate (gamma)
     float weight_decay = 0.0f;  // L2 regularization (lambda)
     float momentum = 0.0f;  // Momentum coefficient (mu)
@@ -355,7 +356,7 @@ float sigmoid_prime(float x) {
 // Compute the multi-layer gradients (aka deltas)
 // Each layer’s deltas are calculated using the deltas from the next layer.
 // The shape of deltas always matches the number of outputs for that layer.
-void mlp_compute_gradients(struct MLP* mlp, float* y_true) {
+void mlp_compute_gradients(struct MLP* mlp, float* y_true, size_t n) {
     // Get the final layer index
     size_t last_layer = mlp->dim.n_layers - 1;
     // Get the final layer dimension
@@ -365,6 +366,11 @@ void mlp_compute_gradients(struct MLP* mlp, float* y_true) {
 
     // Initialize the output deltas
     L_last->d.resize(last_dim);
+
+    // Ensure the output dimensions match
+    // @note mlp.y == L_last->a. They must be equivalent.
+    assert(mlp->y.size() == n);
+    assert(L_last->d.size() == n);
 
     // Backpropagate output layer deltas
 #pragma omp parallel for
@@ -579,14 +585,11 @@ int main(void) {
     // Expected XOR outputs (n_samples * n_out) = 4 * 1 = 4
     std::vector<float> y_true = {0.0f, 1.0f, 1.0f, 0.0f};
 
-    // Ensure the output dimensions match
-    assert(mlp.y.size() == y_true.size());
-
     float loss_0 = mse(mlp.y.data(), y_true.data(), mlp.y.size());
     printf("loss_0: %.6f\n", (double) loss_0);
 
     // Compute output layer gradients (aka deltas)
-    mlp_compute_gradients(&mlp, y_true.data());
+    mlp_compute_gradients(&mlp, y_true.data(), y_true.size());
 
     // Update weights and biases
     mlp_update_params(&mlp);
