@@ -568,22 +568,21 @@ void transpose(const float* W, float* W_T, int rows, int cols) {
 /** @} */
 
 void print_usage(const char* prog) {
-    const char options[]
-        = "[--seed N] [--layers N] [--hidden N] [--epochs N] [--lr F] [--log-every N]";
+    const char options[] = "[--seed N] [--layers N] [--hidden N] [--epochs N] [--lr F] [...]";
     printf("Usage: %s %s\n", prog, options);
     printf("  --seed      N    Random seed (default: 1337)\n");
     printf("  --layers    N    Number of layers (default: 3)\n");
     printf("  --hidden    N    Hidden units per layer (default: 4)\n");
     printf("  --epochs    N    Training epochs (default: 1000)\n");
-    printf("  --lr        F    Learning rate (default: 0.1)\n");
     printf("  --log-every N    Log every N epochs (default: 100)\n");
+    printf("  --lr        F    Learning rate (default: 0.1)\n");
+    printf("  --tolerance F    Stop loss (default: 0.001)\n");
+    printf("  --decay     F    L2 regularization (default: 0.0)\n");
+    printf("  --momentum  F    Momentum coefficient (default: 0.9)\n");
+    printf("  --dampening F    Momentum coefficient (default: 0.0)\n");
 }
 
 int main(int argc, const char* argv[]) {
-    /**
-     * Initialize the model
-     */
-
     // Create the model
     MLP mlp{};
 
@@ -597,10 +596,18 @@ int main(int argc, const char* argv[]) {
             mlp.dim.n_hidden = atoi(argv[++i]);
         } else if (strcmp(argv[i], "--epochs") == 0 && i + 1 < argc) {
             mlp.opt.epochs = atoi(argv[++i]);
-        } else if (strcmp(argv[i], "--lr") == 0 && i + 1 < argc) {
-            mlp.opt.lr = atof(argv[++i]);
         } else if (strcmp(argv[i], "--log-every") == 0 && i + 1 < argc) {
             mlp.opt.log_every = atoi(argv[++i]);
+        } else if (strcmp(argv[i], "--lr") == 0 && i + 1 < argc) {
+            mlp.opt.lr = atof(argv[++i]);
+        } else if (strcmp(argv[i], "--tolerance") == 0 && i + 1 < argc) {
+            mlp.opt.tolerance = atof(argv[++i]);
+        } else if (strcmp(argv[i], "--decay") == 0 && i + 1 < argc) {
+            mlp.opt.weight_decay = atof(argv[++i]);
+        } else if (strcmp(argv[i], "--momentum") == 0 && i + 1 < argc) {
+            mlp.opt.momentum = atof(argv[++i]);
+        } else if (strcmp(argv[i], "--dampening") == 0 && i + 1 < argc) {
+            mlp.opt.dampening = atof(argv[++i]);
         } else if (strcmp(argv[i], "--help") == 0) {
             print_usage(argv[0]);
             return 0;
@@ -684,18 +691,18 @@ int main(int argc, const char* argv[]) {
 
         // Log every n epochs
         if (epoch % mlp.opt.log_every == 0 || loss_epoch < mlp.opt.tolerance) {
-            printf("epoch[%zu] loss = %f\n", epoch, (double) loss_epoch);
+            printf("epoch[%zu] Σ(-᷅_-᷄๑) = %f\n", epoch, (double) loss_epoch);
         }
 
         // Stop loss
         if (loss_epoch < mlp.opt.tolerance) {
-            printf("epoch[%zu] Early stopping (loss < %f)", epoch, (double) mlp.opt.tolerance);
+            printf("epoch[%zu] (◕‿◕✿) (loss < %f)", epoch, (double) mlp.opt.tolerance);
             break;
         }
     }
 
     // Log predictions
-    printf("\nFinal predictions after training:\n");
+    printf("\n-=≡Σ<|°_°|>:\n");
     for (size_t i = 0; i < inputs.size(); i++) {
         mlp.x = inputs[i];
         mlp_forward(&mlp, mlp.x.data(), mlp.x.size());
