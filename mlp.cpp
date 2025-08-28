@@ -41,6 +41,7 @@ struct MLPParams {
 // Model optimization
 struct SGDParams {
     size_t epochs = 1;  // Training cycles
+    float tolerance = 1e-3;  // Stop loss
     float lr = 1e-2f;  // Learning rate (gamma)
     float weight_decay = 0.0f;  // L2 regularization (lambda)
     float momentum = 0.0f;  // Momentum coefficient (mu)
