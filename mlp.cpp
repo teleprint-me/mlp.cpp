@@ -40,7 +40,7 @@ struct MLPParams {
 
 // Model optimization
 struct SGDParams {
-    float lr = 0.01f;  // Learning rate (gamma)
+    float lr = 1e-2f;  // Learning rate (gamma)
     float weight_decay = 0.0f;  // L2 regularization (lambda)
     float momentum = 0.0f;  // Momentum coefficient (mu)
     float dampening = 0.0f;  // Dampening coefficient (tau)
@@ -434,7 +434,7 @@ void mlp_update_params(struct MLP* mlp) {
         }
 
         // before updating parameters
-        constexpr float GRAD_EPS = 1e-15f;
+        constexpr float GRAD_EPS = 1e-6f;
 
         // Apply stochastic gradient descent
         // #pragma omp parallel for
