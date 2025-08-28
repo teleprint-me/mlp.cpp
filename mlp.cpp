@@ -170,13 +170,21 @@ void mlp_init_input_random(struct MLP* mlp) {
     }
 }
 
+// Returns a sample from N(-1, 1)
+float rand_uniform(size_t n_in, size_t n_out) {
+    float a = sqrtf(6.0f / (n_in + n_out));  // scaling factor
+    float ud = 2 * ((float) rand() / (float) RAND_MAX) - 1;  // uniform
+    return ud * a;
+}
+
 // Returns a sample from N(0, 1)
-float rand_normal(void) {
+float rand_normal(size_t n_in, size_t n_out) {
     // Box-Muller transform
     float u1 = (rand() + 1.0f) / (RAND_MAX + 2.0f);  // avoid log(0)
     float u2 = (rand() + 1.0f) / (RAND_MAX + 2.0f);
     float z0 = sqrtf(-2.0f * logf(u1)) * cosf(2.0f * (float) M_PI * u2);
-    return z0;
+    float stddev = sqrtf(2.0f / (n_in + n_out));
+    return z0 * stddev;
 }
 
 // https://proceedings.mlr.press/v9/glorot10a/glorot10a.pdf
@@ -202,15 +210,9 @@ void mlp_init_xavier(struct MLP* mlp) {
         L->W.resize(W_d);
         L->b.resize(b_d);
 
-        // Calculate the scaling factor
-        // float a = sqrtf(6.0f / (n_in + n_out));
-
-        // Calculate the standard deviation
-        float stddev = sqrtf(2.0f / (n_in + n_out));
-
         // Initialize weights
         for (size_t j = 0; j < W_d; j++) {
-            L->W[j] = rand_normal() * stddev;  // [-a, +a]
+            L->W[j] = rand_normal(n_in, n_out);
         }
 
         // Initialize biases
