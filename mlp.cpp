@@ -619,12 +619,12 @@ int main(int argc, const char* argv[]) {
     }
 
     if (mlp.dim.n_layers < 3) {
-        fprintf(stderr, "\n[ERROR] Minimum layers = 3\n\t(┛ಠ_ಠ)┛彡┻━┻\n");
+        fprintf(stderr, "[ERROR] Minimum layers = 3\n\t(┛ಠ_ಠ)┛彡┻━┻\n");
         return 1;
     }
 
     if (mlp.dim.n_hidden < 2) {
-        fprintf(stderr, "\n[ERROR] Minimum hidden dims = 2\n\t┻━┻︵ \\(°□°)/ ︵ ┻━┻\n");
+        fprintf(stderr, "[ERROR] Minimum hidden dims = 2\n\t┻━┻︵ \\(°□°)/ ︵ ┻━┻\n");
         return 1;
     }
 
