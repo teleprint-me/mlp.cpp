@@ -170,6 +170,15 @@ void mlp_init_input_random(struct MLP* mlp) {
     }
 }
 
+// Returns a sample from N(0, 1)
+float rand_normal(void) {
+    // Box-Muller transform
+    float u1 = (rand() + 1.0f) / (RAND_MAX + 2.0f);  // avoid log(0)
+    float u2 = (rand() + 1.0f) / (RAND_MAX + 2.0f);
+    float z0 = sqrtf(-2.0f * logf(u1)) * cosf(2.0f * (float) M_PI * u2);
+    return z0;
+}
+
 // https://proceedings.mlr.press/v9/glorot10a/glorot10a.pdf
 // https://en.wikipedia.org/wiki/Weight_initialization#Glorot_initialization
 void mlp_init_xavier(struct MLP* mlp) {
@@ -194,12 +203,14 @@ void mlp_init_xavier(struct MLP* mlp) {
         L->b.resize(b_d);
 
         // Calculate the scaling factor
-        float a = sqrtf(6.0f / (n_in + n_out));
+        // float a = sqrtf(6.0f / (n_in + n_out));
+
+        // Calculate the standard deviation
+        float stddev = sqrtf(2.0f / (n_in + n_out));
 
         // Initialize weights
         for (size_t j = 0; j < W_d; j++) {
-            float ud = 2 * ((float) rand() / (float) RAND_MAX) - 1;  // uniform
-            L->W[j] = ud * a;  // [-a, +a]
+            L->W[j] = rand_normal() * stddev;  // [-a, +a]
         }
 
         // Initialize biases
@@ -543,6 +554,8 @@ int main(void) {
 
     // Apply xavier-glorot initialization to model layers
     mlp_init_xavier(&mlp);
+    // Do a sanity check when initializing the model
+    mlp_log_layers(&mlp);
 
     // XOR dataset: 4 samples, each sample has 2 inputs, 1 output
     std::vector<std::vector<float>> inputs = {
