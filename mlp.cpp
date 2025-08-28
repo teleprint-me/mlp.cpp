@@ -618,14 +618,23 @@ int main(int argc, const char* argv[]) {
         }
     }
 
-    // Log model parameters
-    mlp_log_dims(&mlp);
-    mlp_log_opts(&mlp);
-
     if (mlp.dim.n_layers < 3) {
         fprintf(stderr, "\n[ERROR] Minimum layers = 3\n\t(┛ಠ_ಠ)┛彡┻━┻\n");
         return 1;
     }
+
+    if (mlp.dim.n_hidden < 2) {
+        fprintf(stderr, "\n[ERROR] Minimum hidden dims = 2\n\t┻━┻︵ \\(°□°)/ ︵ ┻━┻\n");
+        return 1;
+    }
+
+    printf("╔══════════════════════════════════╗\n");
+    printf("║  MiniMLP XOR Lab  (by Austin)    ║\n");
+    printf("╚══════════════════════════════════╝\n");
+
+    // Log model parameters
+    mlp_log_dims(&mlp);
+    mlp_log_opts(&mlp);
 
     // Seed random number generator
     if (mlp.dim.seed > 0) {
