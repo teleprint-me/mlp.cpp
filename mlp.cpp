@@ -705,7 +705,7 @@ int main(int argc, const char* argv[]) {
 
         // Stop loss
         if (loss_epoch < mlp.opt.tolerance) {
-            printf("epoch[%zu] (◕‿◕✿) (loss < %f)", epoch, (double) mlp.opt.tolerance);
+            printf("epoch[%zu] (◕‿◕✿) (loss < %f)\n", epoch, (double) mlp.opt.tolerance);
             break;
         }
     }
