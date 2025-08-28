@@ -40,8 +40,8 @@ struct MLPParams {
 
 // Model optimization
 struct SGDParams {
-    size_t epochs = 10;  // Training cycles
-    size_t log = 1;  // Log epoch every n cycles
+    size_t epochs = 10000;  // Training cycles
+    size_t log = 100;  // Log epoch every n cycles
     float tolerance = 1e-3;  // Stop loss
     float lr = 1e-2f;  // Learning rate (gamma)
     float weight_decay = 0.0f;  // L2 regularization (lambda)
@@ -442,7 +442,7 @@ void mlp_update_params(struct MLP* mlp) {
         }
 
         // before updating parameters
-        constexpr float GRAD_EPS = 1e-6f;
+        // constexpr float GRAD_EPS = 1e-6f;
 
         // Apply stochastic gradient descent
 #pragma omp parallel for
@@ -462,12 +462,13 @@ void mlp_update_params(struct MLP* mlp) {
                 // Apply dampening if set
                 g *= (1.0f - mlp->opt.dampening);
 
-                if (!(fabsf(g) > GRAD_EPS) || std::isnan(g)) {
-                    printf(
-                        "Warning: small or NaN gradient detected: %f at idx %zu\n", (double) g, idx
-                    );
-                    // assert(0 && "Gradient vanished or NaN!");
-                }
+                // if (!(fabsf(g) > GRAD_EPS) || std::isnan(g)) {
+                //     printf(
+                //         "Warning: small or NaN gradient detected: %f at idx %zu\n", (double) g,
+                //         idx
+                //     );
+                //     // assert(0 && "Gradient vanished or NaN!");
+                // }
 
                 // Apply momentum
                 if (mlp->opt.momentum > 0) {
@@ -481,12 +482,13 @@ void mlp_update_params(struct MLP* mlp) {
             // Update the biases
             float db = (1.0f - mlp->opt.dampening) * L->d[j];
 
-            if (!(fabsf(db) > GRAD_EPS) || std::isnan(db)) {
-                printf(
-                    "Warning: small or NaN bias gradient detected: %f at idx %zu\n", (double) db, j
-                );
-                // assert(0 && "Gradient vanished or NaN!");
-            }
+            // if (!(fabsf(db) > GRAD_EPS) || std::isnan(db)) {
+            //     printf(
+            //         "Warning: small or NaN bias gradient detected: %f at idx %zu\n", (double) db,
+            //         j
+            //     );
+            //     // assert(0 && "Gradient vanished or NaN!");
+            // }
 
             if (mlp->opt.momentum > 0) {
                 L->vb[j] = mlp->opt.momentum * L->vb[j] + db;
