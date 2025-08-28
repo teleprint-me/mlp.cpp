@@ -46,7 +46,7 @@ struct SGDParams {
     float weight_decay = 0.0f;  // L2 regularization (lambda)
     float momentum = 0.0f;  // Momentum coefficient (mu)
     float dampening = 0.0f;  // Dampening coefficient (tau)
-    bool nesterov = false;  // Nesterov acceleration
+    bool nesterov = false;  // @todo Nesterov acceleration
 };
 
 // Model layers
