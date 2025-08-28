@@ -33,7 +33,7 @@
 // Model dimensions
 struct MLPParams {
     size_t seed = 1337;  // Random seed for reproducibility
-    size_t n_layers = 5;  // Number of hidden layers
+    size_t n_layers = 3;  // Number of hidden layers
     size_t n_in = 2;  // Input features (e.g., XOR has 4 samples by 2 inputs)
     size_t n_hidden = 4;  // Number of hidden units (4 states per sampled pair)
     size_t n_out = 1;  // Output units (e.g., XOR has 4 samples by 1 output)
@@ -41,8 +41,8 @@ struct MLPParams {
 
 // Model optimization
 struct SGDParams {
-    size_t epochs = 100000;  // Training cycles
-    size_t log = 100;  // Log epoch every n cycles
+    size_t epochs = 1000;  // Training cycles
+    size_t log_every = 100;  // Log epoch every n cycles
     float tolerance = 1e-3;  // Stop loss
     float lr = 1e-1f;  // Learning rate (gamma)
     float weight_decay = 0.0f;  // L2 regularization (lambda)
@@ -104,6 +104,37 @@ size_t mlp_layer_dim_out(struct MLP* mlp, size_t layer) {
  * Logging
  * @{
  */
+
+// LOG(struct, field, format)
+#define MLP_LOG_PARAM_SIZE(s, f, fmt) printf("%s->%s = " fmt "\n", #s, #f, (size_t) (s)->f);
+#define MLP_LOG_PARAM_FLOAT(s, f, fmt) printf("%s->%s = " fmt "\n", #s, #f, (double) (s)->f);
+#define MLP_LOG_PARAM_BOOL(s, f, fmt) \
+    printf("%s->%s = " fmt "\n", #s, #f, (int) (s)->f ? "true" : "false");
+
+void mlp_log_dims(struct MLP* mlp) {
+    printf("Dimensions:\n");
+    struct MLPParams* dim = &mlp->dim;
+    MLP_LOG_PARAM_SIZE(dim, seed, "%zu");
+    MLP_LOG_PARAM_SIZE(dim, n_layers, "%zu");
+    MLP_LOG_PARAM_SIZE(dim, n_in, "%zu");
+    MLP_LOG_PARAM_SIZE(dim, n_hidden, "%zu");
+    MLP_LOG_PARAM_SIZE(dim, n_out, "%zu");
+    printf("\n");
+}
+
+void mlp_log_opts(struct MLP* mlp) {
+    printf("Optimizer:\n");
+    struct SGDParams* opt = &mlp->opt;
+    MLP_LOG_PARAM_SIZE(opt, epochs, "%zu");
+    MLP_LOG_PARAM_SIZE(opt, log_every, "%zu");
+    MLP_LOG_PARAM_FLOAT(opt, tolerance, "%f");
+    MLP_LOG_PARAM_FLOAT(opt, lr, "%f");
+    MLP_LOG_PARAM_FLOAT(opt, weight_decay, "%f");
+    MLP_LOG_PARAM_FLOAT(opt, momentum, "%f");
+    MLP_LOG_PARAM_FLOAT(opt, dampening, "%f");
+    MLP_LOG_PARAM_BOOL(opt, nesterov, "%s");
+    printf("\n");
+}
 
 void mlp_log_vector(const char* title, const float* x, size_t n) {
     printf("%s: ", title);
@@ -537,14 +568,15 @@ void transpose(const float* W, float* W_T, int rows, int cols) {
 /** @} */
 
 void print_usage(const char* prog) {
-    const char options[] = "[--seed N] [--layers N] [--hidden N] [--epochs N] [--lr F] [--log N]";
+    const char options[]
+        = "[--seed N] [--layers N] [--hidden N] [--epochs N] [--lr F] [--log-every N]";
     printf("Usage: %s %s\n", prog, options);
-    printf("  --seed   N    Random seed (default: 1337)\n");
-    printf("  --layers N    Number of layers (default: 5)\n");
-    printf("  --hidden N    Hidden units per layer (default: 4)\n");
-    printf("  --epochs N    Training epochs (default: 10000)\n");
-    printf("  --lr     F    Learning rate (default: 0.1)\n");
-    printf("  --log    N    Log every N epochs (default: 100)\n");
+    printf("  --seed      N    Random seed (default: 1337)\n");
+    printf("  --layers    N    Number of layers (default: 3)\n");
+    printf("  --hidden    N    Hidden units per layer (default: 4)\n");
+    printf("  --epochs    N    Training epochs (default: 1000)\n");
+    printf("  --lr        F    Learning rate (default: 0.1)\n");
+    printf("  --log-every N    Log every N epochs (default: 100)\n");
 }
 
 int main(int argc, const char* argv[]) {
@@ -567,8 +599,8 @@ int main(int argc, const char* argv[]) {
             mlp.opt.epochs = atoi(argv[++i]);
         } else if (strcmp(argv[i], "--lr") == 0 && i + 1 < argc) {
             mlp.opt.lr = atof(argv[++i]);
-        } else if (strcmp(argv[i], "--log") == 0 && i + 1 < argc) {
-            mlp.opt.log = atoi(argv[++i]);
+        } else if (strcmp(argv[i], "--log-every") == 0 && i + 1 < argc) {
+            mlp.opt.log_every = atoi(argv[++i]);
         } else if (strcmp(argv[i], "--help") == 0) {
             print_usage(argv[0]);
             return 0;
@@ -577,6 +609,15 @@ int main(int argc, const char* argv[]) {
             print_usage(argv[0]);
             return 1;
         }
+    }
+
+    // Log model parameters
+    mlp_log_dims(&mlp);
+    mlp_log_opts(&mlp);
+
+    if (mlp.dim.n_layers < 3) {
+        fprintf(stderr, "\n[ERROR] Minimum layers = 3\n\t(┛ಠ_ಠ)┛彡┻━┻\n");
+        return 1;
     }
 
     // Seed random number generator
@@ -642,7 +683,7 @@ int main(int argc, const char* argv[]) {
         loss_epoch /= inputs.size();
 
         // Log every n epochs
-        if (epoch % mlp.opt.log == 0 || loss_epoch < mlp.opt.tolerance) {
+        if (epoch % mlp.opt.log_every == 0 || loss_epoch < mlp.opt.tolerance) {
             printf("epoch[%zu] loss = %f\n", epoch, (double) loss_epoch);
         }
 
