@@ -33,14 +33,15 @@
 struct MLPParams {
     size_t seed = 1337;  // Random seed for reproducibility
     size_t n_layers = 3;  // Number of hidden layers
-    size_t n_in = 8;  // Input features (e.g., XOR has 4 samples by 2 inputs)
-    size_t n_hidden = 8;  // Number of hidden units (4 states per sampled pair)
-    size_t n_out = 4;  // Output units (e.g., XOR has 4 samples by 1 output)
+    size_t n_in = 2;  // Input features (e.g., XOR has 4 samples by 2 inputs)
+    size_t n_hidden = 4;  // Number of hidden units (4 states per sampled pair)
+    size_t n_out = 1;  // Output units (e.g., XOR has 4 samples by 1 output)
 };
 
 // Model optimization
 struct SGDParams {
-    size_t epochs = 1;  // Training cycles
+    size_t epochs = 10;  // Training cycles
+    size_t log = 1;  // Log epoch every n cycles
     float tolerance = 1e-3;  // Stop loss
     float lr = 1e-2f;  // Learning rate (gamma)
     float weight_decay = 0.0f;  // L2 regularization (lambda)
@@ -444,7 +445,7 @@ void mlp_update_params(struct MLP* mlp) {
         constexpr float GRAD_EPS = 1e-6f;
 
         // Apply stochastic gradient descent
-        // #pragma omp parallel for
+#pragma omp parallel for
         for (size_t j = 0; j < n_out; j++) {
             // Update the weights
             for (size_t k = 0; k < n_in; k++) {
@@ -538,76 +539,79 @@ int main(void) {
     mlp.x.resize(mlp.dim.n_in);
     mlp.y.resize(mlp.dim.n_out);
 
-    // Expected XOR inputs (n_samples, n_in) = 4 * 2 = 8
-    // The input vector must be flat!
-    std::vector<float> inputs = {
-        // [0, 0]
-        0.0f,
-        0.0f,
-        // [0, 1]
-        0.0f,
-        1.0f,
-        // [1, 0]
-        1.0f,
-        0.0f,
-        // [1, 1]
-        1.0f,
-        1.0f
-    };
-
-    // Randomly initialize the input vector
-    mlp_init_input(&mlp, inputs.data(), inputs.size());
-
-    // Log initialized input vector
-    mlp_log_matrix("x", mlp.x.data(), mlp.dim.n_out, mlp.dim.n_in / mlp.dim.n_out);
-
     // Apply xavier-glorot initialization to model layers
     mlp_init_xavier(&mlp);
 
-    // Log initialized weights and biases
-    mlp_log_layers(&mlp);
+    // XOR dataset: 4 samples, each sample has 2 inputs, 1 output
+    std::vector<std::vector<float>> inputs = {
+        {0.0f, 0.0f},
+        {0.0f, 1.0f},
+        {1.0f, 0.0f},
+        {1.0f, 1.0f},
+    };
+    std::vector<std::vector<float>> outputs = {
+        {0.0f},
+        {1.0f},
+        {1.0f},
+        {0.0f},
+    };
 
-    /**
-     * Perform a forward pass
-     */
+    // For per-epoch stats
+    std::vector<float> y_pred(mlp.dim.n_out);
 
-    // Execute the forward pass
-    mlp_forward(&mlp, mlp.x.data(), mlp.x.size());
+    // Execute training loop
+    for (size_t epoch = 0; epoch < mlp.opt.epochs; epoch++) {
+        float loss_epoch = 0.0f;
 
-    // Output results
-    mlp_log_vector("y", mlp.y.data(), mlp.y.size());
+        // For each XOR sample
+        for (size_t i = 0; i < inputs.size(); i++) {
+            // Set the current inputs
+            mlp.x = inputs[i];
 
-    /**
-     * Perform a backward pass
-     * A gradient is the error weighted by the derivative of the
-     * activation function at the output.
-     */
+            // Set the current outputs
+            std::vector<float> &y_true = outputs[i];
 
-    // Expected XOR outputs (n_samples * n_out) = 4 * 1 = 4
-    std::vector<float> y_true = {0.0f, 1.0f, 1.0f, 0.0f};
+            // Compute forward propagation (predictions)
+            mlp_forward(&mlp, mlp.x.data(), mlp.x.size());
 
-    float loss_0 = mse(mlp.y.data(), y_true.data(), mlp.y.size());
-    printf("loss_0: %.6f\n", (double) loss_0);
+            // Compute loss per sample
+            float loss = mse(mlp.y.data(), y_true.data(), y_true.size());
+            loss_epoch += loss;
 
-    // Compute output layer gradients (aka deltas)
-    mlp_compute_gradients(&mlp, y_true.data(), y_true.size());
+            // Compute backward propagation (gradients)
+            mlp_compute_gradients(&mlp, y_true.data(), y_true.size());
 
-    // Update weights and biases
-    mlp_update_params(&mlp);
+            // Update parameters using computed gradients
+            mlp_update_params(&mlp);
+        }
 
-    mlp_forward(&mlp, mlp.x.data(), mlp.x.size());
+        // Average loss over all samples
+        loss_epoch /= inputs.size();
 
-    float loss_1 = mse(mlp.y.data(), y_true.data(), mlp.y.size());
-    printf("loss_1: %.6f\n", (double) loss_1);
-    printf(
-        "loss_diff: %.6f - %.6f = %.6f\n\n",
-        (double) loss_1,
-        (double) loss_0,
-        (double) (loss_1 - loss_0)
-    );
+        // Log every n epochs
+        if (epoch % mlp.opt.log == 0 || loss_epoch < mlp.opt.tolerance) {
+            printf("epoch[%zu] loss = %f\n", epoch, (double) loss_epoch);
+        }
 
-    mlp_log_layers(&mlp);
-    mlp_log_vector("y", mlp.y.data(), mlp.y.size());
+        // Stop loss
+        if (loss_epoch < mlp.opt.tolerance) {
+            printf("epoch[%zu] Early stopping (loss < %f)", epoch, (double) mlp.opt.tolerance);
+        }
+    }
+
+    // Log predictions
+    printf("\nFinal predictions after training:\n");
+    for (size_t i = 0; i < inputs.size(); i++) {
+        mlp.x = inputs[i];
+        mlp_forward(&mlp, mlp.x.data(), mlp.x.size());
+        printf(
+            "Input: [%f %f] -> Predicted: %f, Target: %f\n",
+            (double) inputs[i][0],
+            (double) inputs[i][1],
+            (double) mlp.y[0],
+            (double) outputs[i][0]
+        );
+    }
 
     return 0;
 }
