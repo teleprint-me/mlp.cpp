@@ -369,8 +369,8 @@ void mlp_compute_gradients(struct MLP* mlp, float* y_true, size_t n) {
 
     // Ensure the output dimensions match
     // @note mlp.y == L_last->a. They must be equivalent.
-    assert(mlp->y.size() == n);
-    assert(L_last->d.size() == n);
+    assert(mlp->y.size() == n && "Output dim must match label size");
+    assert(L_last->d.size() == n && "Output dim must match label size");
 
     // Backpropagate output layer deltas
 #pragma omp parallel for
