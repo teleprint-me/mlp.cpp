@@ -608,7 +608,7 @@ int main(int argc, const char* argv[]) {
             mlp.opt.momentum = atof(argv[++i]);
         } else if (strcmp(argv[i], "--dampening") == 0 && i + 1 < argc) {
             mlp.opt.dampening = atof(argv[++i]);
-        } else if (strcmp(argv[i], "--help") == 0) {
+        } else if (strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0) {
             print_usage(argv[0]);
             return 0;
         } else {
