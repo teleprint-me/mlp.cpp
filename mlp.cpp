@@ -628,9 +628,9 @@ int main(int argc, const char* argv[]) {
         return 1;
     }
 
-    printf("╔══════════════════════════════════╗\n");
-    printf("║  MiniMLP XOR Lab  (by Austin)    ║\n");
-    printf("╚══════════════════════════════════╝\n");
+    printf("╔══════════════════════════════╗\n");
+    printf("║  MLP XOR Lab  (by Austin)    ║\n");
+    printf("╚══════════════════════════════╝\n");
 
     // Log model parameters
     mlp_log_dims(&mlp);
