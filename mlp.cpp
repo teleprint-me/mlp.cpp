@@ -32,7 +32,7 @@
 // Model dimensions
 struct MLPParams {
     size_t seed = 1337;  // Random seed for reproducibility
-    size_t n_layers = 3;  // Number of hidden layers
+    size_t n_layers = 5;  // Number of hidden layers
     size_t n_in = 2;  // Input features (e.g., XOR has 4 samples by 2 inputs)
     size_t n_hidden = 4;  // Number of hidden units (4 states per sampled pair)
     size_t n_out = 1;  // Output units (e.g., XOR has 4 samples by 1 output)
@@ -40,12 +40,12 @@ struct MLPParams {
 
 // Model optimization
 struct SGDParams {
-    size_t epochs = 10000;  // Training cycles
+    size_t epochs = 100000;  // Training cycles
     size_t log = 100;  // Log epoch every n cycles
     float tolerance = 1e-3;  // Stop loss
-    float lr = 1e-2f;  // Learning rate (gamma)
+    float lr = 1e-1f;  // Learning rate (gamma)
     float weight_decay = 0.0f;  // L2 regularization (lambda)
-    float momentum = 0.0f;  // Momentum coefficient (mu)
+    float momentum = 0.9f;  // Momentum coefficient (mu)
     float dampening = 0.0f;  // Dampening coefficient (tau)
     bool nesterov = false;  // @todo Nesterov acceleration
 };
@@ -598,6 +598,7 @@ int main(void) {
         // Stop loss
         if (loss_epoch < mlp.opt.tolerance) {
             printf("epoch[%zu] Early stopping (loss < %f)", epoch, (double) mlp.opt.tolerance);
+            break;
         }
     }
 
