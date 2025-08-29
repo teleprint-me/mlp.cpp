@@ -115,11 +115,12 @@ size_t mlp_layer_dim_out(struct MLP* mlp, size_t layer) {
 void mlp_log_dims(struct MLP* mlp) {
     printf("Dimensions:\n");
     struct MLPParams* dim = &mlp->dim;
-    MLP_LOG_PARAM_SIZE(dim, seed, "%zu");
     MLP_LOG_PARAM_SIZE(dim, n_layers, "%zu");
     MLP_LOG_PARAM_SIZE(dim, n_in, "%zu");
     MLP_LOG_PARAM_SIZE(dim, n_hidden, "%zu");
     MLP_LOG_PARAM_SIZE(dim, n_out, "%zu");
+    MLP_LOG_PARAM_SIZE(dim, seed, "%zu");
+    MLP_LOG_PARAM_FLOAT(dim, bias, "%f");
     printf("\n");
 }
 
