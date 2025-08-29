@@ -34,10 +34,10 @@
 struct MLPParams {
     size_t n_layers = 3;  // Number of hidden layers
     size_t n_in = 2;  // Input features (e.g., XOR has 4 samples by 2 inputs)
-    size_t n_hidden = 4;  // Number of hidden units (4 states per sampled pair)
+    size_t n_hidden = 3;  // Number of hidden units (4 states per sampled pair)
     size_t n_out = 1;  // Output units (e.g., XOR has 4 samples by 1 output)
     size_t seed = 1337;  // Random seed for reproducibility
-    float bias = 0.0f;
+    float bias = 0.0f;  // Initial tensor biases
 };
 
 // Model optimization
@@ -568,20 +568,20 @@ void transpose(const float* W, float* W_T, int rows, int cols) {
 
 /** @} */
 
-void print_usage(const char* prog) {
+void print_usage(struct MLP* mlp, const char* prog) {
     const char options[] = "[--seed N] [--layers N] [--hidden N] [--epochs N] [--lr F] [...]";
     printf("Usage: %s %s\n", prog, options);
-    printf("  --seed      N    Random seed (default: 1337)\n");
-    printf("  --bias      F    Initial bias (default: 0.0)\n");
-    printf("  --layers    N    Number of layers (default: 3)\n");
-    printf("  --hidden    N    Hidden units per layer (default: 4)\n");
-    printf("  --epochs    N    Training epochs (default: 1000)\n");
-    printf("  --log-every N    Log every N epochs (default: 100)\n");
-    printf("  --lr        F    Learning rate (default: 0.1)\n");
-    printf("  --tolerance F    Stop loss (default: 0.001)\n");
-    printf("  --decay     F    L2 regularization (default: 0.0)\n");
-    printf("  --momentum  F    Momentum coefficient (default: 0.9)\n");
-    printf("  --dampening F    Momentum coefficient (default: 0.0)\n");
+    printf("  --seed      N    Random seed (default: %zu)\n", mlp->dim.seed);
+    printf("  --bias      F    Initial bias (default: %f)\n", (double) mlp->dim.bias);
+    printf("  --layers    N    Number of layers (default: %zu)\n", mlp->dim.n_layers);
+    printf("  --hidden    N    Hidden units per layer (default: %zu)\n", mlp->dim.n_hidden);
+    printf("  --epochs    N    Training epochs (default: %zu)\n", mlp->opt.epochs);
+    printf("  --log-every N    Log every N epochs (default: %zu)\n", mlp->opt.log_every);
+    printf("  --lr        F    Learning rate (default: %f)\n", (double) mlp->opt.lr);
+    printf("  --tolerance F    Stop loss (default: %f)\n", (double) mlp->opt.tolerance);
+    printf("  --decay     F    L2 regularization (default: %f)\n", (double) mlp->opt.weight_decay);
+    printf("  --momentum  F    Momentum coefficient (default: %f)\n", (double) mlp->opt.momentum);
+    printf("  --dampening F    Momentum coefficient (default: %f)\n", (double) mlp->opt.dampening);
 }
 
 int main(int argc, const char* argv[]) {
@@ -613,11 +613,11 @@ int main(int argc, const char* argv[]) {
         } else if (strcmp(argv[i], "--dampening") == 0 && i + 1 < argc) {
             mlp.opt.dampening = atof(argv[++i]);
         } else if (strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0) {
-            print_usage(argv[0]);
+            print_usage(&mlp, argv[0]);
             return 0;
         } else {
             printf("Unknown or incomplete option: %s\n", argv[i]);
-            print_usage(argv[0]);
+            print_usage(&mlp, argv[0]);
             return 1;
         }
     }
