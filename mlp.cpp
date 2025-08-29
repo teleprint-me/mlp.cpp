@@ -32,11 +32,12 @@
 
 // Model dimensions
 struct MLPParams {
-    size_t seed = 1337;  // Random seed for reproducibility
     size_t n_layers = 3;  // Number of hidden layers
     size_t n_in = 2;  // Input features (e.g., XOR has 4 samples by 2 inputs)
     size_t n_hidden = 4;  // Number of hidden units (4 states per sampled pair)
     size_t n_out = 1;  // Output units (e.g., XOR has 4 samples by 1 output)
+    size_t seed = 1337;  // Random seed for reproducibility
+    float bias = 0.0f;
 };
 
 // Model optimization
@@ -46,7 +47,7 @@ struct SGDParams {
     float tolerance = 1e-3;  // Stop loss
     float lr = 1e-1f;  // Learning rate (gamma)
     float weight_decay = 0.0f;  // L2 regularization (lambda)
-    float momentum = 0.9f;  // Momentum coefficient (mu)
+    float momentum = 0.0f;  // Momentum coefficient (mu)
     float dampening = 0.0f;  // Dampening coefficient (tau)
     bool nesterov = false;  // @todo Nesterov acceleration
 };
@@ -249,7 +250,7 @@ void mlp_init_xavier(struct MLP* mlp) {
 
         // Initialize biases
         for (size_t j = 0; j < b_d; j++) {
-            L->b[j] = 1e-5f;  // Can be 0 or small real value
+            L->b[j] = mlp->dim.bias;  // Can be 0 or small real value
         }
     }
 }
@@ -571,6 +572,7 @@ void print_usage(const char* prog) {
     const char options[] = "[--seed N] [--layers N] [--hidden N] [--epochs N] [--lr F] [...]";
     printf("Usage: %s %s\n", prog, options);
     printf("  --seed      N    Random seed (default: 1337)\n");
+    printf("  --bias      F    Initial bias (default: 0.0)\n");
     printf("  --layers    N    Number of layers (default: 3)\n");
     printf("  --hidden    N    Hidden units per layer (default: 4)\n");
     printf("  --epochs    N    Training epochs (default: 1000)\n");
@@ -590,6 +592,8 @@ int main(int argc, const char* argv[]) {
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "--seed") == 0 && i + 1 < argc) {
             mlp.dim.seed = atoi(argv[++i]);
+        } else if (strcmp(argv[i], "--bias") == 0 && i + 1 < argc) {
+            mlp.dim.bias = atof(argv[++i]);
         } else if (strcmp(argv[i], "--layers") == 0 && i + 1 < argc) {
             mlp.dim.n_layers = atoi(argv[++i]);
         } else if (strcmp(argv[i], "--hidden") == 0 && i + 1 < argc) {
