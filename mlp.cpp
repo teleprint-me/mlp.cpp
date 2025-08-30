@@ -463,6 +463,12 @@ void mlp_compute_gradients(struct MLP* mlp, float* y_true, size_t n) {
 
 // Update weights and biases
 void mlp_update_params(struct MLP* mlp) {
+    const float lr = mlp->opt.lr;
+    const float mu = mlp->opt.momentum;
+    const float tau = mlp->opt.dampening;
+    const float lambda = mlp->opt.weight_decay;
+    const bool nesterov = mlp->opt.nesterov;
+
     for (size_t i = 0; i < mlp->dim.n_layers; i++) {
         // Get the current input layer
         struct MLPLayer* L = &mlp->layers[i];
@@ -476,7 +482,7 @@ void mlp_update_params(struct MLP* mlp) {
         std::vector<float> &a = (i == 0) ? mlp->x : mlp->layers[i - 1].a;
 
         // Only initialize moment if it's set
-        if (mlp->opt.momentum > 0) {
+        if (mu > 0) {
             // Initialize weight momentum
             if (L->vW.size() != L->W.size()) {
                 L->vW.assign(L->W.size(), 0.0f);
@@ -501,21 +507,21 @@ void mlp_update_params(struct MLP* mlp) {
                 assert(!std::isnan(gw) && !std::isinf(gw));
 
                 // L2 regularization (g + λW)
-                if (mlp->opt.weight_decay > 0) {
-                    gw += mlp->opt.weight_decay * L->W[idx];
+                if (lambda > 0.0f) {
+                    gw += lambda * L->W[idx];
                 }
 
                 // Apply momentum
-                if (mlp->opt.momentum > 0) {
+                if (mu > 0.0f) {
                     // (1 - τ) * g
-                    gw *= (1.0f - mlp->opt.dampening);
+                    gw *= (1.0f - tau);
 
                     // μv + g
-                    L->vW[idx] = mlp->opt.momentum * L->vW[idx] + gw;
+                    L->vW[idx] = mu * L->vW[idx] + gw;
 
-                    if (mlp->opt.nesterov) {
+                    if (nesterov) {
                         // g + μv
-                        gw += mlp->opt.momentum * L->vW[idx];
+                        gw += mu * L->vW[idx];
                     } else {
                         // g = v
                         gw = L->vW[idx];
@@ -523,7 +529,7 @@ void mlp_update_params(struct MLP* mlp) {
                 }
 
                 // θ - γg
-                L->W[idx] -= mlp->opt.lr * gw;
+                L->W[idx] -= lr * gw;
             }
 
             // Update biases
@@ -531,16 +537,16 @@ void mlp_update_params(struct MLP* mlp) {
             // Sanity check
             assert(!std::isnan(gb) && !std::isinf(gb));
 
-            if (mlp->opt.momentum > 0) {
+            if (mu > 0.0f) {
                 // (1 - τ) * g
-                gb *= (1.0f - mlp->opt.dampening);
+                gb *= (1.0f - tau);
 
                 // μv + g
-                L->vb[j] = mlp->opt.momentum * L->vb[j] + gb;
+                L->vb[j] = mu * L->vb[j] + gb;
 
-                if (mlp->opt.nesterov) {
+                if (nesterov) {
                     // g + μv
-                    gb += mlp->opt.momentum * L->vb[j];
+                    gb += mu * L->vb[j];
                 } else {
                     // g = v
                     gb = L->vb[j];
@@ -548,7 +554,7 @@ void mlp_update_params(struct MLP* mlp) {
             }
 
             // θ - γg
-            L->b[j] -= mlp->opt.lr * gb;
+            L->b[j] -= lr * gb;
         }
     }
 }
