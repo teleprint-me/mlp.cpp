@@ -467,10 +467,10 @@ void mlp_update_params(struct MLP* mlp) {
         // Get the current input layer
         struct MLPLayer* L = &mlp->layers[i];
 
-        // Get the current input dimension (col)
-        size_t n_in = mlp_layer_dim_in(mlp, i);
-        // Get the current output dimension (row)
-        size_t n_out = mlp_layer_dim_out(mlp, i);
+        // Get the current input dimension
+        size_t n_in = mlp_layer_dim_in(mlp, i);  // column
+        // Get the current output dimension
+        size_t n_out = mlp_layer_dim_out(mlp, i);  // row
 
         // Get the previous activation
         std::vector<float> &a = (i == 0) ? mlp->x : mlp->layers[i - 1].a;
@@ -488,49 +488,67 @@ void mlp_update_params(struct MLP* mlp) {
             }
         }
 
-        // before updating parameters
-        // constexpr float GRAD_EPS = 1e-6f;
-
         // Apply stochastic gradient descent
-#pragma omp parallel for
+        // #pragma omp parallel for
         for (size_t j = 0; j < n_out; j++) {
-            // Update the weights
+            // Update weights
             for (size_t k = 0; k < n_in; k++) {
-                // Get the current parameter
+                // Current parameter (θ)
                 size_t idx = j * n_in + k;
-                // Calculate the base gradient
+                // Base gradient (δL / δW)
                 float g = L->d[j] * a[k];
+                // Sanity check
+                assert(!std::isnan(g) && !std::isinf(g));
 
-                // Apply weight decay
+                // L2 regularization (g + λW)
                 if (mlp->opt.weight_decay > 0) {
                     g += mlp->opt.weight_decay * L->W[idx];
                 }
 
-                // Apply dampening if set
-                g *= (1.0f - mlp->opt.dampening);
-
-                assert(!std::isnan(g) || !std::isinf(g));
-
                 // Apply momentum
                 if (mlp->opt.momentum > 0) {
+                    // (1 - τ) * g
+                    g *= (1.0f - mlp->opt.dampening);
+
+                    // μv + g
                     L->vW[idx] = mlp->opt.momentum * L->vW[idx] + g;
-                    L->W[idx] -= mlp->opt.lr * L->vW[idx];
-                } else {  // Otherwise, update
-                    L->W[idx] -= mlp->opt.lr * g;
+
+                    if (mlp->opt.nesterov) {
+                        // g + μv
+                        g += mlp->opt.momentum * L->vW[idx];
+                    } else {
+                        // g = v
+                        g = L->vW[idx];
+                    }
+                }
+
+                // θ - γg
+                L->W[idx] -= mlp->opt.lr * g;
+            }
+
+            // Update biases
+            float db = L->d[j];
+            // Sanity check
+            assert(!std::isnan(db) && !std::isinf(db));
+
+            if (mlp->opt.momentum > 0) {
+                // (1 - τ) * g
+                db *= (1.0f - mlp->opt.dampening);
+
+                // μv + g
+                L->vb[j] = mlp->opt.momentum * L->vb[j] + db;
+
+                if (mlp->opt.nesterov) {
+                    // g + μv
+                    db += mlp->opt.momentum * L->vb[j];
+                } else {
+                    // g = v
+                    db = L->vb[j];
                 }
             }
 
-            // Update the biases
-            float db = (1.0f - mlp->opt.dampening) * L->d[j];
-
-            assert(!std::isnan(db) || !std::isinf(db));
-
-            if (mlp->opt.momentum > 0) {
-                L->vb[j] = mlp->opt.momentum * L->vb[j] + db;
-                L->b[j] -= mlp->opt.lr * L->vb[j];
-            } else {
-                L->b[j] -= mlp->opt.lr * db;
-            }
+            // θ - γg
+            L->b[j] -= mlp->opt.lr * db;
         }
     }
 }
