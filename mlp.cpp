@@ -501,31 +501,31 @@ void mlp_update_params(struct MLP* mlp) {
             for (size_t k = 0; k < n_in; k++) {
                 // Current parameter (θ)
                 size_t idx = j * n_in + k;
-                // Base gradient (δL / δW)
+                // Compute gradient (δL / δW)
                 float gw = L->d[j] * a[k];
                 // Sanity check
                 assert(!std::isnan(gw) && !std::isinf(gw));
 
-                // L2 regularization (g + λW)
+                // L2 regularization (g + λθ)
                 if (lambda > 0.0f) {
                     gw += lambda * L->W[idx];
                 }
 
                 // Apply momentum
                 if (mu > 0.0f) {
-                    // (1 - τ) * g
-                    gw *= (1.0f - tau);
+                    // μb + (1 - τ) * g
+                    L->vW[idx] = mu * L->vW[idx] + (1.0f - tau) * gw;
+                } else {
+                    // b = g
+                    L->vW[idx] = gw;
+                }
 
-                    // μv + g
-                    L->vW[idx] = mu * L->vW[idx] + gw;
-
-                    if (nesterov) {
-                        // g + μv
-                        gw += mu * L->vW[idx];
-                    } else {
-                        // g = v
-                        gw = L->vW[idx];
-                    }
+                if (nesterov) {
+                    // g + μb
+                    gw += mu * L->vW[idx];
+                } else {
+                    // g = b
+                    gw = L->vW[idx];
                 }
 
                 // θ - γg
@@ -538,19 +538,19 @@ void mlp_update_params(struct MLP* mlp) {
             assert(!std::isnan(gb) && !std::isinf(gb));
 
             if (mu > 0.0f) {
-                // (1 - τ) * g
-                gb *= (1.0f - tau);
+                // μv + (1 - τ) * g
+                L->vb[j] = mu * L->vb[j] + (1.0f - tau) * gb;
+            } else {
+                // b = g
+                L->vb[j] = gb;
+            }
 
-                // μv + g
-                L->vb[j] = mu * L->vb[j] + gb;
-
-                if (nesterov) {
-                    // g + μv
-                    gb += mu * L->vb[j];
-                } else {
-                    // g = v
-                    gb = L->vb[j];
-                }
+            if (nesterov) {
+                // g + μb
+                gb += mu * L->vb[j];
+            } else {
+                // g = b
+                gb = L->vb[j];
             }
 
             // θ - γg
