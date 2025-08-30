@@ -489,7 +489,7 @@ void mlp_update_params(struct MLP* mlp) {
         }
 
         // Apply stochastic gradient descent
-        // #pragma omp parallel for
+#pragma omp parallel for
         for (size_t j = 0; j < n_out; j++) {
             // Update weights
             for (size_t k = 0; k < n_in; k++) {
