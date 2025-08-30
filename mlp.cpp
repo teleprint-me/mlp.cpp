@@ -509,13 +509,7 @@ void mlp_update_params(struct MLP* mlp) {
                 // Apply dampening if set
                 g *= (1.0f - mlp->opt.dampening);
 
-                // if (!(fabsf(g) > GRAD_EPS) || std::isnan(g)) {
-                //     printf(
-                //         "Warning: small or NaN gradient detected: %f at idx %zu\n", (double) g,
-                //         idx
-                //     );
-                //     // assert(0 && "Gradient vanished or NaN!");
-                // }
+                assert(!std::isnan(g) || !std::isinf(g));
 
                 // Apply momentum
                 if (mlp->opt.momentum > 0) {
@@ -529,13 +523,7 @@ void mlp_update_params(struct MLP* mlp) {
             // Update the biases
             float db = (1.0f - mlp->opt.dampening) * L->d[j];
 
-            // if (!(fabsf(db) > GRAD_EPS) || std::isnan(db)) {
-            //     printf(
-            //         "Warning: small or NaN bias gradient detected: %f at idx %zu\n", (double) db,
-            //         j
-            //     );
-            //     // assert(0 && "Gradient vanished or NaN!");
-            // }
+            assert(!std::isnan(db) || !std::isinf(db));
 
             if (mlp->opt.momentum > 0) {
                 L->vb[j] = mlp->opt.momentum * L->vb[j] + db;
