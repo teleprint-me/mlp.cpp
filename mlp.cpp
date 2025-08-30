@@ -49,7 +49,7 @@ struct SGDParams {
     float weight_decay = 0.0f;  // L2 regularization (lambda)
     float momentum = 0.0f;  // Momentum coefficient (mu)
     float dampening = 0.0f;  // Dampening coefficient (tau)
-    bool nesterov = false;  // @todo Nesterov acceleration
+    bool nesterov = false;  // Nesterov acceleration
 };
 
 // Model layers
@@ -588,7 +588,11 @@ void print_usage(struct MLP* mlp, const char* prog) {
     printf("  --tolerance F    Stop loss (default: %f)\n", (double) mlp->opt.tolerance);
     printf("  --decay     F    L2 regularization (default: %f)\n", (double) mlp->opt.weight_decay);
     printf("  --momentum  F    Momentum coefficient (default: %f)\n", (double) mlp->opt.momentum);
-    printf("  --dampening F    Momentum coefficient (default: %f)\n", (double) mlp->opt.dampening);
+    printf("  --dampening F    Dampening coefficient (default: %f)\n", (double) mlp->opt.dampening);
+    printf(
+        "  --nesterov  N    Nesterov acceleration (default: %s)\n",
+        (mlp->opt.nesterov) ? "true" : "false"
+    );
 }
 
 int main(int argc, const char* argv[]) {
@@ -619,6 +623,8 @@ int main(int argc, const char* argv[]) {
             mlp.opt.momentum = atof(argv[++i]);
         } else if (strcmp(argv[i], "--dampening") == 0 && i + 1 < argc) {
             mlp.opt.dampening = atof(argv[++i]);
+        } else if (strcmp(argv[i], "--nesterov") == 0 && i + 1 < argc) {
+            mlp.opt.nesterov = atoi(argv[++i]) ? 1 : 0;
         } else if (strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0) {
             print_usage(&mlp, argv[0]);
             return 0;
