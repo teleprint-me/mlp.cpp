@@ -60,8 +60,8 @@ struct MLPLayer {
     std::vector<float> a;  // post-activation (sigmoid(z))
     std::vector<float> d;  // delta (δ_n = ε_n * a_n​)
 
-    std::vector<float> vW;  // Weights momentum
-    std::vector<float> vb;  // Biases momentum
+    std::vector<float> vW;  // Weight velocity (momentum)
+    std::vector<float> vb;  // Biase velocity (momentum)
 };
 
 // Model
@@ -496,59 +496,59 @@ void mlp_update_params(struct MLP* mlp) {
                 // Current parameter (θ)
                 size_t idx = j * n_in + k;
                 // Base gradient (δL / δW)
-                float g = L->d[j] * a[k];
+                float gw = L->d[j] * a[k];
                 // Sanity check
-                assert(!std::isnan(g) && !std::isinf(g));
+                assert(!std::isnan(gw) && !std::isinf(gw));
 
                 // L2 regularization (g + λW)
                 if (mlp->opt.weight_decay > 0) {
-                    g += mlp->opt.weight_decay * L->W[idx];
+                    gw += mlp->opt.weight_decay * L->W[idx];
                 }
 
                 // Apply momentum
                 if (mlp->opt.momentum > 0) {
                     // (1 - τ) * g
-                    g *= (1.0f - mlp->opt.dampening);
+                    gw *= (1.0f - mlp->opt.dampening);
 
                     // μv + g
-                    L->vW[idx] = mlp->opt.momentum * L->vW[idx] + g;
+                    L->vW[idx] = mlp->opt.momentum * L->vW[idx] + gw;
 
                     if (mlp->opt.nesterov) {
                         // g + μv
-                        g += mlp->opt.momentum * L->vW[idx];
+                        gw += mlp->opt.momentum * L->vW[idx];
                     } else {
                         // g = v
-                        g = L->vW[idx];
+                        gw = L->vW[idx];
                     }
                 }
 
                 // θ - γg
-                L->W[idx] -= mlp->opt.lr * g;
+                L->W[idx] -= mlp->opt.lr * gw;
             }
 
             // Update biases
-            float db = L->d[j];
+            float gb = L->d[j];
             // Sanity check
-            assert(!std::isnan(db) && !std::isinf(db));
+            assert(!std::isnan(gb) && !std::isinf(gb));
 
             if (mlp->opt.momentum > 0) {
                 // (1 - τ) * g
-                db *= (1.0f - mlp->opt.dampening);
+                gb *= (1.0f - mlp->opt.dampening);
 
                 // μv + g
-                L->vb[j] = mlp->opt.momentum * L->vb[j] + db;
+                L->vb[j] = mlp->opt.momentum * L->vb[j] + gb;
 
                 if (mlp->opt.nesterov) {
                     // g + μv
-                    db += mlp->opt.momentum * L->vb[j];
+                    gb += mlp->opt.momentum * L->vb[j];
                 } else {
                     // g = v
-                    db = L->vb[j];
+                    gb = L->vb[j];
                 }
             }
 
             // θ - γg
-            L->b[j] -= mlp->opt.lr * db;
+            L->b[j] -= mlp->opt.lr * gb;
         }
     }
 }
