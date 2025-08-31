@@ -49,7 +49,7 @@ bool mlp_save(struct MLP* mlp, const char* path) {
     for (size_t i = 0; i < mlp->dim.n_layers; i++) {
         const MLPLayer* L = &mlp->layers[i];
 
-        size_t W_count = mlp_layer_dim_out(mlp, i) * mlp_layer_dim_in((MLP*) mlp, i);
+        size_t W_count = mlp_layer_dim_out(mlp, i) * mlp_layer_dim_in(mlp, i);
         size_t b_count = mlp_layer_dim_out(mlp, i);
 
         fwrite(L->W.data(), sizeof(float), W_count, file);
@@ -95,7 +95,7 @@ bool mlp_load(struct MLP* mlp, const char* path) {
     for (size_t i = 0; i < mlp->dim.n_layers; i++) {
         MLPLayer* L = &mlp->layers[i];
 
-        size_t W_count = mlp_layer_dim_out(mlp, i) * mlp_layer_dim_in((MLP*) mlp, i);
+        size_t W_count = mlp_layer_dim_out(mlp, i) * mlp_layer_dim_in(mlp, i);
         size_t b_count = mlp_layer_dim_out(mlp, i);
 
         fread(L->W.data(), sizeof(float), W_count, file);
