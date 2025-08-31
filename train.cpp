@@ -27,6 +27,12 @@
 #define MLP_MAGIC 0x6D6C7000  // 'mlp\0'
 #define MLP_VERSION 1
 
+void mlp_timestamp(char* out, size_t n) {
+    time_t t = time(NULL);
+    struct tm* local = localtime(&t);
+    strftime(out, n, "%Y-%m-%dT%H-%M-%S", local);
+}
+
 bool mlp_save(struct MLP* mlp, const char* path) {
     FILE* file = fopen(path, "wb");
     if (!file) {
@@ -108,22 +114,29 @@ bool mlp_load(struct MLP* mlp, const char* path) {
 
 void print_usage(struct MLP* mlp, const char* prog) {
     const char options[] = "[--seed N] [--layers N] [--hidden N] [--epochs N] [--lr F] [...]";
+
+    char stamp[64];
+    mlp_timestamp(stamp, 64);
+
+    char fname[128];
+    snprintf(fname, 128, "mlp-%s.bin", stamp);
+
+    const char* nest = (mlp->opt.nesterov) ? "true" : "false";
+
     printf("Usage: %s %s\n", prog, options);
-    printf("  --seed      N    Random seed (default: %zu)\n", mlp->dim.seed);
-    printf("  --bias      F    Initial bias (default: %f)\n", (double) mlp->dim.bias);
-    printf("  --layers    N    Number of layers (default: %zu)\n", mlp->dim.n_layers);
-    printf("  --hidden    N    Hidden units per layer (default: %zu)\n", mlp->dim.n_hidden);
-    printf("  --epochs    N    Training epochs (default: %zu)\n", mlp->opt.epochs);
-    printf("  --log-every N    Log every N epochs (default: %zu)\n", mlp->opt.log_every);
-    printf("  --lr        F    Learning rate (default: %f)\n", (double) mlp->opt.lr);
-    printf("  --tolerance F    Stop loss (default: %f)\n", (double) mlp->opt.tolerance);
-    printf("  --decay     F    L2 regularization (default: %f)\n", (double) mlp->opt.weight_decay);
-    printf("  --momentum  F    Momentum coefficient (default: %f)\n", (double) mlp->opt.momentum);
-    printf("  --dampening F    Dampening coefficient (default: %f)\n", (double) mlp->opt.dampening);
-    printf(
-        "  --nesterov  N    Nesterov acceleration (default: %s)\n",
-        (mlp->opt.nesterov) ? "true" : "false"
-    );
+    printf("--ckpt      S Checkpoint path (default: %s)\n", fname);
+    printf("--seed      N Random seed (default: %zu)\n", mlp->dim.seed);
+    printf("--bias      F Initial bias (default: %f)\n", (double) mlp->dim.bias);
+    printf("--layers    N Number of layers (default: %zu)\n", mlp->dim.n_layers);
+    printf("--hidden    N Hidden units per layer (default: %zu)\n", mlp->dim.n_hidden);
+    printf("--epochs    N Training epochs (default: %zu)\n", mlp->opt.epochs);
+    printf("--log-every N Log every N epochs (default: %zu)\n", mlp->opt.log_every);
+    printf("--lr        F Learning rate (default: %f)\n", (double) mlp->opt.lr);
+    printf("--tolerance F Stop loss (default: %f)\n", (double) mlp->opt.tolerance);
+    printf("--decay     F L2 regularization (default: %f)\n", (double) mlp->opt.weight_decay);
+    printf("--momentum  F Momentum coefficient (default: %f)\n", (double) mlp->opt.momentum);
+    printf("--dampening F Dampening coefficient (default: %f)\n", (double) mlp->opt.dampening);
+    printf("--nesterov  N Nesterov acceleration (default: %s)\n", nest);
 }
 
 int main(int argc, const char* argv[]) {
