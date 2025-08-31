@@ -506,7 +506,7 @@ void mlp_update_params(struct MLP* mlp) {
                 // Sanity check
                 assert(!std::isnan(gw) && !std::isinf(gw));
 
-                // L2 regularization (g_t + λ * θ_{t - 1})
+                // Coupled L2 regularization (g_t + λ * θ_{t - 1})
                 if (lambda > 0.0f) {
                     gw += lambda * L->W[idx];
                 }
