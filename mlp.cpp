@@ -478,7 +478,7 @@ void mlp_update_params(struct MLP* mlp) {
         // Get the current output dimension
         size_t n_out = mlp_layer_dim_out(mlp, i);  // row
 
-        // Get the previous activation
+        // Get parameter from previous step (θ_{t - 1})
         std::vector<float> &a = (i == 0) ? mlp->x : mlp->layers[i - 1].a;
 
         // Only initialize moment if it's set
@@ -513,19 +513,23 @@ void mlp_update_params(struct MLP* mlp) {
 
                 // Apply momentum
                 if (mu > 0.0f) {
-                    // μb + (1 - τ) * g
-                    L->vW[idx] = mu * L->vW[idx] + (1.0f - tau) * gw;
-                } else {
-                    // b = g
-                    L->vW[idx] = gw;
-                }
+                    // t > 1
+                    if (idx > 0) {
+                        // μb + (1 - τ) * g
+                        L->vW[idx] = mu * L->vW[idx - 1] + (1.0f - tau) * gw;
+                    } else {
+                        // b = g
+                        L->vW[idx] = gw;
+                    }
 
-                if (nesterov) {
-                    // g + μb
-                    gw += mu * L->vW[idx];
-                } else {
-                    // g = b
-                    gw = L->vW[idx];
+                    // Apply accelerated gradient if enabled
+                    if (nesterov) {
+                        // g + μb
+                        gw += mu * L->vW[idx];
+                    } else {
+                        // g = b
+                        gw = L->vW[idx];
+                    }
                 }
 
                 // θ - γg
@@ -538,19 +542,22 @@ void mlp_update_params(struct MLP* mlp) {
             assert(!std::isnan(gb) && !std::isinf(gb));
 
             if (mu > 0.0f) {
-                // μv + (1 - τ) * g
-                L->vb[j] = mu * L->vb[j] + (1.0f - tau) * gb;
-            } else {
-                // b = g
-                L->vb[j] = gb;
-            }
+                // t > 1
+                if (j > 0) {
+                    // μv + (1 - τ) * g
+                    L->vb[j] = mu * L->vb[j - 1] + (1.0f - tau) * gb;
+                } else {
+                    // b = g
+                    L->vb[j] = gb;
+                }
 
-            if (nesterov) {
-                // g + μb
-                gb += mu * L->vb[j];
-            } else {
-                // g = b
-                gb = L->vb[j];
+                if (nesterov) {
+                    // g + μb
+                    gb += mu * L->vb[j];
+                } else {
+                    // g = b
+                    gb = L->vb[j];
+                }
             }
 
             // θ - γg
