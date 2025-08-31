@@ -25,62 +25,7 @@
 #include <cstring>
 #include <vector>
 
-/**
- * Structures
- * @{
- */
-
-// Model dimensions
-struct MLPParams {
-    size_t n_layers = 3;  // Number of hidden layers
-    size_t n_in = 2;  // Input features (e.g., XOR has 4 samples by 2 inputs)
-    size_t n_hidden = 3;  // Number of hidden units (4 states per sampled pair)
-    size_t n_out = 1;  // Output units (e.g., XOR has 4 samples by 1 output)
-    size_t seed = 1337;  // Random seed for reproducibility
-    float bias = 0.0f;  // Initial tensor biases
-};
-
-// Model optimization
-struct SGDParams {
-    size_t epochs = 1000;  // Training cycles
-    size_t log_every = 100;  // Log epoch every n cycles
-    float tolerance = 1e-3;  // Stop loss
-    float lr = 1e-1f;  // Learning rate (gamma)
-    float weight_decay = 0.0f;  // L2 regularization (lambda)
-    float momentum = 0.0f;  // Momentum coefficient (mu)
-    float dampening = 0.0f;  // Dampening coefficient (tau)
-    bool nesterov = false;  // Nesterov acceleration
-};
-
-// Model layers
-struct MLPLayer {
-    std::vector<float> W;  // Weights (n_out x n_in)
-    std::vector<float> b;  // Biases (n_out)
-
-    std::vector<float> a;  // post-activation (sigmoid(z))
-    std::vector<float> d;  // delta (δ_n = ε_n * a_n​)
-
-    std::vector<float> vW;  // Weight velocity (momentum)
-    std::vector<float> vb;  // Biase velocity (momentum)
-};
-
-// Model
-struct MLP {
-    // Model layers
-    std::vector<struct MLPLayer> layers;
-
-    // Input/output tensors
-    std::vector<float> x;  // 1D input vector
-    std::vector<float> y;  // 1D output vector
-
-    // Model dimensions
-    struct MLPParams dim{};
-
-    // Model optimization
-    struct SGDParams opt{};
-};
-
-/** @} */
+#include "mlp.h"
 
 /**
  * MLP Utils
