@@ -38,10 +38,10 @@ cmake -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j 16
 ```
 
-## run
+## train
 
 ```sh
-./build/bin/mlp
+./build/bin/train -h
 ```
 
 Executables can be found in `./build/bin`.
