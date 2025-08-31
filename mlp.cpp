@@ -478,7 +478,7 @@ void mlp_update_params(struct MLP* mlp) {
         // Get the current output dimension
         size_t n_out = mlp_layer_dim_out(mlp, i);  // row
 
-        // Get parameter from previous step (θ_{t - 1})
+        // Get activations from the previous layer
         std::vector<float> &a = (i == 0) ? mlp->x : mlp->layers[i - 1].a;
 
         // Only initialize moment if it's set
@@ -650,6 +650,21 @@ int main(int argc, const char* argv[]) {
 
     if (mlp.dim.n_hidden < 2) {
         fprintf(stderr, "[ERROR] Minimum hidden dims = 2\n\t┻━┻︵ \\(°□°)/ ︵ ┻━┻\n");
+        return 1;
+    }
+
+    if (mlp.opt.lr <= 0.0f) {
+        fprintf(stderr, "[ERROR] Learning rate > 0\n\t(╯°Д°)╯︵/(.□ . \\)");
+        return 1;
+    }
+
+    if (mlp.opt.momentum < 0.0f && mlp.opt.momentum > 1.0f) {
+        fprintf(stderr, "[ERROR] Momentem [0, 1]\n\t┬─┬ノ( º _ ºノ)");
+        return 1;
+    }
+
+    if (mlp.opt.nesterov && mlp.opt.momentum <= 0.0f) {
+        fprintf(stderr, "[Error] Momentum > 0\n\t(˚Õ˚)ر ~~~~╚╩╩╝");
         return 1;
     }
 
