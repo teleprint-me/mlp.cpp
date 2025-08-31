@@ -654,17 +654,21 @@ int main(int argc, const char* argv[]) {
     }
 
     if (mlp.opt.lr <= 0.0f) {
-        fprintf(stderr, "[ERROR] Learning rate > 0\n\t(╯°Д°)╯︵/(.□ . \\)");
+        fprintf(stderr, "[ERROR] Learning rate > 0\n\t(╯°Д°)╯︵/(.□ . \\)\n");
         return 1;
     }
 
-    if (mlp.opt.momentum < 0.0f && mlp.opt.momentum > 1.0f) {
-        fprintf(stderr, "[ERROR] Momentem [0, 1]\n\t┬─┬ノ( º _ ºノ)");
+    if (mlp.opt.dampening < 0.0f || mlp.opt.dampening >= 1.0f) {
+        fprintf(stderr, "[ERROR] 0 <= dampening < 1\n\t(^ಠ_ಠ^)ﾉ\n");
+    }
+
+    if (mlp.opt.momentum < 0.0f || mlp.opt.momentum >= 1.0f) {
+        fprintf(stderr, "[ERROR] 0 <= momentum < 1\n\t┬─┬ノ( º _ ºノ)\n");
         return 1;
     }
 
-    if (mlp.opt.nesterov && mlp.opt.momentum <= 0.0f) {
-        fprintf(stderr, "[Error] Momentum > 0\n\t(˚Õ˚)ر ~~~~╚╩╩╝");
+    if (mlp.opt.nesterov && mlp.opt.momentum == 0.0f) {
+        fprintf(stderr, "[Error] Momentum > 0\n\t(˚Õ˚)ر ~~~~┻━┻\n");
         return 1;
     }
 
