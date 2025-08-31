@@ -23,11 +23,15 @@
 #include <cstdio>
 
 #include <unistd.h>
+#include <sys/stat.h>
 
 #include "mlp.h"
 
 #define MLP_MAGIC 0x6D6C7000  // 'mlp\0'
 #define MLP_VERSION 1
+
+#define MLP_MAX_STAMP 64
+#define MLP_MAX_FNAME 256
 
 size_t mlp_timestamp(char* out, size_t n) {
     time_t t = time(NULL);
@@ -36,7 +40,15 @@ size_t mlp_timestamp(char* out, size_t n) {
 }
 
 bool mlp_exists(const char* path) {
-    if (access(path, F_OK)) {
+    struct stat buffer;
+    // access just tests for accessibility and enables TOCTOU
+    // stat (also vulnerable) checks the system for the inode and can see if it exists
+    // there is an atomic solution (that is still vulnerable), but offers better security
+    // the proposed solution is to use a file descriptor by attempting to open the use the file
+    // immediately though, there are no gaurentees for the atomic operation.
+    // using access and stat keeps things simple for now.
+    // this is not production code. its a proof of concept.
+    if (access(path, F_OK) && stat(path, &buffer) == 0) {
         return true;
     }
     return false;
@@ -124,11 +136,11 @@ bool mlp_load(struct MLP* mlp, const char* path) {
 void print_usage(struct MLP* mlp, const char* prog) {
     const char options[] = "[--seed N] [--layers N] [--hidden N] [--epochs N] [--lr F] [...]";
 
-    char stamp[64];
-    mlp_timestamp(stamp, 64);
+    char stamp[MLP_MAX_STAMP];
+    mlp_timestamp(stamp, MLP_MAX_STAMP);
 
-    char fname[128];
-    snprintf(fname, 128, "mlp-%s.bin", stamp);
+    char fname[MLP_MAX_FNAME];
+    snprintf(fname, MLP_MAX_FNAME, "mlp-%s.bin", stamp);
 
     const char* nest = (mlp->opt.nesterov) ? "true" : "false";
 
@@ -149,12 +161,17 @@ void print_usage(struct MLP* mlp, const char* prog) {
 }
 
 int main(int argc, const char* argv[]) {
+    // Create a default checkpoint path
+    const char* file_path = "mlp-%s.bin";
+
     // Create the model
     MLP mlp{};
 
     // Simple manual CLI parse
     for (int i = 1; i < argc; i++) {
-        if (strcmp(argv[i], "--seed") == 0 && i + 1 < argc) {
+        if (strcmp(argv[i], "--ckpt") == 0 && i + 1 < argc) {
+            file_path = argv[++i];
+        } else if (strcmp(argv[i], "--seed") == 0 && i + 1 < argc) {
             mlp.dim.seed = atoi(argv[++i]);
         } else if (strcmp(argv[i], "--bias") == 0 && i + 1 < argc) {
             mlp.dim.bias = atof(argv[++i]);
@@ -236,8 +253,23 @@ int main(int argc, const char* argv[]) {
     mlp.x.resize(mlp.dim.n_in);
     mlp.y.resize(mlp.dim.n_out);
 
-    // Apply xavier-glorot initialization to model layers
-    mlp_init_xavier(&mlp);
+    // Create a time stamp
+    char stamp[MLP_MAX_STAMP];
+    mlp_timestamp(stamp, sizeof(stamp));
+
+    // Create a checkpoint path
+    char ckpt_path[MLP_MAX_FNAME] = {0};
+    snprintf(ckpt_path, MLP_MAX_FNAME, "%s", file_path);
+
+    // Initialize the model if it does not exist already
+    if (mlp_exists(ckpt_path)) {
+        // Load and initialize a pre-trained model
+        mlp_load(&mlp, ckpt_path);
+    } else {
+        // Apply xavier-glorot initialization to model layers
+        mlp_init_xavier(&mlp);
+    }
+
     // Do a sanity check when initializing the model
     mlp_log_layers(&mlp);
 
