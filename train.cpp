@@ -18,10 +18,93 @@
  */
 
 #include <ctime>
+#include <cstdint>
 #include <cstring>
 #include <cstdio>
 
 #include "mlp.h"
+
+#define MLP_MAGIC 0x6D6C7000  // 'mlp\0'
+#define MLP_VERSION 1
+
+bool mlp_save(struct MLP* mlp, const char* path) {
+    FILE* file = fopen(path, "wb");
+    if (!file) {
+        fprintf(stderr, "[ERROR] File is unwritable.\n\t(⊙.☉)7");
+        return false;
+    }
+
+    uint32_t magic = MLP_MAGIC;
+    uint32_t version = MLP_VERSION;
+
+    // Write header
+    fwrite(&magic, sizeof(uint32_t), 1, file);
+    fwrite(&version, sizeof(uint32_t), 1, file);
+    fwrite(&mlp->dim.n_layers, sizeof(uint32_t), 1, file);
+    fwrite(&mlp->dim.n_in, sizeof(uint32_t), 1, file);
+    fwrite(&mlp->dim.n_hidden, sizeof(uint32_t), 1, file);
+    fwrite(&mlp->dim.n_out, sizeof(uint32_t), 1, file);
+
+    // Write each layer
+    for (size_t i = 0; i < mlp->dim.n_layers; i++) {
+        const MLPLayer* L = &mlp->layers[i];
+
+        size_t W_count = mlp_layer_dim_out(mlp, i) * mlp_layer_dim_in((MLP*) mlp, i);
+        size_t b_count = mlp_layer_dim_out(mlp, i);
+
+        fwrite(L->W.data(), sizeof(float), W_count, file);
+        fwrite(L->b.data(), sizeof(float), b_count, file);
+    }
+
+    fclose(file);
+    return true;
+}
+
+bool mlp_load(struct MLP* mlp, const char* path) {
+    FILE* file = fopen(path, "rb");
+    if (!file) {
+        fprintf(stderr, "[ERROR] File is unreadable.\n\t(⊙.☉)7\n");
+        return false;
+    }
+
+    uint32_t magic = 0;
+    fread(&magic, sizeof(uint32_t), 1, file);
+    if (MLP_MAGIC != magic) {
+        fprintf(stderr, "[ERROR] File is not an MLP.\n\tಡ_ಡ\n");
+        return false;
+    }
+
+    uint32_t version = 0;
+    fread(&version, sizeof(uint32_t), 1, file);
+    if (MLP_VERSION != version) {
+        fprintf(stderr, "[ERROR] Unsupported MLP version.\n\t(－‸ლ)\n");
+        return false;
+    }
+
+    // Read header
+    fread(&mlp->dim.n_layers, sizeof(uint32_t), 1, file);
+    fread(&mlp->dim.n_in, sizeof(uint32_t), 1, file);
+    fread(&mlp->dim.n_hidden, sizeof(uint32_t), 1, file);
+    fread(&mlp->dim.n_out, sizeof(uint32_t), 1, file);
+
+    // Reset the model
+    mlp->layers.clear();
+    mlp->layers.resize(mlp->dim.n_layers);
+
+    // Read each layer
+    for (size_t i = 0; i < mlp->dim.n_layers; i++) {
+        MLPLayer* L = &mlp->layers[i];
+
+        size_t W_count = mlp_layer_dim_out(mlp, i) * mlp_layer_dim_in((MLP*) mlp, i);
+        size_t b_count = mlp_layer_dim_out(mlp, i);
+
+        fread(L->W.data(), sizeof(float), W_count, file);
+        fread(L->b.data(), sizeof(float), b_count, file);
+    }
+
+    fclose(file);
+    return true;
+}
 
 void print_usage(struct MLP* mlp, const char* prog) {
     const char options[] = "[--seed N] [--layers N] [--hidden N] [--epochs N] [--lr F] [...]";
