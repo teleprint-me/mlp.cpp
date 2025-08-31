@@ -482,7 +482,7 @@ void mlp_update_params(struct MLP* mlp) {
         std::vector<float> &a = (i == 0) ? mlp->x : mlp->layers[i - 1].a;
 
         // Only initialize moment if it's set
-        if (mu > 0) {
+        if (mu > 0) {  // b_0 <- 0
             // Initialize weight momentum
             if (L->vW.size() != L->W.size()) {
                 L->vW.assign(L->W.size(), 0.0f);
@@ -500,68 +500,71 @@ void mlp_update_params(struct MLP* mlp) {
             // Update weights
             for (size_t k = 0; k < n_in; k++) {
                 // Current parameter (θ)
-                size_t idx = j * n_in + k;
-                // Compute gradient (δL / δW)
+                size_t idx = j * n_in + k;  // let idx = t
+                // let idx - 1 = j * n_in + k - 1 = t - 1
+                // Compute gradient (g_t ← ∇_{θ} f_{t} (θ_{t−1}))
                 float gw = L->d[j] * a[k];
                 // Sanity check
                 assert(!std::isnan(gw) && !std::isinf(gw));
 
-                // L2 regularization (g + λθ)
-                if (lambda > 0.0f) {
-                    gw += lambda * L->W[idx];
+                // L2 regularization (g_t + λ * θ_{t - 1})
+                if (k > 0 && lambda > 0.0f) {
+                    gw += lambda * L->W[idx - 1];
                 }
 
                 // Apply momentum
                 if (mu > 0.0f) {
                     // t > 1
-                    if (idx > 0) {
-                        // μb + (1 - τ) * g
+                    if (k > 0) {
+                        // b_t = μ * b_{t - 1} + (1 - τ) * g_t
                         L->vW[idx] = mu * L->vW[idx - 1] + (1.0f - tau) * gw;
                     } else {
-                        // b = g
+                        // b_t = g_t
                         L->vW[idx] = gw;
                     }
 
                     // Apply accelerated gradient if enabled
                     if (nesterov) {
-                        // g + μb
+                        // g_t = g_t + μ * b_t
                         gw += mu * L->vW[idx];
                     } else {
-                        // g = b
+                        // g_t = b_t
                         gw = L->vW[idx];
                     }
                 }
 
-                // θ - γg
+                // θ_t = θ_{t - 1} - γ * g_t
                 L->W[idx] -= lr * gw;
             }
 
             // Update biases
-            float gb = L->d[j];
-            // Sanity check
-            assert(!std::isnan(gb) && !std::isinf(gb));
+            {
+                float gb = L->d[j];
+                // Sanity check
+                assert(!std::isnan(gb) && !std::isinf(gb));
 
-            if (mu > 0.0f) {
-                // t > 1
-                if (j > 0) {
-                    // μv + (1 - τ) * g
-                    L->vb[j] = mu * L->vb[j - 1] + (1.0f - tau) * gb;
-                } else {
-                    // b = g
-                    L->vb[j] = gb;
+                if (mu > 0.0f) {
+                    // t > 1
+                    if (j > 0) {
+                        // b_t = μ * b_{t - 1} + (1 - τ) * g_t
+                        L->vb[j] = mu * L->vb[j - 1] + (1.0f - tau) * gb;
+                    } else {
+                        // b_t = g_t
+                        L->vb[j] = gb;
+                    }
+
+                    if (nesterov) {
+                        // g_t = g_t + μ * b_t
+                        gb += mu * L->vb[j];
+                    } else {
+                        // g_t = b_t
+                        gb = L->vb[j];
+                    }
                 }
 
-                if (nesterov) {
-                    // g + μb
-                    gb += mu * L->vb[j];
-                } else {
-                    // g = b
-                    gb = L->vb[j];
-                }
+                // θ_t = θ_{t - 1} - γ * g_t
+                L->b[j] -= lr * gb;
             }
-
-            // θ - γg
-            L->b[j] -= lr * gb;
         }
     }
 }
