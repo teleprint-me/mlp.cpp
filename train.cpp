@@ -27,10 +27,10 @@
 #define MLP_MAGIC 0x6D6C7000  // 'mlp\0'
 #define MLP_VERSION 1
 
-void mlp_timestamp(char* out, size_t n) {
+size_t mlp_timestamp(char* out, size_t n) {
     time_t t = time(NULL);
     struct tm* local = localtime(&t);
-    strftime(out, n, "%Y-%m-%dT%H-%M-%S", local);
+    return strftime(out, n, "%Y-%m-%dT%H-%M-%S", local);
 }
 
 bool mlp_save(struct MLP* mlp, const char* path) {
