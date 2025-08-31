@@ -1,20 +1,16 @@
 /**
- * Copyright © 2025 Austin Berrio
- * @file mlp/mlp.cpp
- * @brief Multi-layer perceptron implementation in C with minimal C++ features.
- * - Classes and templates are **not** allowed! C-like structs are preferred.
- *   - Setting default field parameters for `struct` is encouraged.
- * - `auto` keyword usage is **not** allowed!
- *   - Data types must be explicitly declared! Hiding types is discouraged.
- * - Using std::vector is allowed to simplify memory management.
- *   - std::vector usage is preferred to simplify vector and matrix operations.
- * - Function signatures must be explicit and C-like.
- *   - Function parameters must use explicit types and shapes, e.g. f(float* x, size_t n).
- *   - Pointer refs signal the data is mutable to some capacity unless const qualified.
- * - Simplicity rules them all!
- *   - Implementations should prioritize simplicity at all costs.
- *   - Abstractions are deferred until absolutely necessary.
- *   - Abstractions will reveal themselves through prototyping.
+ * @file    mlp/mlp.cpp
+ * @brief   Multi-layer perceptron (MLP) in C with minimal C++ features.
+ * @author  Austin Berrio
+ * @copyright Copyright © 2025
+ *
+ * Coding rules:
+ *   - No classes/templates; use C-style structs.
+ *   - No 'auto'; all types explicit.
+ *   - Prefer std::vector for storage.
+ *   - Explicit, C-style function signatures.
+ *   - Pointer args: mutable unless const.
+ *   - Simplicity first; abstraction only as needed.
  */
 
 #include <cassert>

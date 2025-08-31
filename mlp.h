@@ -1,20 +1,16 @@
 /**
- * Copyright © 2025 Austin Berrio
- * @file mlp/mlp.h
- * @brief Multi-layer perceptron implementation in C with minimal C++ features.
- * - Classes and templates are **not** allowed! C-like structs are preferred.
- *   - Setting default field parameters for `struct` is encouraged.
- * - `auto` keyword usage is **not** allowed!
- *   - Data types must be explicitly declared! Hiding types is discouraged.
- * - Using std::vector is allowed to simplify memory management.
- *   - std::vector usage is preferred to simplify vector and matrix operations.
- * - Function signatures must be explicit and C-like.
- *   - Function parameters must use explicit types and shapes, e.g. f(float* x, size_t n).
- *   - Pointer refs signal the data is mutable to some capacity unless const qualified.
- * - Simplicity rules them all!
- *   - Implementations should prioritize simplicity at all costs.
- *   - Abstractions are deferred until absolutely necessary.
- *   - Abstractions will reveal themselves through prototyping.
+ * @file    mlp/mlp.h
+ * @brief   Multi-layer perceptron (MLP) in C with minimal C++ features.
+ * @author  Austin Berrio
+ * @copyright Copyright © 2025
+ *
+ * Coding rules:
+ *   - No classes/templates; use C-style structs.
+ *   - No 'auto'; all types explicit.
+ *   - Prefer std::vector for storage.
+ *   - Explicit, C-style function signatures.
+ *   - Pointer args: mutable unless const.
+ *   - Simplicity first; abstraction only as needed.
  */
 
 #ifndef MLP_H
@@ -23,145 +19,136 @@
 #include <cstdlib>
 #include <vector>
 
-/**
- * Structures
- * @{
+/** @defgroup MLPStructs MLP Data Structures
+ *  @{
  */
 
-// Model dimensions
+/** @brief Model dimensions and basic configuration. */
 struct MLPParams {
-    size_t n_layers = 3;  // Number of hidden layers
-    size_t n_in = 2;  // Input features (e.g., XOR has 4 samples by 2 inputs)
-    size_t n_hidden = 3;  // Number of hidden units (4 states per sampled pair)
-    size_t n_out = 1;  // Output units (e.g., XOR has 4 samples by 1 output)
-    size_t seed = 1337;  // Random seed for reproducibility
-    float bias = 0.0f;  // Initial tensor biases
+    size_t n_layers = 3;  ///< Number of layers (hidden + output)
+    size_t n_in = 2;  ///< Input features
+    size_t n_hidden = 3;  ///< Hidden units per layer
+    size_t n_out = 1;  ///< Output units
+    size_t seed = 1337;  ///< RNG seed for reproducibility
+    float bias = 0.0f;  ///< Initial bias value
 };
 
-// Model optimization
+/** @brief Stochastic Gradient Descent (SGD) optimizer settings. */
 struct SGDParams {
-    size_t epochs = 1000;  // Training cycles
-    size_t log_every = 100;  // Log epoch every n cycles
-    float tolerance = 1e-3;  // Stop loss
-    float lr = 1e-1f;  // Learning rate (gamma)
-    float weight_decay = 0.0f;  // L2 regularization (lambda)
-    float momentum = 0.0f;  // Momentum coefficient (mu)
-    float dampening = 0.0f;  // Dampening coefficient (tau)
-    bool nesterov = false;  // Nesterov acceleration
+    size_t epochs = 1000;  ///< Training epochs
+    size_t log_every = 100;  ///< Logging interval (in epochs)
+    float tolerance = 1e-3;  ///< Stop if loss <= tolerance
+    float lr = 1e-1f;  ///< Learning rate (gamma)
+    float weight_decay = 0.0f;  ///< L2 regularization (lambda)
+    float momentum = 0.0f;  ///< SGD momentum
+    float dampening = 0.0f;  ///< Dampening for momentum
+    bool nesterov = false;  ///< Enable Nesterov acceleration
 };
 
-// Model layers
+/** @brief Parameters, activations, and velocity buffers for one layer. */
 struct MLPLayer {
-    std::vector<float> W;  // Weights (n_out x n_in)
-    std::vector<float> b;  // Biases (n_out)
-
-    std::vector<float> a;  // post-activation (sigmoid(z))
-    std::vector<float> d;  // delta (δ_n = ε_n * a_n​)
-
-    std::vector<float> vW;  // Weight velocity (momentum)
-    std::vector<float> vb;  // Biase velocity (momentum)
+    std::vector<float> W;  ///< Weights (row-major: n_out x n_in)
+    std::vector<float> b;  ///< Biases (n_out)
+    std::vector<float> a;  ///< Activations (post-activation, e.g., sigmoid)
+    std::vector<float> d;  ///< Deltas (gradients)
+    std::vector<float> vW;  ///< Velocity (momentum) for weights
+    std::vector<float> vb;  ///< Velocity (momentum) for biases
 };
 
-// Model
+/** @brief Main MLP model object. */
 struct MLP {
-    // Model layers
-    std::vector<struct MLPLayer> layers;
-
-    // Input/output tensors
-    std::vector<float> x;  // 1D input vector
-    std::vector<float> y;  // 1D output vector
-
-    // Model dimensions
-    struct MLPParams dim{};
-
-    // Model optimization
-    struct SGDParams opt{};
+    std::vector<MLPLayer> layers;  ///< Layers (n_layers)
+    std::vector<float> x;  ///< Current input vector (n_in)
+    std::vector<float> y;  ///< Current output vector (n_out)
+    MLPParams dim{};  ///< Model dimensions
+    SGDParams opt{};  ///< Optimizer parameters
 };
 
 /** @} */
 
-/**
- * MLP Utils
- * @{
+/** @defgroup MLPUtils Utility Functions
+ *  @{
  */
 
-// Get layer dimension in
+/** @brief Get number of input features for a given layer. */
 size_t mlp_layer_dim_in(struct MLP* mlp, size_t layer);
 
-// Get layer dimension out
+/** @brief Get number of output features for a given layer. */
 size_t mlp_layer_dim_out(struct MLP* mlp, size_t layer);
 
 /** @} */
 
-/**
- * Logging
- * @{
+/** @defgroup MLPLogging Logging and Debugging
+ *  @{
  */
 
+/** @brief Print model dimensions. */
 void mlp_log_dims(struct MLP* mlp);
 
+/** @brief Print optimizer parameters. */
 void mlp_log_opts(struct MLP* mlp);
 
+/** @brief Print vector with label. */
 void mlp_log_vector(const char* title, const float* x, size_t n);
 
-// Print a row-major matrix (rows x cols)
+/** @brief Print matrix (row-major: rows x cols). */
 void mlp_log_matrix(const char* title, const float* W, int rows, int cols);
 
+/** @brief Print weights and biases for all layers. */
 void mlp_log_layers(struct MLP* mlp);
 
 /** @} */
 
-/**
- * Initialization
- * @{
+/** @defgroup MLPInit Model Initialization
+ *  @{
  */
 
+/** @brief Set input vector to user-specified values. */
 void mlp_init_input(struct MLP* mlp, float* x_in, size_t n);
 
+/** @brief Fill input vector with random values in [0, 1). */
 void mlp_init_input_random(struct MLP* mlp);
 
-// Returns a sample from N(-1, 1)
+/** @brief Uniform random in N(-1, 1), scaled for layer sizes. */
 float rand_uniform(size_t n_in, size_t n_out);
 
-// Returns a sample from N(0, 1)
+/** @brief Normal random in N(0, 1), scaled for layer sizes. */
 float rand_normal(size_t n_in, size_t n_out);
 
+/** @brief Initialize weights/biases (Glorot/Xavier init). */
 void mlp_init_xavier(struct MLP* mlp);
 
 /** @} */
 
-/**
- * Forward pass (inference)
- * @{
+/** @defgroup MLPForward Forward Pass
+ *  @{
  */
 
-// Sigmoid Activation Function
+/** @brief Sigmoid activation function. */
 float sigmoid(float x);
 
-// Apply row-major matrix multiplication (y = Wx + b)
+/** @brief Matrix-vector multiply (row-major): y = Wx + b. */
 void matmul(float* y, float* W, float* x, float* b, size_t n_out, size_t n_in);
 
+/** @brief Compute model output from input. */
 void mlp_forward(struct MLP* mlp, float* x_in, size_t n);
 
 /** @} */
 
-/**
- * Backward pass (training)
- * @{
+/** @defgroup MLPBackward Backward Pass and Training
+ *  @{
  */
 
-// Derivative of sigmoid for backpropagation
+/** @brief Derivative of sigmoid (for backprop). */
 float sigmoid_prime(float x);
 
-// Compute the multi-layer gradients (aka deltas)
-// Each layer’s deltas are calculated using the deltas from the next layer.
-// The shape of deltas always matches the number of outputs for that layer.
+/** @brief Compute output and hidden layer gradients. */
 void mlp_compute_gradients(struct MLP* mlp, float* y_true, size_t n);
 
-// Update weights and biases
+/** @brief Update weights and biases using gradients/optimizer. */
 void mlp_update_params(struct MLP* mlp);
 
-// loss with reduction as mean
+/** @brief Mean squared error (reduction=mean). */
 float mse(float* y_pred, float* y_true, size_t n);
 
 /** @} */
