@@ -42,15 +42,15 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
 # Add core library as a dependency
-# add_library(mlp SHARED
-#     src/rng.cpp
-# )
-# target_include_directories(mlp PUBLIC include)
-# target_link_libraries(mlp PRIVATE m rt)
+add_library(mlp SHARED
+    mlp.cpp
+)
+target_include_directories(mlp PUBLIC include)
+target_link_libraries(mlp PRIVATE m)
 
 # Add mlp executable
-add_executable(mlp mlp.cpp)
-target_link_libraries(mlp PRIVATE m)
+add_executable(train train.cpp)
+target_link_libraries(train PRIVATE mlp)
 
 add_custom_target(run_clean
     COMMAND ${CMAKE_COMMAND} -E rm -rf ${CMAKE_BINARY_DIR}
