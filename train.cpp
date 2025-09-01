@@ -206,7 +206,7 @@ int main(int argc, const char* argv[]) {
         loss_epoch /= inputs.size();
 
         // Log every n epochs
-        if (epoch % mlp.opt.log_every == 0 || epoch == mlp.opt.epochs - 1) {
+        if (epoch % mlp.opt.log_every == 0) {
             printf("epoch[%zu] Σ(-᷅_-᷄๑) %f\n", epoch, (double) loss_epoch);
             mlp_ckpt_name(ckpt_path, MLP_MAX_FNAME, epoch);
             mlp_ckpt_save(&mlp, ckpt_path);
@@ -219,6 +219,11 @@ int main(int argc, const char* argv[]) {
         }
     }
 
+    // Always save the lastest checkpoint with a time stamp as a backup
+    mlp_ckpt_name(ckpt_path, MLP_MAX_FNAME, mlp.opt.epochs);
+    mlp_ckpt_save(&mlp, ckpt_path);
+
+    // Always save the latest checkpoint to the same file
     snprintf(ckpt_path, MLP_MAX_FNAME, "mlp-latest.bin");
     mlp_ckpt_save(&mlp, ckpt_path);
 
