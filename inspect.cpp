@@ -40,6 +40,9 @@ int main(int argc, const char* argv[]) {
     char ckpt_path[MLP_MAX_FNAME];
     mlp_ckpt_path(ckpt_path, MLP_MAX_FNAME, file_path);
 
+    // Ensure the model file exists
+    assert(mlp_ckpt_exists(ckpt_path));
+
     // Read the model file
     assert(mlp_ckpt_load(&mlp, ckpt_path));
 
