@@ -30,7 +30,6 @@ void mlp_ckpt_name(char* buffer, size_t n, size_t epoch) {
     char stamp[MLP_MAX_STAMP];
     mlp_ckpt_stamp(stamp, MLP_MAX_STAMP);
     snprintf(buffer, n, "mlp-%s-ep%zu.bin", stamp, epoch);
-    fprintf(stderr, "ckpt (◡‿◡✿) %s\n", buffer);
 }
 
 bool mlp_ckpt_save(struct MLP* mlp, const char* path) {
