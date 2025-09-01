@@ -49,17 +49,8 @@ add_library(mlp SHARED
 target_include_directories(mlp PUBLIC include)
 target_link_libraries(mlp PRIVATE m)
 
-# Add train executable
-add_executable(train train.cpp)
-target_link_libraries(train PRIVATE mlp)
-
-# Add inspect executable
-add_executable(inspect inspect.cpp)
-target_link_libraries(inspect PRIVATE mlp)
-
-# Add inference executable
-add_executable(inference inference.cpp)
-target_link_libraries(inference PRIVATE mlp)
+# Add XOR to build
+add_subdirectory(xor)
 
 add_custom_target(run_clean
     COMMAND ${CMAKE_COMMAND} -E rm -rf ${CMAKE_BINARY_DIR}
