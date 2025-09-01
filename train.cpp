@@ -260,6 +260,7 @@ int main(int argc, const char* argv[]) {
     // Create a checkpoint path
     char ckpt_path[MLP_MAX_FNAME];
     snprintf(ckpt_path, MLP_MAX_FNAME, "%s", file_path);
+    fprintf(stderr, "ckpt (☞ﾟヮﾟ)☞ %s\n\n", ckpt_path);
 
     // Initialize the model if it does not exist already
     if (mlp_exists(ckpt_path)) {
@@ -270,7 +271,7 @@ int main(int argc, const char* argv[]) {
         mlp_init_xavier(&mlp);
     }
 
-    // Do a sanity check when initializing the model
+    // Do a sanity check after initializing the model
     mlp_log_layers(&mlp);
 
     // XOR dataset: 4 samples, each sample has 2 inputs, 1 output
