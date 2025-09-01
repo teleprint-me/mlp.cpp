@@ -1,4 +1,5 @@
 // @file inspect.cpp
+#include <cassert>
 #include <cstring>
 #include <cstdio>
 
@@ -40,7 +41,7 @@ int main(int argc, const char* argv[]) {
     mlp_ckpt_path(ckpt_path, MLP_MAX_FNAME, file_path);
 
     // Read the model file
-    mlp_ckpt_load(&mlp, ckpt_path);
+    assert(mlp_ckpt_load(&mlp, ckpt_path));
 
     // Log model data to stdout
     mlp_log_dims(&mlp);
