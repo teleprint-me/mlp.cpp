@@ -49,9 +49,13 @@ add_library(mlp SHARED
 target_include_directories(mlp PUBLIC include)
 target_link_libraries(mlp PRIVATE m)
 
-# Add mlp executable
+# Add train executable
 add_executable(train train.cpp)
 target_link_libraries(train PRIVATE mlp)
+
+# Add dump executable
+add_executable(dump dump.cpp)
+target_link_libraries(dump PRIVATE mlp)
 
 add_custom_target(run_clean
     COMMAND ${CMAKE_COMMAND} -E rm -rf ${CMAKE_BINARY_DIR}
