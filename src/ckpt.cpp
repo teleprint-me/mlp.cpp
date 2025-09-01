@@ -18,17 +18,7 @@ size_t mlp_ckpt_stamp(char* out, size_t n) {
 
 bool mlp_ckpt_exists(const char* path) {
     struct stat buffer;
-    // access just tests for accessibility and enables TOCTOU.
-    // stat (also vulnerable) checks the system for the inode and can see if it exists.
-    // there is an "atomic" solution (still vulnerable), but offers better security.
-    // the "atomic" solution is to use a file descriptor by attempting to open the file
-    // immediately. Though, there are no gaurentees for the atomic operation.
-    // using access and stat keeps things simple for now.
-    // this is not production code. its a proof of concept.
-    if (access(path, F_OK) == 0 && stat(path, &buffer) == 0) {
-        return true;
-    }
-    return false;
+    return stat(path, &buffer) == 0;
 }
 
 void mlp_ckpt_path(char* buffer, size_t n, const char* file_path) {
