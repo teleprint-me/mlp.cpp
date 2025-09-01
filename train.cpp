@@ -258,7 +258,7 @@ int main(int argc, const char* argv[]) {
     mlp_timestamp(stamp, sizeof(stamp));
 
     // Create a checkpoint path
-    char ckpt_path[MLP_MAX_FNAME] = {0};
+    char ckpt_path[MLP_MAX_FNAME];
     snprintf(ckpt_path, MLP_MAX_FNAME, "%s", file_path);
 
     // Initialize the model if it does not exist already
@@ -321,7 +321,11 @@ int main(int argc, const char* argv[]) {
 
         // Log every n epochs
         if (epoch % mlp.opt.log_every == 0 || loss_epoch < mlp.opt.tolerance) {
-            printf("epoch[%zu] Σ(-᷅_-᷄๑) = %f\n", epoch, (double) loss_epoch);
+            printf("epoch[%zu] Σ(-᷅_-᷄๑) %f\n", epoch, (double) loss_epoch);
+            mlp_timestamp(stamp, MLP_MAX_STAMP);
+            snprintf(ckpt_path, MLP_MAX_FNAME, "mlp-%s-ep%zu.bin", stamp, epoch);
+            mlp_save(&mlp, ckpt_path);
+            printf("epoch[%zu] (◡‿◡✿) %s\n", epoch, ckpt_path);
         }
 
         // Stop loss
