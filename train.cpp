@@ -1,24 +1,19 @@
 /**
- * Copyright © 2025 Austin Berrio
- * @file mlp/train.cpp
- * @brief Multi-layer perceptron implementation in C with minimal C++ features.
- * - Classes and templates are **not** allowed! C-like structs are preferred.
- *   - Setting default field parameters for `struct` is encouraged.
- * - `auto` keyword usage is **not** allowed!
- *   - Data types must be explicitly declared! Hiding types is discouraged.
- * - Using std::vector is allowed to simplify memory management.
- *   - std::vector usage is preferred to simplify vector and matrix operations.
- * - Function signatures must be explicit and C-like.
- *   - Function parameters must use explicit types and shapes, e.g. f(float* x, size_t n).
- *   - Pointer refs signal the data is mutable to some capacity unless const qualified.
- * - Simplicity rules them all!
- *   - Implementations should prioritize simplicity at all costs.
- *   - Abstractions are deferred until absolutely necessary.
- *   - Abstractions will reveal themselves through prototyping.
+ * @file      train.cpp
+ * @brief     Multi-layer perceptron (MLP) in C with minimal C++ features.
+ * @author    Austin Berrio
+ * @copyright Copyright © 2025
+ *
+ * Coding rules:
+ *   - No classes/templates; use C-style structs.
+ *   - No 'auto'; all types explicit.
+ *   - Prefer std::vector for storage.
+ *   - Explicit, C-style function signatures.
+ *   - Pointer args: mutable unless const.
+ *   - Simplicity first; abstraction only as needed.
  */
 
 #include <ctime>
-#include <cstdint>
 #include <cstring>
 #include <cstdio>
 
@@ -26,121 +21,13 @@
 #include <sys/stat.h>
 
 #include "mlp.h"
-
-#define MLP_MAGIC 0x6D6C7000  // 'mlp\0'
-#define MLP_VERSION 1
-
-#define MLP_MAX_STAMP 64
-#define MLP_MAX_FNAME 256
-
-size_t mlp_timestamp(char* out, size_t n) {
-    time_t t = time(NULL);
-    struct tm* local = localtime(&t);
-    return strftime(out, n, "%Y-%m-%dT%H-%M-%S", local);
-}
-
-bool mlp_exists(const char* path) {
-    struct stat buffer;
-    // access just tests for accessibility and enables TOCTOU
-    // stat (also vulnerable) checks the system for the inode and can see if it exists
-    // there is an atomic solution (that is still vulnerable), but offers better security
-    // the proposed solution is to use a file descriptor by attempting to open the use the file
-    // immediately though, there are no gaurentees for the atomic operation.
-    // using access and stat keeps things simple for now.
-    // this is not production code. its a proof of concept.
-    if (access(path, F_OK) == 0 && stat(path, &buffer) == 0) {
-        return true;
-    }
-    return false;
-}
-
-bool mlp_save(struct MLP* mlp, const char* path) {
-    FILE* file = fopen(path, "wb");
-    if (!file) {
-        fprintf(stderr, "[ERROR] File is unwritable.\n\t(⊙.☉)7");
-        return false;
-    }
-
-    uint32_t magic = MLP_MAGIC;
-    uint32_t version = MLP_VERSION;
-
-    // Write header
-    fwrite(&magic, sizeof(uint32_t), 1, file);
-    fwrite(&version, sizeof(uint32_t), 1, file);
-    fwrite(&mlp->dim.n_layers, sizeof(uint32_t), 1, file);
-    fwrite(&mlp->dim.n_in, sizeof(uint32_t), 1, file);
-    fwrite(&mlp->dim.n_hidden, sizeof(uint32_t), 1, file);
-    fwrite(&mlp->dim.n_out, sizeof(uint32_t), 1, file);
-
-    // Write each layer
-    for (size_t i = 0; i < mlp->dim.n_layers; i++) {
-        const MLPLayer* L = &mlp->layers[i];
-
-        size_t W_count = mlp_layer_dim_out(mlp, i) * mlp_layer_dim_in(mlp, i);
-        size_t b_count = mlp_layer_dim_out(mlp, i);
-
-        fwrite(L->W.data(), sizeof(float), W_count, file);
-        fwrite(L->b.data(), sizeof(float), b_count, file);
-    }
-
-    fclose(file);
-    return true;
-}
-
-bool mlp_load(struct MLP* mlp, const char* path) {
-    FILE* file = fopen(path, "rb");
-    if (!file) {
-        fprintf(stderr, "[ERROR] File is unreadable.\n\t(⊙.☉)7\n");
-        return false;
-    }
-
-    uint32_t magic = 0;
-    fread(&magic, sizeof(uint32_t), 1, file);
-    if (MLP_MAGIC != magic) {
-        fprintf(stderr, "[ERROR] File is not an MLP.\n\tಡ_ಡ\n");
-        return false;
-    }
-
-    uint32_t version = 0;
-    fread(&version, sizeof(uint32_t), 1, file);
-    if (MLP_VERSION != version) {
-        fprintf(stderr, "[ERROR] Unsupported MLP version.\n\t(－‸ლ)\n");
-        return false;
-    }
-
-    // Read header
-    fread(&mlp->dim.n_layers, sizeof(uint32_t), 1, file);
-    fread(&mlp->dim.n_in, sizeof(uint32_t), 1, file);
-    fread(&mlp->dim.n_hidden, sizeof(uint32_t), 1, file);
-    fread(&mlp->dim.n_out, sizeof(uint32_t), 1, file);
-
-    // Reset the model
-    mlp->layers.clear();
-    mlp->layers.resize(mlp->dim.n_layers);
-
-    // Read each layer
-    for (size_t i = 0; i < mlp->dim.n_layers; i++) {
-        MLPLayer* L = &mlp->layers[i];
-
-        size_t W_count = mlp_layer_dim_out(mlp, i) * mlp_layer_dim_in(mlp, i);
-        size_t b_count = mlp_layer_dim_out(mlp, i);
-
-        fread(L->W.data(), sizeof(float), W_count, file);
-        fread(L->b.data(), sizeof(float), b_count, file);
-    }
-
-    fclose(file);
-    return true;
-}
+#include "ckpt.h"
 
 void print_usage(struct MLP* mlp, const char* prog) {
     const char options[] = "[--seed N] [--layers N] [--hidden N] [--epochs N] [--lr F] [...]";
 
-    char stamp[MLP_MAX_STAMP];
-    mlp_timestamp(stamp, MLP_MAX_STAMP);
-
     char fname[MLP_MAX_FNAME];
-    snprintf(fname, MLP_MAX_FNAME, "mlp-%s.bin", stamp);
+    mlp_ckpt_name(fname, MLP_MAX_FNAME, 0);
 
     const char* nest = (mlp->opt.nesterov) ? "true" : "false";
 
@@ -253,19 +140,14 @@ int main(int argc, const char* argv[]) {
     mlp.x.resize(mlp.dim.n_in);
     mlp.y.resize(mlp.dim.n_out);
 
-    // Create a time stamp
-    char stamp[MLP_MAX_STAMP];
-    mlp_timestamp(stamp, sizeof(stamp));
-
     // Create a checkpoint path
     char ckpt_path[MLP_MAX_FNAME];
-    snprintf(ckpt_path, MLP_MAX_FNAME, "%s", file_path);
-    fprintf(stderr, "ckpt (☞ﾟヮﾟ)☞ %s\n\n", ckpt_path);
+    mlp_ckpt_path(ckpt_path, MLP_MAX_FNAME, file_path);
 
     // Initialize the model if it does not exist already
-    if (mlp_exists(ckpt_path)) {
+    if (mlp_ckpt_exists(ckpt_path)) {
         // Load and initialize a pre-trained model
-        mlp_load(&mlp, ckpt_path);
+        mlp_ckpt_load(&mlp, ckpt_path);
     } else {
         // Apply xavier-glorot initialization to model layers
         mlp_init_xavier(&mlp);
@@ -323,10 +205,8 @@ int main(int argc, const char* argv[]) {
         // Log every n epochs
         if (epoch % mlp.opt.log_every == 0 || epoch == mlp.opt.epochs - 1) {
             printf("epoch[%zu] Σ(-᷅_-᷄๑) %f\n", epoch, (double) loss_epoch);
-            mlp_timestamp(stamp, MLP_MAX_STAMP);
-            snprintf(ckpt_path, MLP_MAX_FNAME, "mlp-%s-ep%zu.bin", stamp, epoch);
-            mlp_save(&mlp, ckpt_path);
-            printf("(◡‿◡✿) %s\n", ckpt_path);
+            mlp_ckpt_name(ckpt_path, MLP_MAX_FNAME, epoch);
+            mlp_ckpt_save(&mlp, ckpt_path);
         }
 
         // Stop loss
