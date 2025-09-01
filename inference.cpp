@@ -36,13 +36,13 @@ int main(int argc, const char* argv[]) {
     char* file_path = nullptr;
     cli_parse(argc, argv, &file_path);
 
-    // Construct the checkpoint file path
-    char ckpt_path[MLP_MAX_FNAME];
-    mlp_ckpt_path(ckpt_path, MLP_MAX_FNAME, file_path);
-
     printf("╔══════════════════════════════╗\n");
     printf("║  XOR INFERENCE  (by Austin)  ║\n");
     printf("╚══════════════════════════════╝\n");
+
+    // Construct the checkpoint file path
+    char ckpt_path[MLP_MAX_FNAME];
+    mlp_ckpt_path(ckpt_path, MLP_MAX_FNAME, file_path);
 
     // Ensure the model file exists
     assert(mlp_ckpt_exists(ckpt_path));
