@@ -62,13 +62,16 @@ bool mlp_ckpt_save(struct MLP* mlp, const char* path) {
 
     // Write each layer
     for (size_t i = 0; i < mlp->dim.n_layers; i++) {
+        // Get the current layer
         const MLPLayer* L = &mlp->layers[i];
 
-        size_t W_count = mlp_layer_dim_out(mlp, i) * mlp_layer_dim_in(mlp, i);
-        size_t b_count = mlp_layer_dim_out(mlp, i);
+        // Weight and bias dimensions
+        size_t W_d = mlp_layer_dim_out(mlp, i) * mlp_layer_dim_in(mlp, i);
+        size_t b_d = mlp_layer_dim_out(mlp, i);
 
-        fwrite(L->W.data(), sizeof(float), W_count, file);
-        fwrite(L->b.data(), sizeof(float), b_count, file);
+        // Write the current layer to the file
+        fwrite(L->W.data(), sizeof(float), W_d, file);
+        fwrite(L->b.data(), sizeof(float), b_d, file);
     }
 
     fclose(file);
@@ -108,13 +111,20 @@ bool mlp_ckpt_load(struct MLP* mlp, const char* path) {
 
     // Read each layer
     for (size_t i = 0; i < mlp->dim.n_layers; i++) {
+        // Get the current layer
         MLPLayer* L = &mlp->layers[i];
 
-        size_t W_count = mlp_layer_dim_out(mlp, i) * mlp_layer_dim_in(mlp, i);
-        size_t b_count = mlp_layer_dim_out(mlp, i);
+        // Weight and bias dimensions
+        size_t W_d = mlp_layer_dim_out(mlp, i) * mlp_layer_dim_in(mlp, i);
+        size_t b_d = mlp_layer_dim_out(mlp, i);
 
-        fread(L->W.data(), sizeof(float), W_count, file);
-        fread(L->b.data(), sizeof(float), b_count, file);
+        // Initialize the matrix and vector
+        L->W.resize(W_d);
+        L->b.resize(b_d);
+
+        // Read the current layer from the file
+        fread(L->W.data(), sizeof(float), W_d, file);
+        fread(L->b.data(), sizeof(float), b_d, file);
     }
 
     fclose(file);
