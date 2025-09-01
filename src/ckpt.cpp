@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 
+#include "mlp.h"
 #include "ckpt.h"
 
 size_t mlp_ckpt_stamp(char* out, size_t n) {
