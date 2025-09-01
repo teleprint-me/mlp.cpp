@@ -219,6 +219,9 @@ int main(int argc, const char* argv[]) {
         }
     }
 
+    snprintf(ckpt_path, MLP_MAX_FNAME, "mlp-latest.bin");
+    mlp_ckpt_save(&mlp, ckpt_path);
+
     // Log predictions
     printf("\n-=≡Σ<|°_°|>:\n");
     for (size_t i = 0; i < inputs.size(); i++) {
