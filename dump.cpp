@@ -6,12 +6,10 @@
 #include "ckpt.h"
 
 void cli_usage(const char* prog) {
-    const char options[] = "[--seed N] [--layers N] [--hidden N] [--epochs N] [--lr F] [...]";
-
     char fname[MLP_MAX_FNAME];
     mlp_ckpt_name(fname, MLP_MAX_FNAME, 0);
 
-    printf("Usage: %s %s\n", prog, options);
+    printf("Usage: %s %s\n", prog, "[--ckpt S] ...");
     printf("--ckpt S Checkpoint path (default: %s)\n", fname);
 }
 
@@ -33,11 +31,20 @@ void cli_parse(int argc, const char* argv[], char* file_path[]) {
 int main(int argc, const char* argv[]) {
     struct MLP mlp {};
 
+    // Parse user input
     char* file_path = nullptr;
-
     cli_parse(argc, argv, &file_path);
 
-    fprintf(stderr, "file path: %s\n", file_path);
+    // Construct the checkpoint file path
+    char ckpt_path[MLP_MAX_FNAME];
+    mlp_ckpt_path(ckpt_path, MLP_MAX_FNAME, file_path);
+
+    // Read the model file
+    mlp_ckpt_load(&mlp, ckpt_path);
+
+    // Log model data to stdout
+    mlp_log_dims(&mlp);
+    mlp_log_layers(&mlp);
 
     return 0;
 }
