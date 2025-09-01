@@ -1,6 +1,7 @@
 # Local
 papers/
 models/
+data/
 *.bin
 
 #
