@@ -1,4 +1,4 @@
-// @file dump.cpp
+// @file inspect.cpp
 #include <cstring>
 #include <cstdio>
 
