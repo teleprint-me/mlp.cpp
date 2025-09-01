@@ -13,6 +13,7 @@
  *   - Simplicity first; abstraction only as needed.
  */
 
+#include <cassert>
 #include <ctime>
 #include <cstring>
 #include <cstdio>
@@ -23,7 +24,7 @@
 #include "mlp.h"
 #include "ckpt.h"
 
-void print_usage(struct MLP* mlp, const char* prog) {
+void cli_usage(struct MLP* mlp, const char* prog) {
     const char options[] = "[--seed N] [--layers N] [--hidden N] [--epochs N] [--lr F] [...]";
 
     char fname[MLP_MAX_FNAME];
@@ -47,50 +48,52 @@ void print_usage(struct MLP* mlp, const char* prog) {
     printf("--nesterov  N Nesterov acceleration (default: %s)\n", nest);
 }
 
-int main(int argc, const char* argv[]) {
-    // Create a default checkpoint path
-    const char* file_path = "mlp-%s.bin";
-
-    // Create the model
-    MLP mlp{};
-
+void cli_parse(int argc, const char* argv[], struct MLP* mlp, char* file_path[]) {
     // Simple manual CLI parse
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "--ckpt") == 0 && i + 1 < argc) {
-            file_path = argv[++i];
+            *file_path = (char*) argv[++i];
         } else if (strcmp(argv[i], "--seed") == 0 && i + 1 < argc) {
-            mlp.dim.seed = atoi(argv[++i]);
+            mlp->dim.seed = atoi(argv[++i]);
         } else if (strcmp(argv[i], "--bias") == 0 && i + 1 < argc) {
-            mlp.dim.bias = atof(argv[++i]);
+            mlp->dim.bias = atof(argv[++i]);
         } else if (strcmp(argv[i], "--layers") == 0 && i + 1 < argc) {
-            mlp.dim.n_layers = atoi(argv[++i]);
+            mlp->dim.n_layers = atoi(argv[++i]);
         } else if (strcmp(argv[i], "--hidden") == 0 && i + 1 < argc) {
-            mlp.dim.n_hidden = atoi(argv[++i]);
+            mlp->dim.n_hidden = atoi(argv[++i]);
         } else if (strcmp(argv[i], "--epochs") == 0 && i + 1 < argc) {
-            mlp.opt.epochs = atoi(argv[++i]);
+            mlp->opt.epochs = atoi(argv[++i]);
         } else if (strcmp(argv[i], "--log-every") == 0 && i + 1 < argc) {
-            mlp.opt.log_every = atoi(argv[++i]);
+            mlp->opt.log_every = atoi(argv[++i]);
         } else if (strcmp(argv[i], "--lr") == 0 && i + 1 < argc) {
-            mlp.opt.lr = atof(argv[++i]);
+            mlp->opt.lr = atof(argv[++i]);
         } else if (strcmp(argv[i], "--tolerance") == 0 && i + 1 < argc) {
-            mlp.opt.tolerance = atof(argv[++i]);
+            mlp->opt.tolerance = atof(argv[++i]);
         } else if (strcmp(argv[i], "--decay") == 0 && i + 1 < argc) {
-            mlp.opt.weight_decay = atof(argv[++i]);
+            mlp->opt.weight_decay = atof(argv[++i]);
         } else if (strcmp(argv[i], "--momentum") == 0 && i + 1 < argc) {
-            mlp.opt.momentum = atof(argv[++i]);
+            mlp->opt.momentum = atof(argv[++i]);
         } else if (strcmp(argv[i], "--dampening") == 0 && i + 1 < argc) {
-            mlp.opt.dampening = atof(argv[++i]);
+            mlp->opt.dampening = atof(argv[++i]);
         } else if (strcmp(argv[i], "--nesterov") == 0 && i + 1 < argc) {
-            mlp.opt.nesterov = atoi(argv[++i]) ? 1 : 0;
+            mlp->opt.nesterov = atoi(argv[++i]) ? 1 : 0;
         } else if (strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0) {
-            print_usage(&mlp, argv[0]);
-            return 0;
+            cli_usage(mlp, argv[0]);
+            exit(0);
         } else {
             printf("Unknown or incomplete option: %s\n", argv[i]);
-            print_usage(&mlp, argv[0]);
-            return 1;
+            cli_usage(mlp, argv[0]);
+            exit(1);
         }
     }
+}
+
+int main(int argc, const char* argv[]) {
+    // Create the model
+    struct MLP mlp {};
+
+    char* file_path = nullptr;
+    cli_parse(argc, argv, &mlp, &file_path);
 
     if (mlp.dim.n_layers < 3) {
         fprintf(stderr, "[ERROR] Minimum layers = 3\n\t(┛ಠ_ಠ)┛彡┻━┻\n");
@@ -125,6 +128,19 @@ int main(int argc, const char* argv[]) {
     printf("║  MLP XOR Lab  (by Austin)    ║\n");
     printf("╚══════════════════════════════╝\n");
 
+    // Create a checkpoint path
+    char ckpt_path[MLP_MAX_FNAME];
+    mlp_ckpt_path(ckpt_path, MLP_MAX_FNAME, file_path);
+
+    // Initialize the model if it does not exist already
+    if (mlp_ckpt_exists(ckpt_path)) {
+        // Load and initialize a pre-trained model
+        assert(mlp_ckpt_load(&mlp, ckpt_path));
+    } else {
+        // Apply xavier-glorot initialization to model layers
+        mlp_init_xavier(&mlp);
+    }
+
     // Log model parameters
     mlp_log_dims(&mlp);
     mlp_log_opts(&mlp);
@@ -139,19 +155,6 @@ int main(int argc, const char* argv[]) {
     // Create input and output vectors
     mlp.x.resize(mlp.dim.n_in);
     mlp.y.resize(mlp.dim.n_out);
-
-    // Create a checkpoint path
-    char ckpt_path[MLP_MAX_FNAME];
-    mlp_ckpt_path(ckpt_path, MLP_MAX_FNAME, file_path);
-
-    // Initialize the model if it does not exist already
-    if (mlp_ckpt_exists(ckpt_path)) {
-        // Load and initialize a pre-trained model
-        mlp_ckpt_load(&mlp, ckpt_path);
-    } else {
-        // Apply xavier-glorot initialization to model layers
-        mlp_init_xavier(&mlp);
-    }
 
     // Do a sanity check after initializing the model
     mlp_log_layers(&mlp);
