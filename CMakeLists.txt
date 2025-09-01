@@ -53,9 +53,13 @@ target_link_libraries(mlp PRIVATE m)
 add_executable(train train.cpp)
 target_link_libraries(train PRIVATE mlp)
 
-# Add dump executable
-add_executable(dump dump.cpp)
-target_link_libraries(dump PRIVATE mlp)
+# Add inspect executable
+add_executable(inspect inspect.cpp)
+target_link_libraries(inspect PRIVATE mlp)
+
+# Add inference executable
+add_executable(inference inference.cpp)
+target_link_libraries(inference PRIVATE mlp)
 
 add_custom_target(run_clean
     COMMAND ${CMAKE_COMMAND} -E rm -rf ${CMAKE_BINARY_DIR}
