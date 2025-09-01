@@ -40,6 +40,10 @@ int main(int argc, const char* argv[]) {
     char ckpt_path[MLP_MAX_FNAME];
     mlp_ckpt_path(ckpt_path, MLP_MAX_FNAME, file_path);
 
+    printf("╔══════════════════════════════╗\n");
+    printf("║  XOR INFERENCE  (by Austin)  ║\n");
+    printf("╚══════════════════════════════╝\n");
+
     // Ensure the model file exists
     assert(mlp_ckpt_exists(ckpt_path));
 

@@ -125,7 +125,7 @@ int main(int argc, const char* argv[]) {
     }
 
     printf("╔══════════════════════════════╗\n");
-    printf("║  MLP XOR Lab  (by Austin)    ║\n");
+    printf("║  XOR TRAINER  (by Austin)    ║\n");
     printf("╚══════════════════════════════╝\n");
 
     // Create a checkpoint path
