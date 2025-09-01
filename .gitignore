@@ -1,5 +1,7 @@
 # Local
 papers/
+models/
+*.bin
 
 #
 # C ignore rules
