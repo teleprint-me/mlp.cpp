@@ -48,7 +48,7 @@ bool mlp_exists(const char* path) {
     // immediately though, there are no gaurentees for the atomic operation.
     // using access and stat keeps things simple for now.
     // this is not production code. its a proof of concept.
-    if (access(path, F_OK) && stat(path, &buffer) == 0) {
+    if (access(path, F_OK) == 0 && stat(path, &buffer) == 0) {
         return true;
     }
     return false;
