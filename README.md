@@ -38,13 +38,63 @@ cmake -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j 16
 ```
 
-## train
+### checkpoints
 
 ```sh
-./build/bin/train -h
+mkdir models
 ```
 
-Executables can be found in `./build/bin`.
+## XOR Gate
+
+The XOR gate is a perfect non-linear test bed and is a classic problem well suited for multi-layer preceptrons.
+
+There are 3 binaries available for the XOR model.
+
+- train: train an xor model from scratch.
+- inspect: view the models internal dimensions and state.
+- inference: run predictions on a pre-trained model.
+
+Executables can be found in `./build/xor`.
+
+### pre-train
+
+- For training from scratch:
+
+```sh
+./build/xor/train --ckpt mlp-latest.bin
+```
+
+- Training from a pre-existing checkpoint:
+
+```sh
+./build/xor/train --ckpt mlp-latest.bin
+```
+
+- For more options, see help text:
+
+```sh
+./build/xor/train -h
+```
+
+### @todo checkpoints
+
+To group checkpoints, include the directory:
+
+```sh
+./build/xor/train --ckpt models/mlp-latest.bin
+```
+
+### inspect
+
+```sh
+./build/xor/inspect --ckpt mlp-latest.bin
+```
+
+### inference
+
+```sh
+./build/xor/inference --ckpt mlp-latest.bin
+```
 
 ## references
 
