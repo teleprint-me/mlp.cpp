@@ -2,7 +2,7 @@
 
 A multi-layer perceptron.
 
-## dependencies
+## Dependencies
 
 - g++
 - clangd
@@ -11,34 +11,34 @@ A multi-layer perceptron.
 - libmath
 - openmp
 
-## setup
+## Setup
 
 ```sh
 git clone https://github.com/teleprint-me/mlp.cpp mlp
 cd mlp
 ```
 
-## build
+## Build
 
-### debug
+### Debug
 
 ```sh
 cmake -B build -DCMAKE_BUILD_TYPE=Debug
 ```
 
-### release
+### Release
 
 ```sh
 cmake -B build -DCMAKE_BUILD_TYPE=Release
 ```
 
-### compile
+### Compile
 
 ```sh
 cmake --build build -j 16
 ```
 
-### checkpoints
+### Model Checkpoints
 
 ```sh
 mkdir models
@@ -46,60 +46,61 @@ mkdir models
 
 ## XOR Gate
 
-The XOR gate is a perfect non-linear test bed and is a classic problem well suited for multi-layer preceptrons.
+The XOR gate is a canonical non-linear test bed—an ideal problem for
+multi-layer perceptrons.
 
-There are 3 binaries available for the XOR model.
+There are three binaries for the XOR model:
 
-- train: train an xor model from scratch.
-- inspect: view the models internal dimensions and state.
-- inference: run predictions on a pre-trained model.
+- `train`: Train an XOR model from scratch or resume from a checkpoint.
+- `inspect`: View model dimensions and internal state.
+- `inference`: Run predictions using a trained model.
 
-Executables can be found in `./build/xor`.
+Executables are located in `./build/xor`.
 
-### pre-train
+### Training
 
-- For training from scratch:
+- To train from scratch:
 
-```sh
-./build/xor/train --ckpt mlp-latest.bin
-```
+  ```sh
+  ./build/xor/train --ckpt mlp-latest.bin
+  ```
 
-- Training from a pre-existing checkpoint:
+- To resume from an existing checkpoint:
 
-```sh
-./build/xor/train --ckpt mlp-latest.bin
-```
+  ```sh
+  ./build/xor/train --ckpt mlp-latest.bin
+  ```
 
-- For more options, see help text:
+- For available options:
 
-```sh
-./build/xor/train -h
-```
+  ```sh
+  ./build/xor/train -h
+  ```
 
-### @todo checkpoints
+#### Organizing Checkpoints
 
-To group checkpoints, include the directory:
+To group checkpoints in a directory:
 
 ```sh
 ./build/xor/train --ckpt models/mlp-latest.bin
 ```
 
-### inspect
+### Inspect
 
 ```sh
 ./build/xor/inspect --ckpt mlp-latest.bin
 ```
 
-### inference
+### Inference
 
 ```sh
 ./build/xor/inference --ckpt mlp-latest.bin
 ```
 
-## references
+## References
 
-- [1957 - The Perceptron: A probabilistic model for information storage and organization in the brain](https://archive.org/details/sim_psychological-review_1958-11_65_6/page/386/mode/2up?q=the+perceptron+rosenblatt+1957)
-- [1986 - Learning representations by back-propagating errors](https://www.semanticscholar.org/paper/Learning-representations-by-back-propagating-errors-Rumelhart-Hinton/052b1d8ce63b07fec3de9dbb583772d860b7c769)
-- [1989 - Multilayer feedforward networks are universal approximators](https://www.semanticscholar.org/paper/Multilayer-feedforward-networks-are-universal-Hornik-Stinchcombe/f22f6972e66bdd2e769fa64b0df0a13063c0c101)
-- [2010 - Understanding the difficulty of training deep feedforward neural networks](https://www.semanticscholar.org/paper/Understanding-the-difficulty-of-training-deep-Glorot-Bengio/ea9d2a2b4ce11aaf85136840c65f3bc9c03ab649)
-- [2013 - On the importance of initialization and momentum in deep learning](https://www.semanticscholar.org/paper/On-the-importance-of-initialization-and-momentum-in-Sutskever-Martens/aa7bfd2304201afbb19971ebde87b17e40242e91)
+- [1957 — The Perceptron: A probabilistic model for information storage and organization in the brain](https://archive.org/details/sim_psychological-review_1958-11_65_6/page/386/mode/2up?q=the+perceptron+rosenblatt+1957)
+- [1986 — Learning representations by back-propagating errors](https://www.semanticscholar.org/paper/Learning-representations-by-back-propagating-errors-Rumelhart-Hinton/052b1d8ce63b07fec3de9dbb583772d860b7c769)
+- [1989 — Multilayer feedforward networks are universal approximators](https://www.semanticscholar.org/paper/Multilayer-feedforward-networks-are-universal-Hornik-Stinchcombe/f22f6972e66bdd2e769fa64b0df0a13063c0c101)
+- [2010 — Understanding the difficulty of training deep feedforward neural networks](https://www.semanticscholar.org/paper/Understanding-the-difficulty-of-training-deep-Glorot-Bengio/ea9d2a2b4ce11aaf85136840c65f3bc9c03ab649)
+- [2013 — On the importance of initialization and momentum in deep learning](https://www.semanticscholar.org/paper/On-the-importance-of-initialization-and-momentum-in-Sutskever-Martens/aa7bfd2304201afbb19971ebde87b17e40242e91)
