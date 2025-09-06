@@ -19,11 +19,12 @@ bool path_is_valid(const char* path) {
 
 // Checks if a path exists
 bool path_exists(const char* path) {
-    return path_is_valid(path) && access(path, F_OK) == 0;
+    struct stat buffer;
+    return path_is_valid(path) && stat(path, &buffer) == 0;
 }
 
 // Checks if a path is a directory
-bool path_is_directory(const char* path) {
+bool path_is_dir(const char* path) {
     if (!path_is_valid(path)) {
         return false;
     }

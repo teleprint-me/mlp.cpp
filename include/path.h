@@ -13,7 +13,7 @@ bool path_is_valid(const char* path);
 bool path_exists(const char* path);
 
 // Checks if a path is a directory
-bool path_is_directory(const char* path);
+bool path_is_dir(const char* path);
 
 // Checks if a path is a regular file
 bool path_is_file(const char* path);
