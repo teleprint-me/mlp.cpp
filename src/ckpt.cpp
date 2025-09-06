@@ -7,8 +7,54 @@
 #include <unistd.h>
 #include <sys/stat.h>
 
+#include "path.h"
 #include "mlp.h"
 #include "ckpt.h"
+
+size_t mlp_ckpt_max_path_len(const char* path) {
+    // Calculate the maximum length for the ckeckpoint path
+    return strlen(path) + MLP_MAX_STAMP + MLP_MAX_FNAME;
+}
+
+char* mlp_ckpt_dirname(const char* path) {
+    // Create a checkpoint path
+    char* dirname = nullptr;  // e.g. /mnt/models
+
+    // user supplied path
+    if (path_exists(path)) {
+        dirname = path_dirname(path);
+    } else {
+        return nullptr;
+    }
+
+    // failed to create a working directory
+    if (-1 == path_mkdir(dirname)) {
+        free(dirname);
+        return nullptr;
+    }
+
+    return dirname;
+}
+
+char* mlp_ckpt_basename(const char* path) {
+    // Create a checkpoint path
+    char* basename = nullptr;  // e.g. mlp-latest.bin
+
+    // user supplied path
+    if (path_exists(path)) {
+        basename = path_basename(path);
+    } else {  // default path
+        return nullptr;
+    }
+
+    // no file name was given (edge case)
+    if (!*basename) {
+        free(basename);
+        return nullptr;
+    }
+
+    return basename;
+}
 
 void mlp_ckpt_path(char* buffer, size_t n, const char* dirname, const char* basename) {
     snprintf(buffer, n, "%s/%s", dirname, basename);
