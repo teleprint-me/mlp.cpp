@@ -16,11 +16,6 @@ size_t mlp_ckpt_stamp(char* out, size_t n) {
     return strftime(out, n, "%Y-%m-%dT%H-%M-%S", local);
 }
 
-bool mlp_ckpt_exists(const char* path) {
-    struct stat buffer;
-    return stat(path, &buffer) == 0;
-}
-
 void mlp_ckpt_path(char* buffer, size_t n, const char* file_path) {
     snprintf(buffer, n, "%s", file_path);
     fprintf(stderr, "ckpt (☞ﾟヮﾟ)☞ %s\n\n", buffer);
