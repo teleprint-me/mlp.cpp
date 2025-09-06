@@ -129,7 +129,7 @@ int main(int argc, const char* argv[]) {
     printf("╔══════════════════════════════╗\n");
     printf("║  XOR TRAINER  (by Austin)    ║\n");
     printf("╚══════════════════════════════╝\n");
-    printf("=^_^= %s\n", file_path ? file_path : "NULL");
+    printf("(ᓀ ᓀ) %s\n", file_path ? file_path : "NULL");
 
     // Create a working directory
     char* dirname = mlp_ckpt_dirname(file_path);
