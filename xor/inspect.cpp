@@ -9,7 +9,7 @@
 
 void cli_usage(const char* prog) {
     char fname[MLP_MAX_FNAME];
-    mlp_ckpt_name(fname, MLP_MAX_FNAME, 0);
+    mlp_ckpt_path(fname, MLP_MAX_FNAME, "models", "mlp-latest.bin");
 
     printf("Usage: %s %s\n", prog, "[--ckpt S] ...");
     printf("--ckpt S Checkpoint path (default: %s)\n", fname);
@@ -41,15 +41,42 @@ int main(int argc, const char* argv[]) {
     printf("║  XOR INSPECTOR  (by Austin)  ║\n");
     printf("╚══════════════════════════════╝\n");
 
+    // Create a checkpoint path
+    char* dirname = nullptr;
+    char* basename = nullptr;
+
+    // user supplied path
+    // user supplied path
+    if (path_exists(file_path)) {
+        dirname = path_dirname(file_path);  // models/
+        basename = path_basename(file_path);  // mlp-latest.bin
+    } else {
+        fprintf(stderr, "Path does not exist: %s\n", file_path ? file_path : "NULL");
+        return 1;
+    }
+
+    // no file name was given (edge case)
+    if (!*basename) {
+        free(basename);
+        basename = strdup("mlp-latest.bin");
+    }
+
     // Construct the checkpoint file path
     char ckpt_path[MLP_MAX_FNAME];
-    mlp_ckpt_path(ckpt_path, MLP_MAX_FNAME, file_path);
+    mlp_ckpt_path(ckpt_path, MLP_MAX_FNAME, dirname, basename);
+
+    // Log the resultant checkpoint path
+    fprintf(stderr, "ckpt (☞ﾟヮﾟ)☞ %s\n\n", ckpt_path);
 
     // Ensure the model file exists
     assert(path_is_file(ckpt_path));
 
     // Read the model file
     assert(mlp_ckpt_load(&mlp, ckpt_path));
+
+    // free path resources
+    free(dirname);
+    free(basename);
 
     // Log model data to stdout
     mlp_log_dims(&mlp);

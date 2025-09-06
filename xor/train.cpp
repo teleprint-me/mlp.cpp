@@ -265,8 +265,12 @@ int main(int argc, const char* argv[]) {
     mlp_ckpt_path(ckpt_path, max_len, dirname, basename);
     mlp_ckpt_save(&mlp, ckpt_path);
 
+    free(basename);
+    free(dirname);
+    free(ckpt_path);
+
     // Log predictions
-    printf("\n-=≡Σ<|°_°|>:\n");
+    printf("\n-=≡Σ<|°_°|>\n");
     for (size_t i = 0; i < inputs.size(); i++) {
         mlp.x = inputs[i];
         mlp_forward(&mlp, mlp.x.data(), mlp.x.size());
@@ -279,8 +283,5 @@ int main(int argc, const char* argv[]) {
         );
     }
 
-    free(basename);
-    free(dirname);
-    free(ckpt_path);
     return 0;
 }
