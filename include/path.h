@@ -7,8 +7,6 @@
 #ifndef MLP_PATH_H
 #define MLP_PATH_H
 
-#include <cstdbool>
-
 bool path_is_valid(const char* path);
 
 // Checks if a path exists
