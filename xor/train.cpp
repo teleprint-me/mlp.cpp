@@ -30,7 +30,7 @@ void cli_usage(struct MLP* mlp, const char* prog) {
     const char options[] = "[--seed N] [--layers N] [--hidden N] [--epochs N] [--lr F] [...]";
 
     char fname[MLP_MAX_FNAME];
-    mlp_ckpt_name(fname, MLP_MAX_FNAME, 0);
+    mlp_ckpt_path(fname, MLP_MAX_FNAME, "models", "mlp-latest.bin");
 
     const char* nest = (mlp->opt.nesterov) ? "true" : "false";
 
@@ -166,7 +166,7 @@ int main(int argc, const char* argv[]) {
     // Allocate memory to the checkpoint path
     char* ckpt_path = (char*) malloc(max_len + 1);
     // Write the file path to the checkpoint path
-    snprintf(ckpt_path, max_len, "%s/%s", dirname, basename);
+    mlp_ckpt_path(ckpt_path, max_len, dirname, basename);
     // Log the resultant checkpoint path
     fprintf(stderr, "ckpt (☞ﾟヮﾟ)☞ %s\n\n", ckpt_path);
 
@@ -246,13 +246,7 @@ int main(int argc, const char* argv[]) {
         // Log every n epochs
         if (epoch % mlp.opt.log_every == 0) {
             printf("epoch[%zu] Σ(-᷅_-᷄๑) %f\n", epoch, (double) loss_epoch);
-
-            char stamp[MLP_MAX_STAMP];
-            time_t t = time(NULL);
-            struct tm* local = localtime(&t);
-            strftime(stamp, MLP_MAX_STAMP, "%Y-%m-%dT%H-%M-%S", local);
-            snprintf(ckpt_path, max_len, "%s/mlp-%s-ep%05zu.bin", dirname, stamp, epoch);
-
+            mlp_ckpt_stamp(ckpt_path, max_len, dirname, epoch);
             mlp_ckpt_save(&mlp, ckpt_path);
         }
 
@@ -264,15 +258,11 @@ int main(int argc, const char* argv[]) {
     }
 
     // Always save the lastest checkpoint with a time stamp as a backup
-    char stamp[MLP_MAX_STAMP];
-    time_t t = time(NULL);
-    struct tm* local = localtime(&t);
-    strftime(stamp, MLP_MAX_STAMP, "%Y-%m-%dT%H-%M-%S", local);
-    snprintf(ckpt_path, max_len, "%s/mlp-%s-ep%05zu.bin", dirname, stamp, mlp.opt.epochs);
+    mlp_ckpt_stamp(ckpt_path, max_len, dirname, mlp.opt.epochs);
     mlp_ckpt_save(&mlp, ckpt_path);
 
     // Always save the latest checkpoint to the same file
-    snprintf(ckpt_path, max_len, "%s/%s", dirname, basename);
+    mlp_ckpt_path(ckpt_path, max_len, dirname, basename);
     mlp_ckpt_save(&mlp, ckpt_path);
 
     // Log predictions
