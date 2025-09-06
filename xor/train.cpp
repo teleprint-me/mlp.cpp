@@ -129,46 +129,35 @@ int main(int argc, const char* argv[]) {
     printf("╔══════════════════════════════╗\n");
     printf("║  XOR TRAINER  (by Austin)    ║\n");
     printf("╚══════════════════════════════╝\n");
+    printf("=^_^= %s\n", file_path ? file_path : "NULL");
 
-    // Create a checkpoint path
-    char* dirname = nullptr;
-    char* basename = nullptr;
-
-    // user supplied path
-    if (path_exists(file_path)) {
-        dirname = path_dirname(file_path);  // models/
-        basename = path_basename(file_path);  // mlp-latest.bin
-    } else {  // default path
-        dirname = strdup("models");
-        basename = strdup("mlp-latest.bin");
-    }
-
-    // no file name was given (edge case)
-    if (!*basename) {
-        free(basename);
-        basename = strdup("mlp-latest.bin");
-    }
-
-    // failed to create a working directory
-    if (-1 == path_mkdir(dirname)) {
-        fprintf(stderr, "Failed to make dir '%s': %s\n", dirname, strerror(errno));
+    // Create a working directory
+    char* dirname = mlp_ckpt_dirname(file_path);
+    // No directory was given
+    if (!dirname) {
+        fprintf(stderr, "Failed to create working directory: %s\n", strerror(errno));
         free(dirname);
-        free(basename);
         return 1;
     }
 
+    // Create a file name
+    char* basename = mlp_ckpt_basename(file_path);
+    // No file name was given
+    if (!basename) {
+        basename = strdup("mlp-latest.bin");  // Default to latest model file
+    }
+
     // Calculate the maximum length for the ckeckpoint path
-    size_t dirname_len = strlen(dirname);
-    size_t basename_len = strlen(basename);
-    size_t base_len = dirname_len + basename_len;
-    size_t max_len = base_len + MLP_MAX_STAMP + MLP_MAX_FNAME;
+    size_t max_len = mlp_ckpt_max_path_len(file_path);
 
     // Allocate memory to the checkpoint path
     char* ckpt_path = (char*) malloc(max_len + 1);
+
     // Write the file path to the checkpoint path
     mlp_ckpt_path(ckpt_path, max_len, dirname, basename);
+
     // Log the resultant checkpoint path
-    fprintf(stderr, "ckpt (☞ﾟヮﾟ)☞ %s\n\n", ckpt_path);
+    fprintf(stderr, "(☞ﾟヮﾟ)☞ %s\n\n", ckpt_path);
 
     // Initialize the model if it does not exist already
     if (path_is_file(ckpt_path)) {
