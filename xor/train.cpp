@@ -21,6 +21,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 
+#include "path.h"
 #include "mlp.h"
 #include "ckpt.h"
 
@@ -133,7 +134,7 @@ int main(int argc, const char* argv[]) {
     mlp_ckpt_path(ckpt_path, MLP_MAX_FNAME, file_path);
 
     // Initialize the model if it does not exist already
-    if (mlp_ckpt_exists(ckpt_path)) {
+    if (path_is_file(ckpt_path)) {
         // Load and initialize a pre-trained model
         assert(mlp_ckpt_load(&mlp, ckpt_path));
     } else {

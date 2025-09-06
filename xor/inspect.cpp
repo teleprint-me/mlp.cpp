@@ -3,6 +3,7 @@
 #include <cstring>
 #include <cstdio>
 
+#include "path.h"
 #include "mlp.h"
 #include "ckpt.h"
 
@@ -45,7 +46,7 @@ int main(int argc, const char* argv[]) {
     mlp_ckpt_path(ckpt_path, MLP_MAX_FNAME, file_path);
 
     // Ensure the model file exists
-    assert(mlp_ckpt_exists(ckpt_path));
+    assert(path_is_file(ckpt_path));
 
     // Read the model file
     assert(mlp_ckpt_load(&mlp, ckpt_path));
