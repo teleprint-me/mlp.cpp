@@ -43,6 +43,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
 # Add core library as a dependency
 add_library(mlp SHARED
+    src/path.cpp
     src/mlp.cpp
     src/ckpt.cpp
 )
