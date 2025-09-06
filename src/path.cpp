@@ -4,7 +4,6 @@
  * @copyright Copyright © 2025
  */
 
-#include <cerrno>
 #include <cstdlib>
 #include <cstring>
 #include <cstdio>
@@ -31,7 +30,6 @@ bool path_is_directory(const char* path) {
 
     struct stat buffer;
     if (stat(path, &buffer) != 0) {
-        fprintf(stderr, "Failed to stat path '%s': %s\n", path, strerror(errno));
         return false;
     }
     return S_ISDIR(buffer.st_mode);
@@ -45,7 +43,6 @@ bool path_is_file(const char* path) {
 
     struct stat buffer;
     if (stat(path, &buffer) != 0) {
-        fprintf(stderr, "Failed to stat path '%s': %s\n", path, strerror(errno));
         return false;
     }
     return S_ISREG(buffer.st_mode);
