@@ -143,14 +143,9 @@ int main(int argc, const char* argv[]) {
         basename = strdup("mlp-latest.bin");
     }
 
-    // do not clutter the current working directory
-    if (0 == strcmp(".", dirname)) {
-        free(dirname);
-        dirname = strdup("models");
-    }
-
     // no file name was given (edge case)
-    if (!basename || !*basename) {
+    if (!*basename) {
+        free(basename);
         basename = strdup("mlp-latest.bin");
     }
 
