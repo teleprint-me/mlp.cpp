@@ -1,4 +1,9 @@
-// @file src/ckpt.cpp
+/**
+ * @file      mlp/src/ckpt.cpp
+ * @author    Austin Berrio
+ * @copyright Copyright © 2025
+ */
+
 #include <ctime>
 #include <cstdint>
 #include <cstring>

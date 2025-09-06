@@ -1,4 +1,9 @@
-// @file include/ckpt.h
+/**
+ * @file      mlp/include/ckpt.h
+ * @author    Austin Berrio
+ * @copyright Copyright © 2025
+ */
+
 #ifndef MLP_CKPT_H
 #define MLP_CKPT_H
 
