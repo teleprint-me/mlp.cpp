@@ -16,28 +16,28 @@
 #include "mlp.h"
 #include "ckpt.h"
 
+// Calculate the maximum length for the ckeckpoint path
 size_t mlp_ckpt_max_path_len(const char* path) {
-    // Calculate the maximum length for the ckeckpoint path
+    if (!path || !*path) {
+        return MLP_MAX_STAMP + MLP_MAX_FNAME;
+    }
     return strlen(path) + MLP_MAX_STAMP + MLP_MAX_FNAME;
 }
 
 char* mlp_ckpt_dirname(const char* path) {
-    // Create a checkpoint path
-    char* dirname = nullptr;  // e.g. /mnt/models
+    char* dirname = path_dirname(path);
 
-    // user supplied path
-    if (path_exists(path)) {
-        dirname = path_dirname(path);
-    } else {
+    // Ensure directory path is not empty
+    if (!dirname || !*dirname) {
         return nullptr;
     }
 
-    // failed to create a working directory
+    // Ensure the directory exists
     if (-1 == path_mkdir(dirname)) {
-        free(dirname);
         return nullptr;
     }
 
+    // Return derived directory path
     return dirname;
 }
 
