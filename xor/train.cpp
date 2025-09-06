@@ -13,6 +13,7 @@
  *   - Simplicity first; abstraction only as needed.
  */
 
+#include <cerrno>
 #include <cassert>
 #include <ctime>
 #include <cstring>
@@ -130,8 +131,49 @@ int main(int argc, const char* argv[]) {
     printf("╚══════════════════════════════╝\n");
 
     // Create a checkpoint path
-    char ckpt_path[MLP_MAX_FNAME];
-    mlp_ckpt_path(ckpt_path, MLP_MAX_FNAME, file_path);
+    char* dirname = nullptr;
+    char* basename = nullptr;
+
+    // user supplied path
+    if (path_exists(file_path)) {
+        dirname = path_dirname(file_path);  // models/
+        basename = path_basename(file_path);  // mlp-latest.bin
+    } else {  // default path
+        dirname = strdup("models");
+        basename = strdup("mlp-latest.bin");
+    }
+
+    // do not clutter the current working directory
+    if (0 == strcmp(".", dirname)) {
+        free(dirname);
+        dirname = strdup("models");
+    }
+
+    // no file name was given (edge case)
+    if (!basename || !*basename) {
+        basename = strdup("mlp-latest.bin");
+    }
+
+    // failed to create a working directory
+    if (-1 == path_mkdir(dirname)) {
+        fprintf(stderr, "Failed to make dir '%s': %s\n", dirname, strerror(errno));
+        free(dirname);
+        free(basename);
+        return 1;
+    }
+
+    // Calculate the maximum length for the ckeckpoint path
+    size_t dirname_len = strlen(dirname);
+    size_t basename_len = strlen(basename);
+    size_t base_len = dirname_len + basename_len;
+    size_t max_len = base_len + MLP_MAX_STAMP + MLP_MAX_FNAME;
+
+    // Allocate memory to the checkpoint path
+    char* ckpt_path = (char*) malloc(max_len + 1);
+    // Write the file path to the checkpoint path
+    snprintf(ckpt_path, max_len, "%s/%s", dirname, basename);
+    // Log the resultant checkpoint path
+    fprintf(stderr, "ckpt (☞ﾟヮﾟ)☞ %s\n\n", ckpt_path);
 
     // Initialize the model if it does not exist already
     if (path_is_file(ckpt_path)) {
@@ -209,7 +251,13 @@ int main(int argc, const char* argv[]) {
         // Log every n epochs
         if (epoch % mlp.opt.log_every == 0) {
             printf("epoch[%zu] Σ(-᷅_-᷄๑) %f\n", epoch, (double) loss_epoch);
-            mlp_ckpt_name(ckpt_path, MLP_MAX_FNAME, epoch);
+
+            char stamp[MLP_MAX_STAMP];
+            time_t t = time(NULL);
+            struct tm* local = localtime(&t);
+            strftime(stamp, MLP_MAX_STAMP, "%Y-%m-%dT%H-%M-%S", local);
+            snprintf(ckpt_path, max_len, "%s/mlp-%s-ep%05zu.bin", dirname, stamp, epoch);
+
             mlp_ckpt_save(&mlp, ckpt_path);
         }
 
@@ -221,11 +269,15 @@ int main(int argc, const char* argv[]) {
     }
 
     // Always save the lastest checkpoint with a time stamp as a backup
-    mlp_ckpt_name(ckpt_path, MLP_MAX_FNAME, mlp.opt.epochs);
+    char stamp[MLP_MAX_STAMP];
+    time_t t = time(NULL);
+    struct tm* local = localtime(&t);
+    strftime(stamp, MLP_MAX_STAMP, "%Y-%m-%dT%H-%M-%S", local);
+    snprintf(ckpt_path, max_len, "%s/mlp-%s-ep%05zu.bin", dirname, stamp, mlp.opt.epochs);
     mlp_ckpt_save(&mlp, ckpt_path);
 
     // Always save the latest checkpoint to the same file
-    snprintf(ckpt_path, MLP_MAX_FNAME, "mlp-latest.bin");
+    snprintf(ckpt_path, max_len, "%s/%s", dirname, basename);
     mlp_ckpt_save(&mlp, ckpt_path);
 
     // Log predictions
@@ -242,5 +294,8 @@ int main(int argc, const char* argv[]) {
         );
     }
 
+    free(basename);
+    free(dirname);
+    free(ckpt_path);
     return 0;
 }
