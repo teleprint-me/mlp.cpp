@@ -4,6 +4,7 @@
  * @copyright Copyright © 2025
  */
 
+#include <cerrno>
 #include <cstdlib>
 #include <cstring>
 #include <cstdio>
@@ -47,6 +48,14 @@ bool path_is_file(const char* path) {
         return false;
     }
     return S_ISREG(buffer.st_mode);
+}
+
+// Saner mkdir wrapper
+int path_mkdir(const char* path) {
+    if (mkdir(path, 0755) == -1 && errno != EEXIST) {
+        return -1;
+    }
+    return 0;
 }
 
 char* path_dirname(const char* path) {
