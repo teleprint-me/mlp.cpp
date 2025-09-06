@@ -12,12 +12,11 @@
 #define MLP_MAX_STAMP 64  // timestamp length
 #define MLP_MAX_FNAME 256  // buffer length
 
-// apply a formatted timestamp to out with length n
-size_t mlp_ckpt_stamp(char* out, size_t n);
+// apply a formatted file path to buffer with length n
+void mlp_ckpt_path(char* buffer, size_t n, const char* dirname, const char* basename);
 
-void mlp_ckpt_path(char* buffer, size_t n, const char* file_path);
-
-void mlp_ckpt_name(char* buffer, size_t n, size_t epoch);
+// apply a formatted timestamp to buffer with length n
+void mlp_ckpt_stamp(char* buffer, size_t n, const char* dirname, size_t epoch);
 
 bool mlp_ckpt_save(struct MLP* mlp, const char* path);
 

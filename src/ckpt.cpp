@@ -10,21 +10,16 @@
 #include "mlp.h"
 #include "ckpt.h"
 
-size_t mlp_ckpt_stamp(char* out, size_t n) {
-    time_t t = time(NULL);
-    struct tm* local = localtime(&t);
-    return strftime(out, n, "%Y-%m-%dT%H-%M-%S", local);
+void mlp_ckpt_path(char* buffer, size_t n, const char* dirname, const char* basename) {
+    snprintf(buffer, n, "%s/%s", dirname, basename);
 }
 
-void mlp_ckpt_path(char* buffer, size_t n, const char* file_path) {
-    snprintf(buffer, n, "%s", file_path);
-    fprintf(stderr, "ckpt (☞ﾟヮﾟ)☞ %s\n\n", buffer);
-}
-
-void mlp_ckpt_name(char* buffer, size_t n, size_t epoch) {
+void mlp_ckpt_stamp(char* buffer, size_t n, const char* dirname, size_t epoch) {
     char stamp[MLP_MAX_STAMP];
-    mlp_ckpt_stamp(stamp, MLP_MAX_STAMP);
-    snprintf(buffer, n, "mlp-%s-ep%05zu.bin", stamp, epoch);
+    time_t t = time(NULL);
+    struct tm* lt = localtime(&t);
+    strftime(stamp, MLP_MAX_STAMP, "%Y-%m-%dT%H-%M-%S", lt);
+    snprintf(buffer, n, "%s/mlp-%s-ep%05zu.bin", dirname, stamp, epoch);
 }
 
 bool mlp_ckpt_save(struct MLP* mlp, const char* path) {
