@@ -15,8 +15,6 @@
 // apply a formatted timestamp to out with length n
 size_t mlp_ckpt_stamp(char* out, size_t n);
 
-bool mlp_ckpt_exists(const char* path);
-
 void mlp_ckpt_path(char* buffer, size_t n, const char* file_path);
 
 void mlp_ckpt_name(char* buffer, size_t n, size_t epoch);
