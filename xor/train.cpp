@@ -148,13 +148,13 @@ int main(int argc, const char* argv[]) {
     }
 
     // Calculate the maximum length for the ckeckpoint path
-    size_t max_len = mlp_ckpt_max_path_len(file_path);
+    size_t max_path_len = mlp_ckpt_max_path_len(file_path);
 
     // Allocate memory to the checkpoint path
-    char* ckpt_path = (char*) malloc(max_len + 1);
+    char* ckpt_path = (char*) malloc(max_path_len + 1);
 
     // Write the file path to the checkpoint path
-    mlp_ckpt_path(ckpt_path, max_len, dirname, basename);
+    mlp_ckpt_path(ckpt_path, max_path_len, dirname, basename);
 
     // Log the resultant checkpoint path
     fprintf(stderr, "(☞ﾟヮﾟ)☞ %s\n\n", ckpt_path);
@@ -235,7 +235,7 @@ int main(int argc, const char* argv[]) {
         // Log every n epochs
         if (epoch % mlp.opt.log_every == 0) {
             printf("epoch[%zu] Σ(-᷅_-᷄๑) %f\n", epoch, (double) loss_epoch);
-            mlp_ckpt_stamp(ckpt_path, max_len, dirname, epoch);
+            mlp_ckpt_stamp(ckpt_path, max_path_len, dirname, epoch);
             mlp_ckpt_save(&mlp, ckpt_path);
         }
 
@@ -247,11 +247,11 @@ int main(int argc, const char* argv[]) {
     }
 
     // Always save the lastest checkpoint with a time stamp as a backup
-    mlp_ckpt_stamp(ckpt_path, max_len, dirname, mlp.opt.epochs);
+    mlp_ckpt_stamp(ckpt_path, max_path_len, dirname, mlp.opt.epochs);
     mlp_ckpt_save(&mlp, ckpt_path);
 
     // Always save the latest checkpoint to the same file
-    mlp_ckpt_path(ckpt_path, max_len, dirname, basename);
+    mlp_ckpt_path(ckpt_path, max_path_len, dirname, basename);
     mlp_ckpt_save(&mlp, ckpt_path);
 
     free(basename);
