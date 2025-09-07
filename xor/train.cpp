@@ -54,7 +54,7 @@ void cli_parse(int argc, const char* argv[], struct MLP* mlp, char* file_path[])
     // Simple manual CLI parse
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "--ckpt") == 0 && i + 1 < argc) {
-            *file_path = (char*) argv[++i];
+            *file_path = strdup(argv[++i]);
         } else if (strcmp(argv[i], "--seed") == 0 && i + 1 < argc) {
             mlp->dim.seed = atoi(argv[++i]);
         } else if (strcmp(argv[i], "--bias") == 0 && i + 1 < argc) {
@@ -129,14 +129,16 @@ int main(int argc, const char* argv[]) {
     printf("╔══════════════════════════════╗\n");
     printf("║  XOR TRAINER  (by Austin)    ║\n");
     printf("╚══════════════════════════════╝\n");
-    printf("(ᓀ ᓀ) %s\n", file_path ? file_path : "NULL");
+
+    if (!file_path) {
+        file_path = strdup("./mlp-latest.bin");
+    }
 
     // Create a working directory
     char* dirname = mlp_ckpt_dirname(file_path);
-    // No directory was given
+    // Invalid working directory
     if (!dirname) {
-        fprintf(stderr, "Failed to create working directory: %s\n", strerror(errno));
-        free(dirname);
+        free(file_path);
         return 1;
     }
 
@@ -254,6 +256,7 @@ int main(int argc, const char* argv[]) {
     mlp_ckpt_path(ckpt_path, max_path_len, dirname, basename);
     mlp_ckpt_save(&mlp, ckpt_path);
 
+    free(file_path);
     free(basename);
     free(dirname);
     free(ckpt_path);
