@@ -30,14 +30,11 @@
 
 void cli_usage(struct MLP* mlp, const char* prog) {
     const char options[] = "[--seed N] [--layers N] [--hidden N] [--epochs N] [--lr F] [...]";
-
-    char fname[MLP_MAX_FNAME];
-    mlp_ckpt_path(fname, MLP_MAX_FNAME, ".", "mlp-latest.bin");
-
     const char* nest = (mlp->opt.nesterov) ? "true" : "false";
 
     printf("Usage: %s %s\n", prog, options);
-    printf("--ckpt      S Checkpoint path (default: %s)\n", fname);
+    printf("--data      S Dataset path (default: ./data/mnist)\n");
+    printf("--ckpt      S Checkpoint path (default: ./mlp-latest.bin)\n");
     printf("--seed      N Random seed (default: %zu)\n", mlp->dim.seed);
     printf("--bias      F Initial bias (default: %f)\n", (double) mlp->dim.bias);
     printf("--layers    N Number of layers (default: %zu)\n", mlp->dim.n_layers);
@@ -96,6 +93,10 @@ int main(int argc, const char* argv[]) {
     // Create the model
     struct MLP mlp {};
 
+    mlp.dim.n_in = 768;  // 28x28 for each image
+    mlp.dim.n_out = 10;  // one-hot for each digit
+    mlp.dim.n_hidden = 128;  // default to a sane value
+
     char* file_path = nullptr;
     cli_parse(argc, argv, &mlp, &file_path);
 
@@ -104,8 +105,8 @@ int main(int argc, const char* argv[]) {
         return 1;
     }
 
-    if (mlp.dim.n_hidden < 2) {
-        fprintf(stderr, "[ERROR] Minimum hidden dims = 2\n\t┻━┻︵ \\(°□°)/ ︵ ┻━┻\n");
+    if (mlp.dim.n_hidden < 32) {
+        fprintf(stderr, "[ERROR] Minimum hidden units = 32\n\t┻━┻︵ \\(°□°)/ ︵ ┻━┻\n");
         return 1;
     }
 
@@ -129,7 +130,7 @@ int main(int argc, const char* argv[]) {
     }
 
     printf("╔══════════════════════════════╗\n");
-    printf("║  XOR TRAINER  (by Austin)    ║\n");
+    printf("║  MNIST TRAINER  (by Austin)  ║\n");
     printf("╚══════════════════════════════╝\n");
 
     if (!file_path) {
@@ -239,7 +240,7 @@ int main(int argc, const char* argv[]) {
         // Log every n epochs
         if (epoch % mlp.opt.log_every == 0) {
             printf("epoch[%zu] Σ(-᷅_-᷄๑) %f\n", epoch, (double) loss_epoch);
-            mlp_ckpt_stamp(ckpt_path, max_path_len, dirname, epoch);
+            mlp_ckpt_stamp(ckpt_path, max_path_len, dirname, "mnist", epoch);
             mlp_ckpt_save(&mlp, ckpt_path);
         }
 
@@ -251,7 +252,7 @@ int main(int argc, const char* argv[]) {
     }
 
     // Always save the lastest checkpoint with a time stamp as a backup
-    mlp_ckpt_stamp(ckpt_path, max_path_len, dirname, mlp.opt.epochs);
+    mlp_ckpt_stamp(ckpt_path, max_path_len, dirname, "mnist", mlp.opt.epochs);
     mlp_ckpt_save(&mlp, ckpt_path);
 
     // Always save the latest checkpoint to the same file
