@@ -12,8 +12,9 @@
 #include <unistd.h>
 #include <sys/stat.h>
 
-// Path existence and checks
+#include "path.h"
 
+// Path existence and checks
 bool path_is_valid(const char* path) {
     return path && *path != '\0';
 }
@@ -99,4 +100,37 @@ char* path_basename(const char* path) {
 
     // Return the part after the last slash
     return strdup(last_slash + 1);
+}
+
+// Splits a path into components
+char** path_split(const char* path, size_t* count) {
+    if (!path || !*path) {
+        return nullptr;
+    }
+
+    *count = 0;
+    char** parts = nullptr;
+
+    // Estimate components length and allocate memory
+    char* temp = strdup(path);
+    char* token = strtok(temp, "/");
+    while (token) {
+        parts = (char**) realloc(parts, (*count + 1) * sizeof(char*));
+        parts[*count] = strdup(token);
+        *count += 1;
+        token = strtok(NULL, "/");
+    }
+
+    free(temp);
+    return parts;
+}
+
+// Frees split path components
+void path_split_free(char** parts, size_t count) {
+    if (parts) {
+        for (size_t i = 0; i < count; i++) {
+            free(parts[i]);
+        }
+        free(parts);
+    }
 }

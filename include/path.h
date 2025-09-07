@@ -7,22 +7,33 @@
 #ifndef MLP_PATH_H
 #define MLP_PATH_H
 
+#include <cstdlib>
+
+// Checks if path is valid input
 bool path_is_valid(const char* path);
 
-// Checks if a path exists
+// Checks if path exists
 bool path_exists(const char* path);
 
-// Checks if a path is a directory
+// Checks if path is a directory
 bool path_is_dir(const char* path);
 
-// Checks if a path is a regular file
+// Checks if path is a regular file
 bool path_is_file(const char* path);
 
-// Saner mkdir wrapper
+// Saner mkdir wrapper (0 on success, -1 on failure)
 int path_mkdir(const char* path);
 
+// Returns the directory path
 char* path_dirname(const char* path);
 
+// Returns the file name
 char* path_basename(const char* path);
+
+// Splits a path into components
+char** path_split(const char* path, size_t* count);
+
+// Frees split path components
+void path_split_free(char** parts, size_t count);
 
 #endif  // MLP_PATH_H
