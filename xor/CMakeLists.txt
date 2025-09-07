@@ -1,9 +1,9 @@
 # mlp/xor/CMakeLists.txt
 
 set(BIN
-    "train"
-    "inspect"
-    "inference"
+    "xor_train"
+    "xor_inspect"
+    "xor_inference"
 )
 
 set(INPUT_DIR ${PROJECT_SOURCE_DIR}/xor)
