@@ -1,4 +1,18 @@
-// @file inference.cpp
+/**
+ * @file      xor/inference.cpp
+ * @brief     Inference a pre-trained multi-layer perceptron.
+ * @author    Austin Berrio
+ * @copyright Copyright © 2025
+ *
+ * Coding rules:
+ *   - No classes/templates; use C-style structs.
+ *   - No 'auto'; all types explicit.
+ *   - Prefer std::vector for storage.
+ *   - Explicit, C-style function signatures.
+ *   - Pointer args: mutable unless const.
+ *   - Simplicity first; abstraction only as needed.
+ */
+
 #include <cassert>
 #include <cstring>
 #include <cstdio>

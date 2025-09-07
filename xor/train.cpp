@@ -1,6 +1,6 @@
 /**
- * @file      train.cpp
- * @brief     Multi-layer perceptron (MLP) in C with minimal C++ features.
+ * @file      xor/train.cpp
+ * @brief     Pre-train a multi-layer perceptron on the XOR gate.
  * @author    Austin Berrio
  * @copyright Copyright © 2025
  *
