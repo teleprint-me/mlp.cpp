@@ -70,7 +70,7 @@ Executables are located in `./build/xor`.
 - To resume from an existing checkpoint:
 
 ```sh
-./build/xor/xor_train --ckpt mlp-latest.bin
+./build/xor/xor_train --ckpt xor-latest.bin
 ```
 
 - For available options:
@@ -84,19 +84,19 @@ Executables are located in `./build/xor`.
 To group checkpoints in a directory:
 
 ```sh
-./build/xor/xor_train --ckpt models/mlp-latest.bin
+./build/xor/xor_train --ckpt models/xor-latest.bin
 ```
 
 ### Inspect
 
 ```sh
-./build/xor/xor_inspect --ckpt mlp-latest.bin
+./build/xor/xor_inspect --ckpt xor-latest.bin
 ```
 
 ### Inference
 
 ```sh
-./build/xor/xor_inference --ckpt mlp-latest.bin
+./build/xor/xor_inference --ckpt xor-latest.bin
 ```
 
 ## References
