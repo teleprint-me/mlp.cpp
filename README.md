@@ -61,40 +61,40 @@ Executables are located in `./build/xor`.
 
 - To train from scratch:
 
-  ```sh
-  ./build/xor/train --ckpt mlp-latest.bin
-  ```
+```sh
+./build/xor/xor_train
+```
 
 - To resume from an existing checkpoint:
 
-  ```sh
-  ./build/xor/train --ckpt mlp-latest.bin
-  ```
+```sh
+./build/xor/xor_train --ckpt mlp-latest.bin
+```
 
 - For available options:
 
-  ```sh
-  ./build/xor/train -h
-  ```
+```sh
+./build/xor/xor_train -h
+```
 
 #### Organizing Checkpoints
 
 To group checkpoints in a directory:
 
 ```sh
-./build/xor/train --ckpt models/mlp-latest.bin
+./build/xor/xor_train --ckpt models/mlp-latest.bin
 ```
 
 ### Inspect
 
 ```sh
-./build/xor/inspect --ckpt mlp-latest.bin
+./build/xor/xor_inspect --ckpt mlp-latest.bin
 ```
 
 ### Inference
 
 ```sh
-./build/xor/inference --ckpt mlp-latest.bin
+./build/xor/xor_inference --ckpt mlp-latest.bin
 ```
 
 ## References
@@ -105,3 +105,4 @@ To group checkpoints in a directory:
 - [1998 — Gradient-based learning applied to document recognition](https://www.semanticscholar.org/paper/Gradient-based-learning-applied-to-document-LeCun-Bottou/162d958ff885f1462aeda91cd72582323fd6a1f4)
 - [2010 — Understanding the difficulty of training deep feedforward neural networks](https://www.semanticscholar.org/paper/Understanding-the-difficulty-of-training-deep-Glorot-Bengio/ea9d2a2b4ce11aaf85136840c65f3bc9c03ab649)
 - [2013 — On the importance of initialization and momentum in deep learning](https://www.semanticscholar.org/paper/On-the-importance-of-initialization-and-momentum-in-Sutskever-Martens/aa7bfd2304201afbb19971ebde87b17e40242e91)
+- [2016 — Deep Learning](https://www.deeplearningbook.org)
