@@ -20,7 +20,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
 
 set(WARN "-Wall -Wextra -Wpedantic -Werror -Wformat-security -Wshadow -fexceptions")
-set(EXTRA_WARN "-Wformat -Wnull-dereference -Wdouble-promotion")
+# stb_image.h won't build if -Wdouble-promotion is enabled
+set(EXTRA_WARN "-Wformat -Wnull-dereference") # -Wdouble-promotion
 set(SANITIZE "-fsanitize=address,undefined -fno-omit-frame-pointer")
 set(ANALYSIS "-Wanalyzer-double-free -Wanalyzer-file-leak -Wanalyzer-malloc-leak -Wanalyzer-null-dereference -Wanalyzer-out-of-bounds -Wanalyzer-va-list-leak")
 set(COMMON "-D_FILE_OFFSET_BITS=64 ${OpenMP_C_FLAGS} ${WARN}")
@@ -52,6 +53,7 @@ target_link_libraries(mlp PRIVATE m)
 
 # Add XOR to build
 add_subdirectory(xor)
+add_subdirectory(mnist)
 
 add_custom_target(run_clean
     COMMAND ${CMAKE_COMMAND} -E rm -rf ${CMAKE_BINARY_DIR}
