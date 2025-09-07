@@ -34,7 +34,7 @@ void cli_usage(struct MLP* mlp, const char* prog) {
 
     printf("Usage: %s %s\n", prog, options);
     printf("--data      S Dataset path (default: ./data/mnist)\n");
-    printf("--ckpt      S Checkpoint path (default: ./mlp-latest.bin)\n");
+    printf("--ckpt      S Checkpoint path (default: ./mnist-latest.bin)\n");
     printf("--seed      N Random seed (default: %zu)\n", mlp->dim.seed);
     printf("--bias      F Initial bias (default: %f)\n", (double) mlp->dim.bias);
     printf("--layers    N Number of layers (default: %zu)\n", mlp->dim.n_layers);
@@ -134,7 +134,7 @@ int main(int argc, const char* argv[]) {
     printf("╚══════════════════════════════╝\n");
 
     if (!file_path) {
-        file_path = strdup("./mlp-latest.bin");
+        file_path = strdup("./mnist-latest.bin");
     }
 
     // Create a working directory
@@ -149,7 +149,7 @@ int main(int argc, const char* argv[]) {
     char* basename = mlp_ckpt_basename(file_path);
     // No file name was given
     if (!basename) {
-        basename = strdup("mlp-latest.bin");  // Default to latest model file
+        basename = strdup("mnist-latest.bin");  // Default to latest model file
     }
 
     // Calculate the maximum length for the ckeckpoint path
