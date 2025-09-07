@@ -13,7 +13,6 @@
  *   - Simplicity first; abstraction only as needed.
  */
 
-#include <cerrno>
 #include <cassert>
 #include <ctime>
 #include <cstring>
