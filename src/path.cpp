@@ -1,20 +1,23 @@
 /**
- * @file      mlp/src/path.cpp
+ * @file      mlp/src/path.c
  * @author    Austin Berrio
  * @copyright Copyright © 2025
+ * @brief     A POSIX C pathlib interface.
  */
 
-#include <cerrno>
-#include <cstdlib>
-#include <cstring>
-#include <cstdio>
+#include <errno.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
 
-#include <unistd.h>
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <dirent.h>
+#include <unistd.h>
 
 #include "path.h"
 
-// Path existence and checks
+// Checks if path is valid input
 bool path_is_valid(const char* path) {
     return path && *path != '\0';
 }
@@ -25,7 +28,7 @@ bool path_exists(const char* path) {
     return path_is_valid(path) && stat(path, &buffer) == 0;
 }
 
-// Checks if a path is a directory
+// Checks if path is a directory
 bool path_is_dir(const char* path) {
     if (!path_is_valid(path)) {
         return false;
@@ -38,7 +41,7 @@ bool path_is_dir(const char* path) {
     return S_ISDIR(buffer.st_mode);
 }
 
-// Checks if a path is a regular file
+// Checks if path is a regular file
 bool path_is_file(const char* path) {
     if (!path_is_valid(path)) {
         return false;
@@ -59,6 +62,7 @@ int path_mkdir(const char* path) {
     return 0;
 }
 
+// Returns the directory path
 char* path_dirname(const char* path) {
     if (!path_is_valid(path)) {
         return strdup("");  // Invalid input -> empty string
@@ -87,6 +91,7 @@ char* path_dirname(const char* path) {
     return dir;
 }
 
+// Returns the file name
 char* path_basename(const char* path) {
     if (!path_is_valid(path)) {
         return strdup("");  // Invalid input -> empty string
@@ -102,14 +107,33 @@ char* path_basename(const char* path) {
     return strdup(last_slash + 1);
 }
 
+// Concatenate path components
+char* path_cat(const char* dst, const char* src) {
+    if (!path_is_valid(dst) || !path_is_valid(src)) {
+        return NULL;  // Invalid inputs
+    }
+
+    // Allocate mem to new path
+    size_t path_len = strlen(dst) + strlen(src) + 1;
+    char* path = (char*) malloc(path_len);
+    if (!path) {
+        return NULL;
+    }
+
+    // Glue dst and src to path
+    strcpy(path, dst);
+    strcat(path, src);
+    return path;
+}
+
 // Splits a path into components
 char** path_split(const char* path, size_t* count) {
-    if (!path || !*path) {
-        return nullptr;
+    if (!path_is_valid(path)) {
+        return NULL;
     }
 
     *count = 0;
-    char** parts = nullptr;
+    char** parts = NULL;
 
     // Estimate components length and allocate memory
     char* temp = strdup(path);
@@ -133,4 +157,21 @@ void path_split_free(char** parts, size_t count) {
         }
         free(parts);
     }
+}
+
+// Read directory contents into memory
+char** path_list(const char* path, size_t* count) {
+    if (!path_is_dir(path)) {
+        return NULL;
+    }
+
+    DIR* dir = opendir(path);
+    if (!dir) {
+        return NULL;
+    }
+
+    *count = 0;
+    char** list = NULL;
+
+    return list;
 }

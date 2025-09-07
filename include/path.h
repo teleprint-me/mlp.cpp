@@ -2,12 +2,13 @@
  * @file      mlp/include/path.h
  * @author    Austin Berrio
  * @copyright Copyright © 2025
+ * @brief     A POSIX C pathlib interface.
  */
 
 #ifndef MLP_PATH_H
 #define MLP_PATH_H
 
-#include <cstdlib>
+#include <stdlib.h>
 
 // Checks if path is valid input
 bool path_is_valid(const char* path);
@@ -30,10 +31,16 @@ char* path_dirname(const char* path);
 // Returns the file name
 char* path_basename(const char* path);
 
+// Concatenate path components
+char* path_cat(const char* dst, const char* src);
+
 // Splits a path into components
 char** path_split(const char* path, size_t* count);
 
 // Frees split path components
 void path_split_free(char** parts, size_t count);
+
+// Read directory files into memory
+char** path_list(const char* path, size_t* count);
 
 #endif  // MLP_PATH_H
