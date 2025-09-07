@@ -4,9 +4,9 @@ A multi-layer perceptron.
 
 ## Dependencies
 
-- gcc
 - g++
 - gdb
+- cmake
 - clangd
 - clang-format
 - clib
