@@ -65,12 +65,12 @@ void mlp_ckpt_path(char* buffer, size_t n, const char* dirname, const char* base
     snprintf(buffer, n, "%s/%s", dirname, basename);
 }
 
-void mlp_ckpt_stamp(char* buffer, size_t n, const char* dirname, size_t epoch) {
+void mlp_ckpt_stamp(char* buffer, size_t n, const char* dirname, const char* name, size_t epoch) {
     char stamp[MLP_MAX_STAMP];
     time_t t = time(NULL);
     struct tm* lt = localtime(&t);
     strftime(stamp, MLP_MAX_STAMP, "%Y-%m-%dT%H-%M-%S", lt);
-    snprintf(buffer, n, "%s/mlp-%s-ep%05zu.bin", dirname, stamp, epoch);
+    snprintf(buffer, n, "%s/%s-%s-ep%05zu.bin", dirname, name, stamp, epoch);
 }
 
 bool mlp_ckpt_save(struct MLP* mlp, const char* path) {

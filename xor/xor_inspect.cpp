@@ -56,31 +56,36 @@ int main(int argc, const char* argv[]) {
     printf("╚══════════════════════════════╝\n");
 
     // Create a checkpoint path
-    char* dirname = nullptr;
-    char* basename = nullptr;
+    if (!file_path) {
+        file_path = strdup("./xor-latest.bin");
+    }
 
-    // user supplied path
-    // user supplied path
-    if (path_exists(file_path)) {
-        dirname = path_dirname(file_path);  // models/
-        basename = path_basename(file_path);  // mlp-latest.bin
-    } else {
-        fprintf(stderr, "Path does not exist: %s\n", file_path ? file_path : "NULL");
+    // Create a working directory
+    char* dirname = mlp_ckpt_dirname(file_path);
+    // Invalid working directory
+    if (!dirname) {
+        free(file_path);
         return 1;
     }
 
-    // no file name was given (edge case)
-    if (!*basename) {
-        free(basename);
-        basename = strdup("mlp-latest.bin");
+    // Create a file name
+    char* basename = mlp_ckpt_basename(file_path);
+    // No file name was given
+    if (!basename) {
+        basename = strdup("xor-latest.bin");  // Default to latest model file
     }
 
-    // Construct the checkpoint file path
-    char ckpt_path[MLP_MAX_FNAME];
-    mlp_ckpt_path(ckpt_path, MLP_MAX_FNAME, dirname, basename);
+    // Calculate the maximum length for the ckeckpoint path
+    size_t max_path_len = mlp_ckpt_max_path_len(file_path);
+
+    // Allocate memory to the checkpoint path
+    char* ckpt_path = (char*) malloc(max_path_len + 1);
+
+    // Write the file path to the checkpoint path
+    mlp_ckpt_path(ckpt_path, max_path_len, dirname, basename);
 
     // Log the resultant checkpoint path
-    fprintf(stderr, "ckpt (☞ﾟヮﾟ)☞ %s\n\n", ckpt_path);
+    fprintf(stderr, "(☞ﾟヮﾟ)☞ %s\n\n", ckpt_path);
 
     // Ensure the model file exists
     assert(path_is_file(ckpt_path));
@@ -88,9 +93,10 @@ int main(int argc, const char* argv[]) {
     // Read the model file
     assert(mlp_ckpt_load(&mlp, ckpt_path));
 
-    // free path resources
+    // Free path resources
     free(dirname);
     free(basename);
+    free(ckpt_path);
 
     // Log model data to stdout
     mlp_log_dims(&mlp);

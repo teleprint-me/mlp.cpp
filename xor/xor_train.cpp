@@ -27,14 +27,10 @@
 
 void cli_usage(struct MLP* mlp, const char* prog) {
     const char options[] = "[--seed N] [--layers N] [--hidden N] [--epochs N] [--lr F] [...]";
-
-    char fname[MLP_MAX_FNAME];
-    mlp_ckpt_path(fname, MLP_MAX_FNAME, ".", "mlp-latest.bin");
-
     const char* nest = (mlp->opt.nesterov) ? "true" : "false";
 
     printf("Usage: %s %s\n", prog, options);
-    printf("--ckpt      S Checkpoint path (default: %s)\n", fname);
+    printf("--ckpt      S Checkpoint path (default: ./xor-latest.bin)\n");
     printf("--seed      N Random seed (default: %zu)\n", mlp->dim.seed);
     printf("--bias      F Initial bias (default: %f)\n", (double) mlp->dim.bias);
     printf("--layers    N Number of layers (default: %zu)\n", mlp->dim.n_layers);
@@ -130,7 +126,7 @@ int main(int argc, const char* argv[]) {
     printf("╚══════════════════════════════╝\n");
 
     if (!file_path) {
-        file_path = strdup("./mlp-latest.bin");
+        file_path = strdup("./xor-latest.bin");
     }
 
     // Create a working directory
@@ -145,7 +141,7 @@ int main(int argc, const char* argv[]) {
     char* basename = mlp_ckpt_basename(file_path);
     // No file name was given
     if (!basename) {
-        basename = strdup("mlp-latest.bin");  // Default to latest model file
+        basename = strdup("xor-latest.bin");  // Default to latest model file
     }
 
     // Calculate the maximum length for the ckeckpoint path
@@ -236,7 +232,7 @@ int main(int argc, const char* argv[]) {
         // Log every n epochs
         if (epoch % mlp.opt.log_every == 0) {
             printf("epoch[%zu] Σ(-᷅_-᷄๑) %f\n", epoch, (double) loss_epoch);
-            mlp_ckpt_stamp(ckpt_path, max_path_len, dirname, epoch);
+            mlp_ckpt_stamp(ckpt_path, max_path_len, dirname, "xor", epoch);
             mlp_ckpt_save(&mlp, ckpt_path);
         }
 
@@ -248,7 +244,7 @@ int main(int argc, const char* argv[]) {
     }
 
     // Always save the lastest checkpoint with a time stamp as a backup
-    mlp_ckpt_stamp(ckpt_path, max_path_len, dirname, mlp.opt.epochs);
+    mlp_ckpt_stamp(ckpt_path, max_path_len, dirname, "xor", mlp.opt.epochs);
     mlp_ckpt_save(&mlp, ckpt_path);
 
     // Always save the latest checkpoint to the same file

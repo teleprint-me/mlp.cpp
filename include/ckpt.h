@@ -25,7 +25,7 @@ char* mlp_ckpt_basename(const char* path);
 
 void mlp_ckpt_path(char* buffer, size_t n, const char* dirname, const char* basename);
 
-void mlp_ckpt_stamp(char* buffer, size_t n, const char* dirname, size_t epoch);
+void mlp_ckpt_stamp(char* buffer, size_t n, const char* dirname, const char* name, size_t epoch);
 
 bool mlp_ckpt_save(struct MLP* mlp, const char* path);
 
