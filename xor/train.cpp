@@ -29,7 +29,7 @@ void cli_usage(struct MLP* mlp, const char* prog) {
     const char options[] = "[--seed N] [--layers N] [--hidden N] [--epochs N] [--lr F] [...]";
 
     char fname[MLP_MAX_FNAME];
-    mlp_ckpt_path(fname, MLP_MAX_FNAME, "models", "mlp-latest.bin");
+    mlp_ckpt_path(fname, MLP_MAX_FNAME, ".", "mlp-latest.bin");
 
     const char* nest = (mlp->opt.nesterov) ? "true" : "false";
 
