@@ -175,13 +175,17 @@ char** path_list_files(const char* path, size_t* count) {
 
     struct dirent* dir_entry;
     while ((dir_entry = readdir(dir))) {
-        if (0 == strcmp(".", dir_entry->d_name) || 0 == strcmp("..", dir_entry->d_name)) {
+        int current = strcmp(".", dir_entry->d_name);
+        int previous = strcmp("..", dir_entry->d_name);
+
+        char* entry = path_cat(path, dir_entry->d_name);
+        if (0 == current || 0 == previous || !path_is_file(entry)) {
+            free(entry);
             continue;
         }
 
-        char* file_entry = path_cat(path, dir_entry->d_name);
         files = (char**) realloc(files, (*count + 1) * sizeof(char*));
-        files[*count] = file_entry;
+        files[*count] = entry;
         *count += 1;
     }
 
