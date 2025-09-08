@@ -160,7 +160,7 @@ void path_split_free(char** parts, size_t count) {
 }
 
 // Read directory contents into memory
-char** path_list(const char* path, size_t* count) {
+char** path_list_files(const char* path, size_t* count) {
     if (!path_is_dir(path)) {
         return NULL;
     }
@@ -171,7 +171,19 @@ char** path_list(const char* path, size_t* count) {
     }
 
     *count = 0;
-    char** list = NULL;
+    char** files = NULL;
 
-    return list;
+    struct dirent* dir_entry;
+    while ((dir_entry = readdir(dir))) {
+        if (0 == strcmp(".", dir_entry->d_name) || 0 == strcmp("..", dir_entry->d_name)) {
+            continue;
+        }
+
+        char* file_entry = path_cat(path, dir_entry->d_name);
+        files = (char**) realloc(files, (*count + 1) * sizeof(char*));
+        files[*count] = file_entry;
+        *count += 1;
+    }
+
+    return files;
 }

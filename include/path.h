@@ -41,6 +41,6 @@ char** path_split(const char* path, size_t* count);
 void path_split_free(char** parts, size_t count);
 
 // Read directory files into memory
-char** path_list(const char* path, size_t* count);
+char** path_list_files(const char* path, size_t* count);
 
 #endif  // MLP_PATH_H
