@@ -38,7 +38,7 @@ char* path_cat(const char* root, const char* sub);
 char** path_split(const char* path, size_t* count);
 
 // Read directory files into memory
-char** path_list_files(const char* path, size_t* count);
+char** path_list_files(const char* dirname, size_t* count);
 
 // Free all allocated path components
 void path_free_parts(char** parts, size_t count);
