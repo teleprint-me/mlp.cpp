@@ -1,12 +1,12 @@
 /**
- * @file      mlp/include/path.h
+ * @file      include/path.h
  * @author    Austin Berrio
  * @copyright Copyright © 2025
  * @brief     A POSIX C pathlib interface.
  */
 
-#ifndef MLP_PATH_H
-#define MLP_PATH_H
+#ifndef PATHLIB_H
+#define PATHLIB_H
 
 #include <stdlib.h>
 
@@ -46,4 +46,4 @@ void path_free_parts(char** parts, size_t count);
 // Free an allocated path component
 void path_free(char* path);
 
-#endif  // MLP_PATH_H
+#endif  // PATHLIB_H
