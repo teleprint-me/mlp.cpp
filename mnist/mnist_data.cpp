@@ -14,10 +14,14 @@
  */
 
 #include <cstdint>
+#include <stdlib.h>
 #include <cstdio>
+
 #include <vector>
 
+#define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
+
 #include "path.h"
 
 // MNIST image dimensions
