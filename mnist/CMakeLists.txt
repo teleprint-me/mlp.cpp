@@ -2,8 +2,9 @@
 
 set(BIN
     "mnist_train"
-    # "inspect"
-    # "inference"
+    "mnist_data"
+    # "mnist_inspect"
+    # "mnist_inference"
 )
 
 set(INPUT_DIR ${PROJECT_SOURCE_DIR}/mnist)
