@@ -10,6 +10,10 @@
 
 #include <stdlib.h>
 
+#ifndef PATH_MAX
+    #define PATH_MAX 4096
+#endif  // PATH_MAX
+
 // Checks if path is valid input
 bool path_is_valid(const char* path);
 
