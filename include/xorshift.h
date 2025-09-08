@@ -7,7 +7,11 @@
 #ifndef XORSHIFT_H
 #define XORSHIFT_H
 
-#include <cstdint>
+#include <stdint.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 struct XORShiftState {
     uint64_t seed;
@@ -26,5 +30,9 @@ uint32_t xorshift_gen_int32(void);
  * xorshift rng: normalize rng state [0, 1).
  */
 float xorshift_gen_float(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif  // RNG_XORSHIFT_H

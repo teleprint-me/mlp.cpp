@@ -44,8 +44,8 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
 # Add core library as a dependency
 add_library(mlp SHARED
-    "src/xorshift.cpp"
-    "src/path.cpp"
+    "src/xorshift.c"
+    "src/path.c"
     "src/mlp.cpp"
     "src/ckpt.cpp"
 )

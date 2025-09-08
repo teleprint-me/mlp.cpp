@@ -8,7 +8,12 @@
 #ifndef PATHLIB_H
 #define PATHLIB_H
 
+#include <stdbool.h>
 #include <stdlib.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #ifndef PATH_MAX
     #define PATH_MAX 4096
@@ -52,5 +57,9 @@ void path_free_parts(char** parts, size_t count);
 
 // Free an allocated path component
 void path_free(char* path);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif  // PATHLIB_H

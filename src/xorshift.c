@@ -1,12 +1,12 @@
 /**
  * @license cc-by-sa-4.0
- * @file mlp/include/xorshift.cpp
+ * @file mlp/include/xorshift.c
  * @ref https://en.wikipedia.org/wiki/Xorshift#xorshift.2A
  */
 
 #include "xorshift.h"
 
-struct XORShiftState state{};
+struct XORShiftState state = {0};
 
 void xorshift_init(uint64_t seed) {
     state.seed = seed;
