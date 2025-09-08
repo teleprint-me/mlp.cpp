@@ -3,13 +3,6 @@
 cmake_minimum_required(VERSION 3.14)
 project(mlp VERSION 0.1.0 DESCRIPTION "MLP written completely from scratch")
 
-# clang: Invalid argument '-std=gnu17' not allowed with 'C++'
-# C17 conflicts with C++17. The only way to resolve this is to set to C11.
-# This seems to be a clang related bug. See cmake discourse forum for more info.
-set(CMAKE_C_STANDARD 11)
-set(CMAKE_C_STANDARD_REQUIRED ON)
-set(CMAKE_C_EXTENSIONS ON)
-
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS ON)
@@ -31,10 +24,8 @@ set(RELEASE "${COMMON} -fopenmp -Ofast -march=native")
 
 find_package(OpenMP REQUIRED)
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${DEBUG}")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${DEBUG}")
 else()
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${RELEASE}")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${RELEASE}")
 endif()
 
