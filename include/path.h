@@ -32,7 +32,7 @@ char* path_dirname(const char* path);
 char* path_basename(const char* path);
 
 // Concatenate two path components, inserting a '/' if needed
-char* path_cat(const char* dst, const char* src);
+char* path_cat(const char* root, const char* sub);
 
 // Splits a path into components
 char** path_split(const char* path, size_t* count);
