@@ -155,16 +155,6 @@ char** path_split(const char* path, size_t* count) {
     return parts;
 }
 
-// Frees split path components
-void path_split_free(char** parts, size_t count) {
-    if (parts) {
-        for (size_t i = 0; i < count; i++) {
-            free(parts[i]);
-        }
-        free(parts);
-    }
-}
-
 // Read directory contents into memory
 char** path_list_files(const char* path, size_t* count) {
     if (!path_is_dir(path)) {
@@ -196,4 +186,21 @@ char** path_list_files(const char* path, size_t* count) {
     }
 
     return files;
+}
+
+// Free all allocated path components
+void path_free_parts(char** parts, size_t count) {
+    if (parts) {
+        for (size_t i = 0; i < count; i++) {
+            free(parts[i]);
+        }
+        free(parts);
+    }
+}
+
+// Free an allocated path component
+void path_free(char* path) {
+    if (path_is_valid(path)) {
+        free(path);
+    }
 }

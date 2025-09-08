@@ -37,10 +37,13 @@ char* path_cat(const char* root, const char* sub);
 // Splits a path into components
 char** path_split(const char* path, size_t* count);
 
-// Frees split path components
-void path_split_free(char** parts, size_t count);
-
 // Read directory files into memory
 char** path_list_files(const char* path, size_t* count);
+
+// Free all allocated path components
+void path_free_parts(char** parts, size_t count);
+
+// Free an allocated path component
+void path_free(char* path);
 
 #endif  // MLP_PATH_H
