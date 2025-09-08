@@ -45,6 +45,17 @@ struct MNISTDataset {
 
 int main(void) {
     char dataset_path[] = "data/mnist/training";
-    (void) dataset_path;
+
+    size_t dirs_count;
+    char** dirs = path_list_dirs(dataset_path, &dirs_count);
+    if (!dirs) {
+        return 1;
+    }
+
+    for (size_t i = 0; i < dirs_count; i++) {
+        printf("dirs[%zu] %s\n", i, dirs[i]);
+    }
+
+    path_free_parts(dirs, dirs_count);
     return 0;
 }
