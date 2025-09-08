@@ -1,17 +1,28 @@
 /**
  * @license cc-by-sa-4.0
- * @file mlp/src/xorshift.cpp
+ * @file mlp/include/xorshift.h
+ * @ref https://en.wikipedia.org/wiki/Xorshift#xorshift.2A
  */
 
 #include "xorshift.h"
 
-uint32_t xorshift_int32(uint64_t* state) {
-    *state ^= *state >> 12;  // shift right, then flip
-    *state ^= *state << 25;  // shift left, then flip
-    *state ^= *state >> 27;  // shift right, then flip
-    return (*state * 0x2545F4914F6CDD1Dull) >> 32;  // scale, then drop 32-bits
+struct XORShiftState state{};
+
+void xorshift_init(uint64_t seed) {
+    state.seed = seed;
 }
 
-float xorshift_float(uint64_t* state) {
-    return (xorshift_int32(state) >> 8) / 16777216.0f;
+void xorshift_gen(void) {
+    state.seed ^= state.seed >> 12;
+    state.seed ^= state.seed << 25;
+    state.seed ^= state.seed >> 27;
+}
+
+uint32_t xorshift_gen_int32(void) {
+    xorshift_gen();
+    return (state.seed * 0x2545F4914F6CDD1Dull) >> 32;
+}
+
+float xorshift_gen_float(void) {
+    return (xorshift_gen_int32() >> 8) / 16777216.0f;
 }
