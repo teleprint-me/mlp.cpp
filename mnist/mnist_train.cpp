@@ -1,5 +1,5 @@
 /**
- * @file      mnist/train.cpp
+ * @file      mnist/mnist_train.cpp
  * @brief     Pre-train a multi-layer perceptron on hand-written digit classification.
  * @author    Austin Berrio
  * @copyright Copyright © 2025
