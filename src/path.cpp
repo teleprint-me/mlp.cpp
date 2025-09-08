@@ -155,7 +155,44 @@ char** path_split(const char* path, size_t* count) {
     return parts;
 }
 
-// Read directory contents into memory as full paths (files only)
+// Read directory paths into memory (dirs only)
+char** path_list_dirs(const char* dirname, size_t* count) {
+    if (!path_is_dir(dirname)) {
+        return NULL;
+    }
+
+    DIR* dir = opendir(dirname);
+    if (!dir) {
+        return NULL;
+    }
+
+    *count = 0;
+    char** dirs = NULL;
+
+    struct dirent* entry;
+    while ((entry = readdir(dir))) {
+        int current = strcmp(entry->d_name, ".");
+        int previous = strcmp(entry->d_name, "..");
+        if (0 == current || 0 == previous) {
+            continue;
+        }
+
+        char* fullpath = path_cat(dirname, entry->d_name);
+        if (!path_is_dir(fullpath)) {
+            free(fullpath);
+            continue;
+        }
+
+        dirs = (char**) realloc(dirs, (*count + 1) * sizeof(char*));
+        dirs[*count] = fullpath;
+        (*count)++;
+    }
+
+    closedir(dir);
+    return dirs;
+}
+
+// Read file paths into memory (files only)
 char** path_list_files(const char* dirname, size_t* count) {
     if (!path_is_dir(dirname)) {
         return NULL;

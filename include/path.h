@@ -37,7 +37,10 @@ char* path_cat(const char* root, const char* sub);
 // Splits a path into components
 char** path_split(const char* path, size_t* count);
 
-// Read directory files into memory
+// Read directory paths into memory (dirs only)
+char** path_list_dirs(const char* dirname, size_t* count);
+
+// Read file paths into memory (files only)
 char** path_list_files(const char* dirname, size_t* count);
 
 // Free all allocated path components
