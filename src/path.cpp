@@ -1,5 +1,5 @@
 /**
- * @file      mlp/src/path.c
+ * @file      src/path.c
  * @author    Austin Berrio
  * @copyright Copyright © 2025
  * @brief     A POSIX C pathlib interface.
@@ -192,7 +192,9 @@ char** path_list_files(const char* path, size_t* count) {
 void path_free_parts(char** parts, size_t count) {
     if (parts) {
         for (size_t i = 0; i < count; i++) {
-            free(parts[i]);
+            if (path_is_valid(parts[i])) {
+                free(parts[i]);
+            }
         }
         free(parts);
     }
