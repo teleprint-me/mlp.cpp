@@ -1,6 +1,6 @@
 /**
  * @license cc-by-sa-4.0
- * @file mlp/include/xorshift.h
+ * @file mlp/include/xorshift.cpp
  * @ref https://en.wikipedia.org/wiki/Xorshift#xorshift.2A
  */
 
