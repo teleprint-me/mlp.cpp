@@ -102,6 +102,7 @@ int main(void) {
                 pixels[k] = data[k] / 255.0f;
             }
             samples.push_back({label, pixels});
+            stbi_image_free(data);
         }
 
         path_free_parts(files, files_count);
