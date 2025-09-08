@@ -155,13 +155,13 @@ char** path_split(const char* path, size_t* count) {
     return parts;
 }
 
-// Read directory contents into memory
-char** path_list_files(const char* path, size_t* count) {
-    if (!path_is_dir(path)) {
+// Read directory contents into memory as full paths (files only)
+char** path_list_files(const char* dirname, size_t* count) {
+    if (!path_is_dir(dirname)) {
         return NULL;
     }
 
-    DIR* dir = opendir(path);
+    DIR* dir = opendir(dirname);
     if (!dir) {
         return NULL;
     }
@@ -169,22 +169,26 @@ char** path_list_files(const char* path, size_t* count) {
     *count = 0;
     char** files = NULL;
 
-    struct dirent* dir_entry;
-    while ((dir_entry = readdir(dir))) {
-        int current = strcmp(".", dir_entry->d_name);
-        int previous = strcmp("..", dir_entry->d_name);
+    struct dirent* entry;
+    while ((entry = readdir(dir))) {
+        int current = strcmp(entry->d_name, ".");
+        int previous = strcmp(entry->d_name, "..");
+        if (0 == current || 0 == previous) {
+            continue;
+        }
 
-        char* entry = path_cat(path, dir_entry->d_name);
-        if (0 == current || 0 == previous || !path_is_file(entry)) {
-            free(entry);
+        char* fullpath = path_cat(dirname, entry->d_name);
+        if (!path_is_file(fullpath)) {
+            free(fullpath);
             continue;
         }
 
         files = (char**) realloc(files, (*count + 1) * sizeof(char*));
-        files[*count] = entry;
-        *count += 1;
+        files[*count] = fullpath;
+        (*count)++;
     }
 
+    closedir(dir);
     return files;
 }
 
