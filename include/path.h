@@ -31,7 +31,7 @@ char* path_dirname(const char* path);
 // Returns the file name
 char* path_basename(const char* path);
 
-// Concatenate path components
+// Concatenate two path components, inserting a '/' if needed
 char* path_cat(const char* dst, const char* src);
 
 // Splits a path into components

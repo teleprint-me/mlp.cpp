@@ -107,22 +107,28 @@ char* path_basename(const char* path) {
     return strdup(last_slash + 1);
 }
 
-// Concatenate path components
-char* path_cat(const char* dst, const char* src) {
-    if (!path_is_valid(dst) || !path_is_valid(src)) {
-        return NULL;  // Invalid inputs
+// Concatenate two path components, inserting a '/' if needed
+char* path_cat(const char* dir, const char* file) {
+    if (!path_is_valid(dir) || !path_is_valid(file)) {
+        return NULL;
     }
 
-    // Allocate mem to new path
-    size_t path_len = strlen(dst) + strlen(src) + 1;
-    char* path = (char*) malloc(path_len);
+    size_t len_dir = strlen(dir);
+    size_t len_file = strlen(file);
+    int needs_slash = (len_dir > 0 && dir[len_dir - 1] != '/');
+    size_t total_len = len_dir + needs_slash + len_file + 1;
+
+    char* path = (char*) malloc(total_len);
     if (!path) {
         return NULL;
     }
 
-    // Glue dst and src to path
-    strcpy(path, dst);
-    strcat(path, src);
+    strcpy(path, dir);
+    if (needs_slash) {
+        strcat(path, "/");
+    }
+    strcat(path, file);
+
     return path;
 }
 
