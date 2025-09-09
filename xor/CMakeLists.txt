@@ -1,6 +1,7 @@
 # mlp/xor/CMakeLists.txt
 
 set(BIN
+    "xor_shift"
     "xor_train"
     "xor_inspect"
     "xor_inference"
