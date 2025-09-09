@@ -38,18 +38,6 @@ struct MNISTSample {
     std::vector<float> pixels{}; /**< Flattened pixel data (grayscale values). */
 };
 
-// shuffle an array of indices [0, n)
-void shuffle_indices(size_t* values, size_t n, uint32_t (*rng)(void)) {
-    for (size_t i = n - 1; i > 0; i--) {
-        // random index [0, i]
-        size_t j = rng() % (i + 1);
-        // swap indices i with j
-        size_t temp = values[i];
-        values[i] = values[j];
-        values[j] = temp;
-    }
-}
-
 // load image and force grayscale
 uint8_t* mnist_load_image(const char* filename) {
     int width, height, channels;
@@ -100,7 +88,7 @@ int mnist_load_samples(
         }
 
         // select n samples for this class
-        shuffle_indices(indices.data(), indices.size(), xorshift_gen_int32);
+        xorshift_shuffle_yates(indices.data(), indices.size(), sizeof(size_t));
         size_t max_samples = std::min(n_samples_per_class, files_count);
         printf("Using %zu samples from label %d.\n", max_samples, label);
 
