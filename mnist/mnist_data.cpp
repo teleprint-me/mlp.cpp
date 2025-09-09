@@ -88,7 +88,7 @@ int mnist_load_samples(
         }
 
         // select n samples for this class
-        xorshift_shuffle_yates(indices.data(), indices.size(), sizeof(size_t));
+        xorshift_yates(indices.data(), indices.size(), sizeof(size_t));
         size_t max_samples = std::min(n_samples_per_class, files_count);
         printf("Using %zu samples from label %d.\n", max_samples, label);
 
