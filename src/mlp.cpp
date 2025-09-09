@@ -171,7 +171,7 @@ void mlp_init_xavier(struct MLP* mlp) {
 
         // Initialize weights
         for (size_t j = 0; j < W_d; j++) {
-            L->W[j] = xorshift_normal_mueller(n_in, n_out);
+            L->W[j] = xorshift_xavier(n_in, n_out);
         }
 
         // Initialize biases
