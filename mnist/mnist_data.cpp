@@ -79,7 +79,6 @@ int mnist_load_samples(
         // extract files from dirname
         size_t files_count;
         char** files = path_list_files(dirs[i], &files_count);
-        printf("Counted %zu samples for label %d.\n", files_count, label);
 
         // build a list of indices
         std::vector<size_t> indices(files_count);
@@ -90,15 +89,17 @@ int mnist_load_samples(
         // select n samples for this class
         xorshift_yates(indices.data(), indices.size(), sizeof(size_t));
         size_t max_samples = std::min(n_samples_per_class, files_count);
-        printf("Using %zu samples from label %d.\n", max_samples, label);
+        printf("[samples] %05zu [max] %05zu [label] %d.\n", files_count, max_samples, label);
 
         // process upto n samples for this class
         for (size_t j = 0; j < max_samples; j++) {
             // select images at random
             uint32_t idx = indices[j];
+            char* path = files[idx];
+            printf("[idx] %05u [selected] %s\n", idx, path);
 
             // load image and force grayscale
-            uint8_t* data = mnist_load_image(files[idx]);
+            uint8_t* data = mnist_load_image(path);
             if (!data) {
                 continue;  // bad data
             }
@@ -106,6 +107,7 @@ int mnist_load_samples(
             // create a new sample with pixel data
             MNISTSample sample = mnist_new_sample(label, data);
             if (-1 == sample.label) {
+                stbi_image_free(data);
                 continue;  // bad label
             }
 
