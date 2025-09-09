@@ -63,7 +63,7 @@ float xorshift_float(void);
  * @param out Output dimension (fan-out)
  * @return 32-bit float uniform in [-a, a]
  */
-float xorshift_uniform_xavier(size_t in, size_t out);
+float xorshift_xavier(size_t in, size_t out);
 
 /**
  * @brief Generate a Glorot-scaled normal random value using Box-Muller transform.
@@ -75,7 +75,7 @@ float xorshift_uniform_xavier(size_t in, size_t out);
  * @param out Output dimension (fan-out)
  * @return 32-bit float from N(0, stddev^2)
  */
-float xorshift_normal_mueller(size_t in, size_t out);
+float xorshift_mueller(size_t in, size_t out);
 
 /**
  * @brief In-place Fisher–Yates shuffle of an array.
@@ -87,7 +87,7 @@ float xorshift_normal_mueller(size_t in, size_t out);
  * @param size Size in bytes of each element
  * @return true on success, false on failure
  */
-bool xorshift_shuffle_yates(void* base, size_t n, size_t size);
+bool xorshift_yates(void* base, size_t n, size_t size);
 
 #ifdef __cplusplus
 }
