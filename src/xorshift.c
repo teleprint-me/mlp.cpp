@@ -69,6 +69,7 @@ float xorshift_muller(size_t in, size_t out) {
     return z0 * stddev;
 }
 
+// Fisher–Yates shuffle
 bool xorshift_yates(void* base, size_t n, size_t size) {
     if (!base || n < 2) {
         return false;  // redundant
