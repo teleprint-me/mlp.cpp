@@ -109,12 +109,6 @@ void mlp_init_input(struct MLP* mlp, float* x_in, size_t n);
 /** @brief Fill input vector with random values in [0, 1). */
 void mlp_init_input_random(struct MLP* mlp);
 
-/** @brief Uniform random in N(-1, 1), scaled for layer sizes. */
-float rand_uniform(size_t n_in, size_t n_out);
-
-/** @brief Normal random in N(0, 1), scaled for layer sizes. */
-float rand_normal(size_t n_in, size_t n_out);
-
 /** @brief Initialize weights/biases (Glorot/Xavier init). */
 void mlp_init_xavier(struct MLP* mlp);
 

@@ -21,6 +21,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 
+#include "xorshift.h"
 #include "path.h"
 #include "mlp.h"
 #include "ckpt.h"
@@ -125,6 +126,13 @@ int main(int argc, const char* argv[]) {
     printf("║  XOR TRAINER  (by Austin)    ║\n");
     printf("╚══════════════════════════════╝\n");
 
+    // Seed random number generator
+    if (mlp.dim.seed > 0) {
+        xorshift_init(mlp.dim.seed);
+    } else {
+        xorshift_init(time(NULL));
+    }
+
     if (!file_path) {
         file_path = strdup("./xor-latest.bin");
     }
@@ -168,13 +176,6 @@ int main(int argc, const char* argv[]) {
     // Log model parameters
     mlp_log_dims(&mlp);
     mlp_log_opts(&mlp);
-
-    // Seed random number generator
-    if (mlp.dim.seed > 0) {
-        srand(mlp.dim.seed);
-    } else {
-        srand(time(NULL));
-    }
 
     // Create input and output vectors
     mlp.x.resize(mlp.dim.n_in);
