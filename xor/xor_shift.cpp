@@ -44,7 +44,7 @@ int main(void) {
     printf("\n");
 
     xorshift_init(SEED);
-    printf("xorshift_shuffle\n");
+    printf("xorshift_yates\n");
 
     printf("before\n");
     std::vector<size_t> x(GENERATIONS);
