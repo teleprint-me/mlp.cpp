@@ -36,7 +36,7 @@ int main(void) {
 
     // float [0, 1)
     xorshift_init(SEED);
-    printf("xorshift_mueller\n");
+    printf("xorshift_muller\n");
     for (size_t i = 0; i < GENERATIONS; i++) {
         float x = xorshift_muller(/* in */ 3, /* out */ 2);
         printf("x[%zu] %f\n", i, x);
