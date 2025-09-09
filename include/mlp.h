@@ -103,12 +103,6 @@ void mlp_log_layers(struct MLP* mlp);
  *  @{
  */
 
-/** @brief Set input vector to user-specified values. */
-void mlp_init_input(struct MLP* mlp, float* x_in, size_t n);
-
-/** @brief Fill input vector with random values in [0, 1). */
-void mlp_init_input_random(struct MLP* mlp);
-
 /** @brief Initialize weights/biases (Glorot/Xavier init). */
 void mlp_init_xavier(struct MLP* mlp);
 

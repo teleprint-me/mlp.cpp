@@ -130,22 +130,6 @@ void mlp_log_layers(struct MLP* mlp) {
  * @{
  */
 
-void mlp_init_input(struct MLP* mlp, float* x_in, size_t n) {
-    assert(n == mlp->dim.n_in);
-
-    mlp->x.resize(n);
-    for (size_t i = 0; i < mlp->x.size(); i++) {
-        mlp->x[i] = x_in[i];
-    }
-}
-
-void mlp_init_input_random(struct MLP* mlp) {
-    mlp->x.resize(mlp->dim.n_in);
-    for (size_t i = 0; i < mlp->x.size(); i++) {
-        mlp->x[i] = xorshift_float();  // Normalize input
-    }
-}
-
 // https://proceedings.mlr.press/v9/glorot10a/glorot10a.pdf
 // https://en.wikipedia.org/wiki/Weight_initialization#Glorot_initialization
 void mlp_init_xavier(struct MLP* mlp) {
