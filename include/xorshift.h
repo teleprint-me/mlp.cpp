@@ -54,7 +54,7 @@ uint32_t xorshift_uint32(void);
 float xorshift_float(void);
 
 /**
- * @brief Generate a Glorot/Xavier-scaled uniform random value in [-a, a].
+ * @brief Generate a Xavier-Bengio scaled uniform distribution [-a, a].
  *
  * Uses the formula: a = sqrt(6 / (in + out))
  * Output is uniform in [-a, a]. Suitable for ML weight initialization.
@@ -66,7 +66,7 @@ float xorshift_float(void);
 float xorshift_xavier(size_t in, size_t out);
 
 /**
- * @brief Generate a Glorot-scaled normal random value using Box-Muller transform.
+ * @brief Generate a Xavier-Bengio scaled normal distribution using Box-Muller transform.
  *
  * Standard normal (mean=0, variance=1), scaled by sqrt(2 / (in + out)).
  * Suitable for ML weight initialization.
