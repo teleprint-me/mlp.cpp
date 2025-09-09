@@ -75,7 +75,7 @@ float xorshift_xavier(size_t in, size_t out);
  * @param out Output dimension (fan-out)
  * @return 32-bit float from N(0, stddev^2)
  */
-float xorshift_mueller(size_t in, size_t out);
+float xorshift_muller(size_t in, size_t out);
 
 /**
  * @brief In-place Fisher–Yates shuffle of an array.

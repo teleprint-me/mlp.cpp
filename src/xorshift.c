@@ -55,7 +55,7 @@ float xorshift_xavier(size_t in, size_t out) {
 }
 
 // Box-Muller normal
-float xorshift_mueller(size_t in, size_t out) {
+float xorshift_muller(size_t in, size_t out) {
     float u1 = xorshift_float();
     if (u1 < 1e-7f) {
         u1 = 1e-7f;  // avoid 0
