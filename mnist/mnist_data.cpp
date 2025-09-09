@@ -50,6 +50,30 @@ void shuffle_indices(size_t* values, size_t n, uint32_t (*rng)(void)) {
     }
 }
 
+// load image and force grayscale
+uint8_t* mnist_load_image(const char* filename) {
+    int width, height, channels;
+    uint8_t* data = stbi_load(filename, &width, &height, &channels, 1);
+
+    if (!data || IMAGE_LEN != width || IMAGE_LEN != height) {
+        printf("[skip] [bad image] %s\n", filename);
+        if (data) {
+            stbi_image_free(data);
+        }
+        return NULL;
+    }
+
+    return data;
+}
+
+struct MNISTSample mnist_new_sample(int label, const uint8_t* data) {
+    std::vector<float> pixels(IMAGE_PIXELS);
+    for (int k = 0; k < IMAGE_PIXELS; k++) {
+        pixels[k] = data[k] / 255.0f;
+    }
+    return {label, pixels};
+}
+
 int mnist_load_samples(
     std::vector<MNISTSample> &out, size_t n_samples_per_class, const char* dirname
 ) {
@@ -69,35 +93,38 @@ int mnist_load_samples(
         char** files = path_list_files(dirs[i], &files_count);
         printf("Counted %zu samples for label %d.\n", files_count, label);
 
-        // Build a list of indices
+        // build a list of indices
         std::vector<size_t> indices(files_count);
         for (size_t k = 0; k < files_count; ++k) {
             indices[k] = k;
         }
 
+        // select n samples for this class
         shuffle_indices(indices.data(), indices.size(), xorshift_gen_int32);
         size_t max_samples = std::min(n_samples_per_class, files_count);
         printf("Using %zu samples from label %d.\n", max_samples, label);
+
+        // process upto n samples for this class
         for (size_t j = 0; j < max_samples; j++) {
-            // select images at random and bind them to the file count
+            // select images at random
             uint32_t idx = indices[j];
 
             // load image and force grayscale
-            int width, height, channels;
-            uint8_t* data = stbi_load(files[idx], &width, &height, &channels, 1);
-            if (!data || IMAGE_LEN != width || IMAGE_LEN != height) {
-                printf("[skip] %s (bad image)\n", files[idx]);
-                if (data) {
-                    stbi_image_free(data);
-                }
-                continue;
+            uint8_t* data = mnist_load_image(files[idx]);
+            if (!data) {
+                continue;  // bad data
             }
 
-            std::vector<float> pixels(IMAGE_PIXELS);
-            for (int k = 0; k < IMAGE_PIXELS; k++) {
-                pixels[k] = data[k] / 255.0f;
+            // create a new sample with pixel data
+            MNISTSample sample = mnist_new_sample(label, data);
+            if (-1 == sample.label) {
+                continue;  // bad label
             }
-            out.push_back({label, pixels});
+
+            // append sample to output vector
+            out.push_back(sample);
+
+            // clean up
             stbi_image_free(data);
         }
 
