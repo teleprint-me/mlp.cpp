@@ -50,21 +50,15 @@ void shuffle_indices(size_t* values, size_t n, uint32_t (*rng)(void)) {
     }
 }
 
-int main(void) {
-    uint64_t seed = 1337;
-    xorshift_init(seed);
-
-    char dataset_path[] = "data/mnist/training";
-
-    std::vector<MNISTSample> samples{}; /**< Array of MNIST samples. */
-
+int mnist_load_samples(
+    std::vector<MNISTSample> &out, size_t n_samples_per_class, const char* dirname
+) {
     size_t dirs_count;
-    char** dirs = path_list_dirs(dataset_path, &dirs_count);
+    char** dirs = path_list_dirs(dirname, &dirs_count);
     if (!dirs) {
         return 1;
     }
 
-    size_t n_samples = 10;  // select up to 10 samples
     for (size_t i = 0; i < dirs_count; i++) {
         // extract label from dirname
         char* label_str = path_basename(dirs[i]);
@@ -73,6 +67,7 @@ int main(void) {
         // extract files from dirname
         size_t files_count;
         char** files = path_list_files(dirs[i], &files_count);
+        printf("Counted %zu samples for label %d.\n", files_count, label);
 
         // Build a list of indices
         std::vector<size_t> indices(files_count);
@@ -81,7 +76,8 @@ int main(void) {
         }
 
         shuffle_indices(indices.data(), indices.size(), xorshift_gen_int32);
-        size_t max_samples = std::min(n_samples, files_count);
+        size_t max_samples = std::min(n_samples_per_class, files_count);
+        printf("Using %zu samples from label %d.\n", max_samples, label);
         for (size_t j = 0; j < max_samples; j++) {
             // select images at random and bind them to the file count
             uint32_t idx = indices[j];
@@ -101,7 +97,7 @@ int main(void) {
             for (int k = 0; k < IMAGE_PIXELS; k++) {
                 pixels[k] = data[k] / 255.0f;
             }
-            samples.push_back({label, pixels});
+            out.push_back({label, pixels});
             stbi_image_free(data);
         }
 
@@ -110,5 +106,17 @@ int main(void) {
     }
 
     path_free_parts(dirs, dirs_count);
+    return 0;
+}
+
+int main(void) {
+    uint64_t seed = 1337;
+    xorshift_init(seed);
+
+    char dataset_path[] = "data/mnist/training";
+
+    std::vector<MNISTSample> samples{}; /**< Array of MNIST samples. */
+
+    mnist_load_samples(samples, 10, dataset_path);
     return 0;
 }
