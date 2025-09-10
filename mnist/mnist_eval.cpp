@@ -126,16 +126,14 @@ int main(int argc, const char* argv[]) {
 
     // Log the resultant checkpoint path
     fprintf(stderr, "Paths:\n");
-    fprintf(stderr, "(ಥ⌣ಥ) %s\n\n", cli.data_path);
-    fprintf(stderr, "(ಥ⌣ಥ) %s\n\n", cli.ckpt_path);
-    fprintf(stderr, "(☞ﾟヮﾟ)☞ %s\n", ckpt_path);
+    fprintf(stderr, "(ಥ⌣ಥ) %s\n", cli.data_path);
+    fprintf(stderr, "(☞ﾟヮﾟ)☞ %s\n\n", ckpt_path);
 
     // Load and initialize a pre-trained model
     assert(mlp_ckpt_load(&mlp, ckpt_path));
 
     // Log model initialization as a sanity check
     mlp_log_dims(&mlp);
-    mlp_log_opts(&mlp);
 
     // Load and initialize the MNIST dataset
     std::vector<MNISTSample> samples{}; /**< Array of MNIST samples. */
