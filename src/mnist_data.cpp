@@ -93,14 +93,14 @@ int mnist_load_samples(
         // select n samples for this class
         xorshift_yates(indices.data(), indices.size(), sizeof(size_t));
         size_t max_samples = std::min(n_samples_per_class, files_count);
-        printf("[samples] %05zu [max] %05zu [label] %d.\n", files_count, max_samples, label);
+        // printf("[samples] %05zu [max] %05zu [label] %d.\n", files_count, max_samples, label);
 
         // process upto n samples for this class
         for (size_t j = 0; j < max_samples; j++) {
             // select images at random
             uint32_t idx = indices[j];
             char* path = files[idx];
-            printf("[idx] %05u [selected] %s\n", idx, path);
+            // printf("[idx] %05u [selected] %s\n", idx, path);
 
             // load image and force grayscale
             uint8_t* data = mnist_load_image(path);

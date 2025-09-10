@@ -223,7 +223,7 @@ int main(int argc, const char* argv[]) {
     // Log model initialization as a sanity check
     mlp_log_dims(&mlp);
     mlp_log_opts(&mlp);
-    mlp_log_layers(&mlp);
+    // mlp_log_layers(&mlp);
 
     // Load and initialize the MNIST dataset
     std::vector<MNISTSample> samples{}; /**< Array of MNIST samples. */
