@@ -118,8 +118,8 @@ int main(int argc, const char* argv[]) {
 
     // Initialize model layers (do this before parsing!)
     cli.mlp.dim.n_in = 768;  // 28x28 for each image
+    cli.mlp.dim.n_hidden = 10;  // default to a sane value
     cli.mlp.dim.n_out = 10;  // one-hot for each digit
-    cli.mlp.dim.n_hidden = 128;  // default to a sane value
 
     // Initialize and parse cli parameters
     cli.argc = argc;
@@ -149,8 +149,8 @@ int main(int argc, const char* argv[]) {
         return 1;
     }
 
-    if (mlp.dim.n_hidden < 32) {
-        fprintf(stderr, "[ERROR] Minimum hidden units = 32\n\t┻━┻︵ \\(°□°)/ ︵ ┻━┻\n");
+    if (mlp.dim.n_hidden < 10) {
+        fprintf(stderr, "[ERROR] Minimum hidden units = 10\n\t┻━┻︵ \\(°□°)/ ︵ ┻━┻\n");
         return 1;
     }
 
@@ -209,7 +209,9 @@ int main(int argc, const char* argv[]) {
     mlp_ckpt_path(ckpt_path, ckpt_max_path_len, dirname, basename);
 
     // Log the resultant checkpoint path
-    fprintf(stderr, "(☞ﾟヮﾟ)☞ %s\n\n", ckpt_path);
+    fprintf(stderr, "Paths:\n");
+    fprintf(stderr, "(☞ﾟヮﾟ)☞ %s\n", ckpt_path);
+    fprintf(stderr, "(ಥ⌣ಥ) %s\n\n", cli.data_path);
 
     // Initialize the model if it does not exist already
     if (path_is_file(ckpt_path)) {
@@ -227,7 +229,9 @@ int main(int argc, const char* argv[]) {
 
     // Load and initialize the MNIST dataset
     std::vector<MNISTSample> samples{}; /**< Array of MNIST samples. */
+    fprintf(stderr, "Loading:\n");
     mnist_load_samples(cli.data_path, cli.n_samples_per_class, samples);
+    fprintf(stderr, "(ʘ‿ʘ)~ Loaded %d images\n\n", cli.n_samples_per_class * 10);
 
     // Initialize input and output vectors
     mlp.x.resize(mlp.dim.n_in);
