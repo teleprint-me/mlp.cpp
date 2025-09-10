@@ -66,13 +66,13 @@ struct MNISTSample mnist_new_sample(const uint8_t* data, int label) {
     return {label, pixels};
 }
 
-int mnist_load_samples(
+bool mnist_load_samples(
     const char* dirname, size_t n_samples_per_class, std::vector<MNISTSample> &out
 ) {
     size_t dirs_count;
     char** dirs = path_list_dirs(dirname, &dirs_count);
     if (!dirs) {
-        return 1;
+        return false;
     }
 
     for (size_t i = 0; i < dirs_count; i++) {
@@ -127,5 +127,5 @@ int mnist_load_samples(
     }
 
     path_free_parts(dirs, dirs_count);
-    return 0;
+    return true;
 }

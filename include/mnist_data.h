@@ -47,7 +47,7 @@ uint8_t* mnist_load_image(const char* filename);
 
 struct MNISTSample mnist_new_sample(const uint8_t* data, int label);
 
-int mnist_load_samples(
+bool mnist_load_samples(
     const char* dirname, size_t n_samples_per_class, std::vector<MNISTSample> &out
 );
 
