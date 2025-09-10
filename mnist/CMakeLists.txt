@@ -2,7 +2,6 @@
 
 set(BIN
     "mnist_train"
-    "mnist_data"
     # "mnist_inspect"
     # "mnist_inference"
 )
