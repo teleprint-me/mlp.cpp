@@ -20,6 +20,7 @@
 #include <algorithm>
 #include <vector>
 
+#include "xorshift.h"
 #include "mlp.h"
 #include "ckpt.h"
 #include "mnist_data.h"
@@ -135,15 +136,11 @@ int main(int argc, const char* argv[]) {
     // Log model initialization as a sanity check
     mlp_log_dims(&mlp);
 
-    // Load and initialize the MNIST dataset
-    std::vector<MNISTSample> samples{}; /**< Array of MNIST samples. */
-    fprintf(stderr, "Loading:\n");
-    assert(mnist_load_samples(cli.data_path, cli.n_samples_per_class, samples));
-    fprintf(stderr, "(ʘ‿ʘ)~ Loaded %d images\n\n", cli.n_samples_per_class * 10);
-
     // Run evaluation for digit classification
+    fprintf(stderr, "Loading:\n");
     std::vector<MNISTSample> test_samples{};
-    mnist_load_samples("./data/mnist/testing", cli.n_samples_per_class, test_samples);
+    assert(mnist_load_samples(cli.data_path, cli.n_samples_per_class, test_samples));
+    fprintf(stderr, "(ʘ‿ʘ)~ Loaded %d images\n", cli.n_samples_per_class * 10);
 
     size_t correct = 0;
     for (size_t i = 0; i < test_samples.size(); i++) {
@@ -154,6 +151,7 @@ int main(int argc, const char* argv[]) {
             correct++;
         }
     }
+    printf("\n-=≡Σ<|°_°|>\n");
     printf("Test Accuracy: %.2f%%\n", 100.0 * correct / test_samples.size());
 
     // Clean up
