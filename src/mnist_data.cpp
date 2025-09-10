@@ -11,6 +11,13 @@
  *   - Explicit, C-style function signatures.
  *   - Pointer args: mutable unless const.
  *   - Simplicity first; abstraction only as needed.
+ *
+ * Usage example:
+ *   uint64_t seed = 1337;
+ *   xorshift_init(seed);
+ *   char dataset_path[] = "data/mnist/training";
+ *   std::vector<MNISTSample> samples{}; ///< Array of MNIST samples.
+ *   mnist_load_samples(samples, 10, dataset_path);
  */
 
 #include <cstdint>
@@ -25,18 +32,15 @@
 #include "xorshift.h"
 #include "path.h"
 
-// MNIST image length
-#define IMAGE_LEN 28
-// Flattened size of MNIST images
-#define IMAGE_PIXELS ((IMAGE_LEN) * (IMAGE_LEN))
+#include "mnist_data.h"
 
-/**
- * @brief Represents a single MNIST image and its label.
- */
-struct MNISTSample {
-    int label = -1; /**< Label representing the digit (0-9). */
-    std::vector<float> pixels{}; /**< Flattened pixel data (grayscale values). */
-};
+std::vector<float> mnist_one_hot(int label, int n_classes) {
+    std::vector<float> vec(n_classes, 0.0f);
+    if (label >= 0 && label < n_classes) {
+        vec[label] = 1.0f;
+    }
+    return vec;
+}
 
 // load image and force grayscale
 uint8_t* mnist_load_image(const char* filename) {
@@ -54,7 +58,7 @@ uint8_t* mnist_load_image(const char* filename) {
     return data;
 }
 
-struct MNISTSample mnist_new_sample(int label, const uint8_t* data) {
+struct MNISTSample mnist_new_sample(const uint8_t* data, int label) {
     std::vector<float> pixels(IMAGE_PIXELS);
     for (int k = 0; k < IMAGE_PIXELS; k++) {
         pixels[k] = data[k] / 255.0f;
@@ -63,7 +67,7 @@ struct MNISTSample mnist_new_sample(int label, const uint8_t* data) {
 }
 
 int mnist_load_samples(
-    std::vector<MNISTSample> &out, size_t n_samples_per_class, const char* dirname
+    const char* dirname, size_t n_samples_per_class, std::vector<MNISTSample> &out
 ) {
     size_t dirs_count;
     char** dirs = path_list_dirs(dirname, &dirs_count);
@@ -105,7 +109,7 @@ int mnist_load_samples(
             }
 
             // create a new sample with pixel data
-            MNISTSample sample = mnist_new_sample(label, data);
+            MNISTSample sample = mnist_new_sample(data, label);
             if (-1 == sample.label) {
                 stbi_image_free(data);
                 continue;  // bad label
@@ -123,17 +127,5 @@ int mnist_load_samples(
     }
 
     path_free_parts(dirs, dirs_count);
-    return 0;
-}
-
-int main(void) {
-    uint64_t seed = 1337;
-    xorshift_init(seed);
-
-    char dataset_path[] = "data/mnist/training";
-
-    std::vector<MNISTSample> samples{}; /**< Array of MNIST samples. */
-
-    mnist_load_samples(samples, 10, dataset_path);
     return 0;
 }
