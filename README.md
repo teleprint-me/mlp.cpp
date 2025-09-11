@@ -99,6 +99,79 @@ To group checkpoints in a directory:
 ./build/xor/xor_inference --ckpt xor-latest.bin
 ```
 
+## MNIST
+
+The MNIST dataset provides a classic benchmark for handwritten digit
+classification using MLPs.
+
+### **Setup**
+
+1. **Download and validate (tested with PNG images):**
+
+   ```sh
+   wget 'https://huggingface.co/datasets/teleprint-me/mnist/resolve/main/mnist.tar.gz?download=true' -O mnist.tar.gz
+   wget 'https://huggingface.co/datasets/teleprint-me/mnist/resolve/main/sha256sum.txt?download=true' -O sha256sum.txt
+   sha256sum -c sha256sum.txt  # Should output: mnist.tar.gz: OK
+   ```
+
+2. **Extract:**
+
+   ```sh
+   mkdir -p data
+   mv mnist.tar.gz data/
+   cd data
+   tar xvf mnist.tar.gz
+   ```
+
+   This creates `data/mnist/training/0` ... `9` and `data/mnist/testing/0` ...
+   `9`.
+
+3. **Dataset quick stats:**
+
+   - **Total images:** 70,000 (PNG, 28×28, 8-bit grayscale)
+   - **Training:** 60,000 images
+   - **Testing:** 10,000 images
+   - **Disk usage:** \~276MB
+
+### **Data inspection (optional):**
+
+```sh
+file mnist/training/0/10005.png
+identify mnist/training/0/10005.png   # Needs ImageMagick
+```
+
+- **Dataset layout:** `data/mnist/training/0-9/` (images),
+  `data/mnist/testing/0-9/` (images)
+
+### **Training & Evaluation**
+
+- **Train:**
+
+  ```sh
+  ./build/mnist/mnist_train [options]
+  ```
+
+  For example:
+
+  ```sh
+  ./build/mnist/mnist_train --samples 1000 --layers 5 --hidden 32
+  ```
+
+  All options:
+
+  ```sh
+  ./build/mnist/mnist_train --help
+  ```
+
+- **Checkpoints:** Saved as `models/mnist-latest.bin` and as timestamped
+  snapshots per epoch.
+
+- **Evaluate:**
+
+  ```sh
+  ./build/mnist/mnist_eval --ckpt models/mnist-latest.bin --data data/mnist/testing --samples 1000
+  ```
+
 ## References
 
 - [1957 — The Perceptron: A probabilistic model for information storage and organization in the brain](https://archive.org/details/sim_psychological-review_1958-11_65_6/page/386/mode/2up?q=the+perceptron+rosenblatt+1957)
