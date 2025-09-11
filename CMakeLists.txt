@@ -39,7 +39,6 @@ add_library(mlp SHARED
     "src/path.c"
     "src/mlp.cpp"
     "src/ckpt.cpp"
-    "src/mnist_data.cpp"
 )
 target_include_directories(mlp PUBLIC include)
 target_link_libraries(mlp PRIVATE m)
