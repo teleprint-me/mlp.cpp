@@ -241,6 +241,7 @@ int main(int argc, const char* argv[]) {
     std::vector<float> y_pred(mlp.dim.n_out);
 
     // Execute training loop
+    fprintf(stderr, "Training:\n");
     for (size_t epoch = 0; epoch < mlp.opt.epochs; epoch++) {
         float loss_epoch = 0.0f;
 
