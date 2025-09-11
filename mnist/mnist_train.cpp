@@ -210,8 +210,8 @@ int main(int argc, const char* argv[]) {
 
     // Log the resultant checkpoint path
     fprintf(stderr, "Paths:\n");
-    fprintf(stderr, "(☞ﾟヮﾟ)☞ %s\n", ckpt_path);
     fprintf(stderr, "(ಥ⌣ಥ) %s\n\n", cli.data_path);
+    fprintf(stderr, "(☞ﾟヮﾟ)☞ %s\n", ckpt_path);
 
     // Initialize the model if it does not exist already
     if (path_is_file(ckpt_path)) {
