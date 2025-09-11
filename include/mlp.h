@@ -115,6 +115,8 @@ void mlp_init_xavier(struct MLP* mlp);
 /** @brief Sigmoid activation function. */
 float sigmoid(float x);
 
+void softmax(float* x, int n);
+
 /** @brief Matrix-vector multiply (row-major): y = Wx + b. */
 void matmul(float* y, float* W, float* x, float* b, size_t n_out, size_t n_in);
 

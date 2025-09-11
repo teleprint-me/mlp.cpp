@@ -184,6 +184,25 @@ void sigmoid_vector(float* v, size_t n) {
     }
 }
 
+void softmax(float* x, int n) {
+    float max_score = x[0];
+    for (int i = 1; i < n; i++) {
+        if (x[i] > max_score) {
+            max_score = x[i];
+        }
+    }
+
+    float sum = 0.0f;
+    for (int i = 0; i < n; i++) {
+        x[i] = exp(x[i] - max_score);
+        sum += x[i];
+    }
+
+    for (int i = 0; i < n; i++) {
+        x[i] /= sum;
+    }
+}
+
 // Apply row-major matrix multiplication (y = Wx + b)
 void matmul(float* y, float* W, float* x, float* b, size_t n_out, size_t n_in) {
 #pragma omp parallel for
