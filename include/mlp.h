@@ -146,6 +146,8 @@ float mse(float* y_pred, float* y_true, size_t n);
 // n: number of classes
 float cross_entropy(const float* y_pred, const float* y_true, size_t n);
 
+std::vector<float> one_hot_encode(int label, int n_classes);
+
 /** @} */
 
 #endif  // MLP_H

@@ -210,8 +210,8 @@ int main(int argc, const char* argv[]) {
 
     // Log the resultant checkpoint path
     fprintf(stderr, "Paths:\n");
-    fprintf(stderr, "(ಥ⌣ಥ) %s\n\n", cli.data_path);
-    fprintf(stderr, "(☞ﾟヮﾟ)☞ %s\n", ckpt_path);
+    fprintf(stderr, "(ಥ⌣ಥ) %s\n", cli.data_path);
+    fprintf(stderr, "(☞ﾟヮﾟ)☞ %s\n\n", ckpt_path);
 
     // Initialize the model if it does not exist already
     if (path_is_file(ckpt_path)) {
@@ -254,7 +254,7 @@ int main(int argc, const char* argv[]) {
             mlp.x = samples[i].pixels;
 
             // Set the current outputs
-            std::vector<float> y_true = mnist_one_hot(samples[i].label, mlp.dim.n_out);
+            std::vector<float> y_true = one_hot_encode(samples[i].label, mlp.dim.n_out);
 
             // Compute forward propagation (predictions)
             mlp_forward(&mlp, mlp.x.data(), mlp.x.size());

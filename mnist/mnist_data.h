@@ -40,8 +40,6 @@ struct MNISTSample {
     std::vector<float> pixels{}; /**< Flattened pixel data (grayscale values). */
 };
 
-std::vector<float> mnist_one_hot(int label, int n_classes);
-
 // load image and force grayscale
 uint8_t* mnist_load_image(const char* filename);
 

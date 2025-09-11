@@ -512,6 +512,14 @@ float cross_entropy(const float* y_pred, const float* y_true, size_t n) {
     return loss / n;  // Equivalent to log(softmax(x, n))
 }
 
+std::vector<float> one_hot_encode(int label, int n_classes) {
+    std::vector<float> vec(n_classes, 0.0f);
+    if (label >= 0 && label < n_classes) {
+        vec[label] = 1.0f;
+    }
+    return vec;
+}
+
 // Transpose a row-major matrix (rows x cols) into (cols x rows)
 void transpose(const float* W, float* W_T, int rows, int cols) {
 #pragma omp parallel for

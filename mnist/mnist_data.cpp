@@ -34,14 +34,6 @@
 
 #include "mnist_data.h"
 
-std::vector<float> mnist_one_hot(int label, int n_classes) {
-    std::vector<float> vec(n_classes, 0.0f);
-    if (label >= 0 && label < n_classes) {
-        vec[label] = 1.0f;
-    }
-    return vec;
-}
-
 // load image and force grayscale
 uint8_t* mnist_load_image(const char* filename) {
     int width, height, channels;
