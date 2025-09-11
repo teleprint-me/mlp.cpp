@@ -141,6 +141,11 @@ void mlp_update_params(struct MLP* mlp);
 /** @brief Mean squared error (reduction=mean). */
 float mse(float* y_pred, float* y_true, size_t n);
 
+// y_pred: predicted probabilities (softmax output), shape (n,)
+// y_true: target one-hot vector, shape (n,)
+// n: number of classes
+float cross_entropy(const float* y_pred, const float* y_true, size_t n);
+
 /** @} */
 
 #endif  // MLP_H
