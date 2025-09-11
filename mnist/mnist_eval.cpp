@@ -140,8 +140,11 @@ int main(int argc, const char* argv[]) {
     fprintf(stderr, "Loading:\n");
     std::vector<MNISTSample> test_samples{};
     assert(mnist_load_samples(cli.data_path, cli.n_samples_per_class, test_samples));
-    fprintf(stderr, "(ʘ‿ʘ)~ Loaded %d images\n\n", cli.n_samples_per_class * 10);
+    fprintf(stderr, "(ʘ‿ʘ)~ Loaded %d images\n", cli.n_samples_per_class * 10);
+    xorshift_yates(test_samples.data(), test_samples.size(), sizeof(MNISTSample));
+    fprintf(stderr, "(☞ಠ_ಠ)☞ Shuffled %zu samples\n\n", test_samples.size());
 
+    printf("Eval:\n");
     printf("-=≡Σ<|°_°|>\n");
     size_t correct = 0;
     for (size_t i = 0; i < test_samples.size(); i++) {
